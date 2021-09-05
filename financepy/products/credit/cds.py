@@ -9,12 +9,12 @@ from math import exp, log
 from copy import deepcopy
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.calendar import Calendar, CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes, DateGenRuleTypes
-from ...utils.day_count import DayCount, DayCountTypes
-from ...utils.frequency import annual_frequency, FrequencyTypes
-from ...utils.global_vars import gDaysInYear
+from ...utils.error import finpy_error
+from ...utils.calendar import calendar, calendar_types
+from ...utils.calendar import bus_day_adjust_types, date_gen_rule_types
+from ...utils.day_count import day_count, day_count_types
+from ...utils.frequency import annual_frequency, frequency_types
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import ONE_MILLION
 from ...utils.helpers import label_to_string, table_to_string
 from ...market.curves.interpolator import InterpTypes, _uinterpolate
@@ -194,11 +194,11 @@ class CDS:
                  running_coupon: float,  # Annualised coupon on premium fee leg
                  notional: float = ONE_MILLION,
                  long_protection: bool = True,
-                 freq_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 freq_type: frequency_types = frequency_types.QUARTERLY,
+                 day_count_type: day_count_types = day_count_types.ACT_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Create a CDS from the step-in date, maturity date and coupon """
 
         check_argument_types(self.__init__, locals())
@@ -213,7 +213,7 @@ class CDS:
             maturity_date = maturity_date.next_cds_date()
 
         if step_in_date > maturity_date:
-            raise FinError("Step in date after maturity date")
+            raise finpy_error("Step in date after maturity date")
 
         self._step_in_date = step_in_date
         self._maturity_date = maturity_date
@@ -234,7 +234,7 @@ class CDS:
     def _generate_adjusted_cds_payment_dates(self):
         """ Generate CDS payment dates which have been holiday adjusted."""
         frequency = annual_frequency(self._freq_type)
-        calendar = Calendar(self._calendar_type)
+        calendar = calendar(self._calendar_type)
         start_date = self._step_in_date
         end_date = self._maturity_date
 
@@ -243,7 +243,7 @@ class CDS:
 
         unadjusted_schedule_dates = []
 
-        if self._date_gen_rule_type == DateGenRuleTypes.BACKWARD:
+        if self._date_gen_rule_type == date_gen_rule_types.BACKWARD:
 
             next_date = end_date
             flow_num = 0
@@ -274,7 +274,7 @@ class CDS:
             # Final date is moved forward by one day
             self._adjusted_dates[flow_num - 1] = finalDate.add_days(1)
 
-        elif self._date_gen_rule_type == DateGenRuleTypes.FORWARD:
+        elif self._date_gen_rule_type == date_gen_rule_types.FORWARD:
 
             next_date = start_date
             flow_num = 0
@@ -297,15 +297,15 @@ class CDS:
             self._adjusted_dates.append(finalDate)
 
         else:
-            raise FinError("Unknown DateGenRuleType:" +
-                           str(self._date_gen_rule_type))
+            raise finpy_error("Unknown DateGenRuleType:" +
+                              str(self._date_gen_rule_type))
 
     ###############################################################################
 
     def _calc_flows(self):
         """ Calculate cash flow amounts on premium leg. """
         payment_dates = self._adjusted_dates
-        day_count = DayCount(self._day_count_type)
+        day_count = day_count(self._day_count_type)
 
         self._accrual_factors = []
         self._flows = []
@@ -510,7 +510,7 @@ class CDS:
         """ RiskyPV01 of the contract using the OLD method. """
 
         payment_dates = self._adjusted_dates
-        day_count = DayCount(self._day_count_type)
+        day_count = day_count(self._day_count_type)
 
         couponAccruedIndicator = 1
 
@@ -609,7 +609,7 @@ class CDS:
         """ Calculate the amount of accrued interest that has accrued from the
         previous coupon date (PCD) to the step_in_date of the CDS contract. """
 
-        day_count = DayCount(self._day_count_type)
+        day_count = day_count(self._day_count_type)
         payment_dates = self._adjusted_dates
         pcd = payment_dates[0]
         accrual_factor = day_count.year_frac(pcd, self._step_in_date)[0]
@@ -631,8 +631,8 @@ class CDS:
         """ Calculates the protection leg PV of the CDS by calling into the
         fast NUMBA code that has been defined above. """
 
-        teff = (self._step_in_date - valuation_date) / gDaysInYear
-        tmat = (self._maturity_date - valuation_date) / gDaysInYear
+        teff = (self._step_in_date - valuation_date) / g_days_in_year
+        tmat = (self._maturity_date - valuation_date) / g_days_in_year
 
         libor_curve = issuer_curve._libor_curve
 
@@ -661,19 +661,19 @@ class CDS:
 
         paymentTimes = []
         for it in range(0, len(self._adjusted_dates)):
-            t = (self._adjusted_dates[it] - valuation_date) / gDaysInYear
+            t = (self._adjusted_dates[it] - valuation_date) / g_days_in_year
             paymentTimes.append(t)
 
         # this is the part of the coupon accrued from the previous coupon date
         # to now
         pcd = self._adjusted_dates[0]
         eff = self._step_in_date
-        day_count = DayCount(self._day_count_type)
+        day_count = day_count(self._day_count_type)
 
         accrual_factorPCDToNow = day_count.year_frac(pcd, eff)[0]
 
         year_fracs = self._accrual_factors
-        teff = (eff - valuation_date) / gDaysInYear
+        teff = (eff - valuation_date) / g_days_in_year
 
         valueRPV01 = _risky_pv01_numba(teff,
                                        accrual_factorPCDToNow,
@@ -744,11 +744,11 @@ class CDS:
         accurate approximation that avoids curve building. """
 
         if type(valuation_date) is not Date:
-            raise FinError("Valuation date must be a Date and not " +
-                           str(valuation_date))
+            raise finpy_error("Valuation date must be a Date and not " +
+                              str(valuation_date))
 
-        t_mat = (self._maturity_date - valuation_date) / gDaysInYear
-        t_eff = (self._step_in_date - valuation_date) / gDaysInYear
+        t_mat = (self._maturity_date - valuation_date) / g_days_in_year
+        t_eff = (self._step_in_date - valuation_date) / g_days_in_year
 
         h = flatCDSCurveSpread / (1.0 - curveRecovery)
         r = flatContinuousInterestRate

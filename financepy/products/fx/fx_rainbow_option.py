@@ -7,8 +7,8 @@ from typing import List
 
 from ...utils.date import Date
 from ...utils.math import N, M
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
 from ...models.gbm_process_simulator import FinGBMProcess
 from ...products.equity.equity_option import EquityOption
 
@@ -58,7 +58,7 @@ def payoff_value(s, payoff_typeValue, payoff_params):
         assetn = ssorted[:, -n]
         payoff = np.maximum(k - assetn, 0.0)
     else:
-        raise FinError("Unknown payoff type")
+        raise finpy_error("Unknown payoff type")
 
     return payoff
 
@@ -122,22 +122,22 @@ class FXRainbowOption(EquityOption):
                  betas):
 
         if len(stock_prices) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Stock prices must be a vector of length "
                 + str(self._num_assets))
 
         if len(dividend_yields) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Dividend yields must be a vector of length "
                 + str(self._num_assets))
 
         if len(volatilities) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Volatilities must be a vector of length "
                 + str(self._num_assets))
 
         if len(betas) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Betas must be a vector of length "
                 + str(self._num_assets))
 
@@ -160,10 +160,10 @@ class FXRainbowOption(EquityOption):
         elif payoff_type == FXRainbowOptionTypes.PUT_ON_NTH:
             num_params = 2
         else:
-            raise FinError("Unknown payoff type")
+            raise finpy_error("Unknown payoff type")
 
         if len(payoff_params) != num_params:
-            raise FinError(
+            raise finpy_error(
                 "Number of parameters required for " +
                 str(payoff_type) +
                 " must be " +
@@ -173,7 +173,7 @@ class FXRainbowOption(EquityOption):
                 or payoff_type == FXRainbowOptionTypes.PUT_ON_NTH:
             n = payoff_params[0]
             if n < 1 or n > num_assets:
-                raise FinError("Nth parameter must be 1 to " + str(num_assets))
+                raise finpy_error("Nth parameter must be 1 to " + str(num_assets))
 
     ###############################################################################
 
@@ -187,10 +187,10 @@ class FXRainbowOption(EquityOption):
               betas):
 
         if self._num_assets != 2:
-            raise FinError("Analytical results for two assets only.")
+            raise finpy_error("Analytical results for two assets only.")
 
         if valuation_date > self._expiry_date:
-            raise FinError("Value date after expiry date.")
+            raise finpy_error("Value date after expiry date.")
 
         self.validate(stock_prices,
                       dividend_yields,
@@ -198,7 +198,7 @@ class FXRainbowOption(EquityOption):
                       betas)
 
         # Use result by Stulz (1982) given by Haug Page 211
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve._df(t)
         r = -np.log(df) / t
@@ -244,7 +244,7 @@ class FXRainbowOption(EquityOption):
                                                                                      rho)
             v = k * df - cmin1 + cmin2
         else:
-            raise FinError("Unsupported FX Rainbow option type")
+            raise finpy_error("Unsupported FX Rainbow option type")
 
         return v
 
@@ -267,9 +267,9 @@ class FXRainbowOption(EquityOption):
                       betas)
 
         if valuation_date > expiry_date:
-            raise FinError("Value date after expiry date.")
+            raise finpy_error("Value date after expiry date.")
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
 
         v = value_mc_fast(t,
                           stock_prices,

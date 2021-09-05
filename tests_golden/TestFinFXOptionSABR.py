@@ -6,7 +6,7 @@ from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 from financepy.models.black_scholes import BlackScholes
 from financepy.products.fx.fx_vanilla_option import FXVanillaOption
-from financepy.utils.global_types import FinOptionTypes
+from financepy.utils.global_types import option_types
 from financepy.utils.date import Date
 import numpy as np
 
@@ -56,10 +56,10 @@ def test_FinFXOptionSABR():
     for spot_fx_rate in spot_fx_rates:
 
         call_option = FXVanillaOption(expiry_date,
-                                     strike_fx_rate,
+                                      strike_fx_rate,
                                      "EURUSD",
-                                     FinOptionTypes.EUROPEAN_CALL,
-                                     notional,
+                                      option_types.EUROPEAN_CALL,
+                                      notional,
                                      "USD")
 
         valueEuropean = call_option.value(valuation_date,
@@ -69,10 +69,10 @@ def test_FinFXOptionSABR():
                                          model)['v']
 
         call_option = FXVanillaOption(expiry_date,
-                                     strike_fx_rate,
+                                      strike_fx_rate,
                                      "EURUSD",
-                                     FinOptionTypes.AMERICAN_CALL,
-                                     1000000,
+                                      option_types.AMERICAN_CALL,
+                                      1000000,
                                      "USD")
 
         valueAmerican = call_option.value(valuation_date,
@@ -94,10 +94,10 @@ def test_FinFXOptionSABR():
     for spot_fx_rate in spot_fx_rates:
 
         call_option = FXVanillaOption(expiry_date,
-                                     strike_fx_rate,
+                                      strike_fx_rate,
                                      "EURUSD",
-                                     FinOptionTypes.EUROPEAN_PUT,
-                                     1000000,
+                                      option_types.EUROPEAN_PUT,
+                                      1000000,
                                      "USD")
 
         valueEuropean = call_option.value(valuation_date,
@@ -107,10 +107,10 @@ def test_FinFXOptionSABR():
                                          model)['v']
 
         call_option = FXVanillaOption(expiry_date,
-                                     strike_fx_rate,
+                                      strike_fx_rate,
                                      "EURUSD",
-                                     FinOptionTypes.AMERICAN_PUT,
-                                     1000000,
+                                      option_types.AMERICAN_PUT,
+                                      1000000,
                                      "USD")
 
         valueAmerican = call_option.value(valuation_date,

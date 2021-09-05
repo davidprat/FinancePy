@@ -8,14 +8,14 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 
 from ...utils.date import Date
-from ...utils.math import scale, test_monotonicity
-from ...utils.global_vars import gDaysInYear
-from ...utils.day_count import DayCount, DayCountTypes
+from ...utils.math import scale, arr_is_monotonic
+from ...utils.global_vars import g_days_in_year
+from ...utils.day_count import day_count, day_count_types
 from ...utils.helpers import input_time
 from ...utils.helpers import table_to_string
 from ...market.curves.interpolator import InterpTypes, interpolate
-from ...utils.error import FinError
-from ...utils.frequency import annual_frequency, FrequencyTypes
+from ...utils.error import finpy_error
+from ...utils.frequency import annual_frequency, frequency_types
 from ...market.curves.discount_curve import DiscountCurve
 from ...utils.helpers import label_to_string
 
@@ -49,7 +49,7 @@ class BondZeroCurve(DiscountCurve):
         curve specified. """
 
         if len(bonds) != len(clean_prices):
-            raise FinError("Num bonds does not equal number of prices.")
+            raise finpy_error("Num bonds does not equal number of prices.")
 
         self._settlement_date = valuation_date
         self._valuation_date = valuation_date
@@ -60,12 +60,12 @@ class BondZeroCurve(DiscountCurve):
 
         times = []
         for bond in self._bonds:
-            tmat = (bond._maturity_date - self._settlement_date)/gDaysInYear
+            tmat = (bond._maturity_date - self._settlement_date) / g_days_in_year
             times.append(tmat)
 
         times = np.array(times)
-        if test_monotonicity(times) is False:
-            raise FinError("Times are not sorted in increasing order")
+        if arr_is_monotonic(times) is False:
+            raise finpy_error("Times are not sorted in increasing order")
 
         self._yearsToMaturity = np.array(times)
 
@@ -83,7 +83,7 @@ class BondZeroCurve(DiscountCurve):
             bond = self._bonds[i]
             maturity_date = bond._maturity_date
             clean_price = self._clean_prices[i]
-            tmat = (maturity_date - self._settlement_date) / gDaysInYear
+            tmat = (maturity_date - self._settlement_date) / g_days_in_year
             argtuple = (self, self._settlement_date, bond, clean_price)
             self._times = np.append(self._times, tmat)
             self._values = np.append(self._values, df)
@@ -95,7 +95,7 @@ class BondZeroCurve(DiscountCurve):
 
     def zero_rate(self,
                   dt: Date,
-                  frequencyType: FrequencyTypes = FrequencyTypes.CONTINUOUS):
+                  frequencyType: frequency_types = frequency_types.CONTINUOUS):
         """ Calculate the zero rate to maturity date. """
         t = input_time(dt, self)
         f = annual_frequency(frequencyType)
@@ -142,17 +142,17 @@ class BondZeroCurve(DiscountCurve):
     def fwd_rate(self,
                  date1: Date,
                  date2: Date,
-                 day_count_type: DayCountTypes):
+                 day_count_type: day_count_types):
         """ Calculate the forward rate according to the specified
         day count convention. """
 
         if date1 < self._valuation_date:
-            raise FinError("Date1 before curve value date.")
+            raise finpy_error("Date1 before curve value date.")
 
         if date2 < date1:
-            raise FinError("Date2 must not be before Date1")
+            raise finpy_error("Date2 must not be before Date1")
 
-        day_count = DayCount(day_count_type)
+        day_count = day_count(day_count_type)
         year_frac = day_count.year_frac(date1, date2)[0]
         df1 = self.df(date1)
         df2 = self.df(date2)

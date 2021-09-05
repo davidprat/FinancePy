@@ -1,18 +1,12 @@
-###############################################################################
-# Copyright (C) 2018, 2019, 2020 Dominic O'Kane
-###############################################################################
+"""Copyright (C) Dominic O'Kane.
 
-
-###############################################################################
-# TODO: Do some timings and tidy up logic in adjustment function
-###############################################################################
+TODO: Do some timings and tidy up logic in adjustment function
+"""
 
 import datetime
 from enum import Enum
 from .date import Date
-from .error import FinError
-
-# from numba import njit, jit, int64, boolean
+from .error import finpy_error
 
 easterMondayDay = [98, 90, 103, 95, 114, 106, 91, 111, 102, 87,
                    107, 99, 83, 103, 95, 115, 99, 91, 111, 96, 87,
@@ -46,7 +40,7 @@ easterMondayDay = [98, 90, 103, 95, 114, 106, 91, 111, 102, 87,
                    116, 101, 93, 112, 97, 89, 109, 100, 85, 105]
 
 
-class BusDayAdjustTypes(Enum):
+class bus_day_adjust_types(Enum):
     NONE = 1
     FOLLOWING = 2
     MODIFIED_FOLLOWING = 3
@@ -54,7 +48,7 @@ class BusDayAdjustTypes(Enum):
     MODIFIED_PRECEDING = 5
 
 
-class CalendarTypes(Enum):
+class calendar_types(Enum):
     NONE = 1
     WEEKEND = 2
     AUSTRALIA = 3
@@ -72,14 +66,12 @@ class CalendarTypes(Enum):
     UNITED_KINGDOM = 15
 
 
-class DateGenRuleTypes(Enum):
+class date_gen_rule_types(Enum):
     FORWARD = 1
     BACKWARD = 2
 
-###############################################################################
 
-
-class Calendar:
+class calendar:
     """ Class to manage designation of payment dates as holidays according to
     a regional or country-specific calendar convention specified by the user.
     It also supplies an adjustment method which takes in an adjustment
@@ -87,11 +79,11 @@ class Calendar:
     specified calendar. """
 
     def __init__(self,
-                 calendar_type: CalendarTypes):
+                 calendar_type: calendar_types):
         """ Create a calendar based on a specified calendar type. """
 
-        if calendar_type not in CalendarTypes:
-            raise FinError(
+        if calendar_type not in calendar_types:
+            raise finpy_error(
                 "Need to pass FinCalendarType and not " +
                 str(calendar_type))
 
@@ -101,17 +93,17 @@ class Calendar:
 
     def adjust(self,
                dt: Date,
-               busDayConventionType: BusDayAdjustTypes):
+               busDayConventionType: bus_day_adjust_types):
         """ Adjust a payment date if it falls on a holiday according to the
         specified business day convention. """
 
-        if type(busDayConventionType) != BusDayAdjustTypes:
-            raise FinError("Invalid type passed. Need FinBusDayConventionType")
+        if type(busDayConventionType) != bus_day_adjust_types:
+            raise finpy_error("Invalid type passed. Need FinBusDayConventionType")
 
-        if busDayConventionType == BusDayAdjustTypes.NONE:
+        if busDayConventionType == bus_day_adjust_types.NONE:
             return dt
 
-        elif busDayConventionType == BusDayAdjustTypes.FOLLOWING:
+        elif busDayConventionType == bus_day_adjust_types.FOLLOWING:
 
             # step forward until we find a business day
             while self.is_business_day(dt) is False:
@@ -119,7 +111,7 @@ class Calendar:
 
             return dt
 
-        elif busDayConventionType == BusDayAdjustTypes.MODIFIED_FOLLOWING:
+        elif busDayConventionType == bus_day_adjust_types.MODIFIED_FOLLOWING:
 
             d_start = dt._d
             m_start = dt._m
@@ -139,7 +131,7 @@ class Calendar:
 
             return dt
 
-        elif busDayConventionType == BusDayAdjustTypes.PRECEDING:
+        elif busDayConventionType == bus_day_adjust_types.PRECEDING:
 
             # if the business day is in the next month look back
             # for previous first business day one day at a time
@@ -148,7 +140,7 @@ class Calendar:
 
             return dt
 
-        elif busDayConventionType == BusDayAdjustTypes.MODIFIED_PRECEDING:
+        elif busDayConventionType == bus_day_adjust_types.MODIFIED_PRECEDING:
 
             d_start = dt._d
             m_start = dt._m
@@ -170,23 +162,23 @@ class Calendar:
 
         else:
 
-            raise FinError("Unknown adjustment convention" +
-                           str(busDayConventionType))
+            raise finpy_error("Unknown adjustment convention" +
+                              str(busDayConventionType))
 
         return dt
 
-###############################################################################
+    ###############################################################################
 
     def add_business_days(self,
-                        start_date: Date,
-                        numDays: int):
+                          start_date: Date,
+                          numDays: int):
         """ Returns a new date that is numDays business days after Date.
         All holidays in the chosen calendar are assumed not business days. """
 
         # TODO: REMOVE DATETIME DEPENDENCE HERE ???
 
         if isinstance(numDays, int) is False:
-            raise FinError("Num days must be an integer")
+            raise finpy_error("Num days must be an integer")
 
         dt = datetime.date(start_date._y, start_date._m, start_date._d)
         d = dt.day
@@ -211,10 +203,10 @@ class Calendar:
 
         return newDt
 
-###############################################################################
+    ###############################################################################
 
     def is_business_day(self,
-                      dt: Date):
+                        dt: Date):
         """ Determines if a date is a business day according to the specified
         calendar. If it is it returns True, otherwise False. """
 
@@ -228,10 +220,10 @@ class Calendar:
         else:
             return True
 
-###############################################################################
+    ###############################################################################
 
     def is_holiday(self,
-                  dt: Date):
+                   dt: Date):
         """ Determines if a date is a Holiday according to the specified
         calendar. Weekends are not holidays unless the holiday falls on a 
         weekend date. """
@@ -247,41 +239,41 @@ class Calendar:
         self._weekday = weekday
         self._dt = dt
 
-        if self._type == CalendarTypes.NONE:
+        if self._type == calendar_types.NONE:
             return self.holiday_none()
-        elif self._type == CalendarTypes.WEEKEND:
+        elif self._type == calendar_types.WEEKEND:
             return self.holiday_weekend()
-        elif self._type == CalendarTypes.AUSTRALIA:
+        elif self._type == calendar_types.AUSTRALIA:
             return self.holiday_australia()
-        elif self._type == CalendarTypes.CANADA:
+        elif self._type == calendar_types.CANADA:
             return self.holiday_canada()
-        elif self._type == CalendarTypes.FRANCE:
+        elif self._type == calendar_types.FRANCE:
             return self.holiday_france()
-        elif self._type == CalendarTypes.GERMANY:
+        elif self._type == calendar_types.GERMANY:
             return self.holiday_germany()
-        elif self._type == CalendarTypes.ITALY:
+        elif self._type == calendar_types.ITALY:
             return self.holiday_italy()
-        elif self._type == CalendarTypes.JAPAN:
+        elif self._type == calendar_types.JAPAN:
             return self.holiday_japan()
-        elif self._type == CalendarTypes.NEW_ZEALAND:
+        elif self._type == calendar_types.NEW_ZEALAND:
             return self.holiday_new_zealand()
-        elif self._type == CalendarTypes.NORWAY:
+        elif self._type == calendar_types.NORWAY:
             return self.holiday_norway()
-        elif self._type == CalendarTypes.SWEDEN:
+        elif self._type == calendar_types.SWEDEN:
             return self.holiday_sweden()
-        elif self._type == CalendarTypes.SWITZERLAND:
+        elif self._type == calendar_types.SWITZERLAND:
             return self.holiday_switzerland()
-        elif self._type == CalendarTypes.TARGET:
+        elif self._type == calendar_types.TARGET:
             return self.holiday_target()
-        elif self._type == CalendarTypes.UNITED_KINGDOM:
+        elif self._type == calendar_types.UNITED_KINGDOM:
             return self.holiday_united_kingdom()
-        elif self._type == CalendarTypes.UNITED_STATES:
+        elif self._type == calendar_types.UNITED_STATES:
             return self.holiday_united_states()
         else:
             print(self._type)
-            raise FinError("Unknown calendar")
+            raise finpy_error("Unknown calendar")
 
-###############################################################################
+    ###############################################################################
 
     def holiday_weekend(self):
         """ Weekends by themselves are a holiday. """
@@ -291,12 +283,14 @@ class Calendar:
         else:
             return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_australia(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
         weekday = self._weekday
 
@@ -354,14 +348,17 @@ class Calendar:
             return True
 
         return False
-   
-###############################################################################
+
+    ###############################################################################
 
     def holiday_united_kingdom(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
-        weekday = self._weekday ; day_in_year = self._day_in_year
+        m = self._m;
+        d = self._d;
+        y = self._y
+        weekday = self._weekday;
+        day_in_year = self._day_in_year
 
         if m == 1 and d == 1:  # new years day
             return True
@@ -386,10 +383,10 @@ class Calendar:
         if m == 5 and d >= 25 and weekday == Date.MON:
             return True
 
-        if m == 6 and d == 2 and y == 2022: # SPRING BANK HOLIDAY
+        if m == 6 and d == 2 and y == 2022:  # SPRING BANK HOLIDAY
             return True
 
-        if m == 6 and d == 3 and y == 2022: # QUEEN PLAT JUB
+        if m == 6 and d == 3 and y == 2022:  # QUEEN PLAT JUB
             return True
 
         if m == 8 and d > 24 and weekday == Date.MON:  # Late Summer
@@ -415,12 +412,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_france(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
 
         if m == 1 and d == 1:  # new years day
@@ -434,10 +433,10 @@ class Calendar:
         if day_in_year == em - 3:  # good friday
             return True
 
-        if m == 5 and d == 1: # LABOUR DAY
+        if m == 5 and d == 1:  # LABOUR DAY
             return True
 
-        if m == 5 and d == 8: # VICTORY DAY
+        if m == 5 and d == 8:  # VICTORY DAY
             return True
 
         if day_in_year == em + 39 - 1:  # Ascension
@@ -446,10 +445,10 @@ class Calendar:
         if day_in_year == em + 50 - 1:  # pentecost
             return True
 
-        if m == 7 and d == 14: # BASTILLE DAY
+        if m == 7 and d == 14:  # BASTILLE DAY
             return True
 
-        if m == 8 and d  == 15:  # ASSUMPTION
+        if m == 8 and d == 15:  # ASSUMPTION
             return True
 
         if m == 11 and d == 1:  # ALL SAINTS
@@ -466,12 +465,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_sweden(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
         weekday = self._weekday
 
@@ -495,10 +496,10 @@ class Calendar:
         if m == 5 and d == 1:  # labour day
             return True
 
-        if m == 6 and d == 6: # June
+        if m == 6 and d == 6:  # June
             return True
 
-        if m == 6 and d > 18 and d < 26 and weekday == Date.FRI: # Midsummer
+        if m == 6 and d > 18 and d < 26 and weekday == Date.FRI:  # Midsummer
             return True
 
         if m == 12 and d == 24:  # Xmas eve
@@ -515,12 +516,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_germany(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
 
         if m == 1 and d == 1:  # new years day
@@ -534,7 +537,7 @@ class Calendar:
         if day_in_year == em - 3:  # good friday
             return True
 
-        if m == 5 and d == 1: # LABOUR DAY
+        if m == 5 and d == 1:  # LABOUR DAY
             return True
 
         if day_in_year == em + 39 - 1:  # Ascension
@@ -557,12 +560,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_switzerland(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
 
         if m == 1 and d == 1:  # new years day
@@ -599,12 +604,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_japan(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y;
+        m = self._m;
+        d = self._d;
+        y = self._y;
         weekday = self._weekday
 
         if m == 1 and d == 1:  # new years day
@@ -658,10 +665,10 @@ class Calendar:
         if m == 7 and d > 14 and d < 22 and y != 2021 and weekday == Date.MON:
             return True
 
-        if m == 7 and d == 22 and y == 2021: # OLYMPICS
+        if m == 7 and d == 22 and y == 2021:  # OLYMPICS
             return True
 
-        if m == 7 and d == 23 and y == 2021: # OLYMPICS HEALTH AND SPORTS HERE
+        if m == 7 and d == 23 and y == 2021:  # OLYMPICS HEALTH AND SPORTS HERE
             return True
 
         # Mountain day
@@ -699,12 +706,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_new_zealand(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
         weekday = self._weekday
 
@@ -760,12 +769,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_norway(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
 
         if m == 1 and d == 1:  # new years day
@@ -802,7 +813,7 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_united_states(self):
         """ Only bank holidays. Weekends by themselves are not a holiday.
@@ -810,7 +821,8 @@ class Calendar:
         holidays for bond markets, NYSE, and public holidays. For each of
         these and other categories there will be some variations. """
 
-        m = self._m; d = self._d; 
+        m = self._m;
+        d = self._d;
         weekday = self._weekday
 
         if m == 1 and d == 1:  # NYD
@@ -872,13 +884,16 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_canada(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
-        weekday = self._weekday; day_in_year = self._day_in_year
+        m = self._m;
+        d = self._d;
+        y = self._y
+        weekday = self._weekday;
+        day_in_year = self._day_in_year
 
         if m == 1 and d == 1:  # NYD
             return True
@@ -947,12 +962,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_italy(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
 
         if m == 1 and d == 1:  # new years day
@@ -969,16 +986,16 @@ class Calendar:
         if day_in_year == em - 3:  # good friday
             return True
 
-        if m == 4 and d == 25: # LIBERATION DAY
+        if m == 4 and d == 25:  # LIBERATION DAY
             return True
 
-        if m == 5 and d == 1: # LABOUR DAY
+        if m == 5 and d == 1:  # LABOUR DAY
             return True
 
-        if m == 6 and d == 2 and y > 1999: # REPUBLIC DAY
+        if m == 6 and d == 2 and y > 1999:  # REPUBLIC DAY
             return True
 
-        if m == 8 and d  == 15:  # ASSUMPTION
+        if m == 8 and d == 15:  # ASSUMPTION
             return True
 
         if m == 11 and d == 1:  # ALL SAINTS
@@ -995,12 +1012,14 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_target(self):
         """ Only bank holidays. Weekends by themselves are not a holiday. """
 
-        m = self._m; d = self._d; y = self._y
+        m = self._m;
+        d = self._d;
+        y = self._y
         day_in_year = self._day_in_year
 
         if m == 1 and d == 1:  # new year's day
@@ -1025,13 +1044,13 @@ class Calendar:
 
         return False
 
-###############################################################################
+    ###############################################################################
 
     def holiday_none(self):
         """ No day is a holiday. """
         return False
 
-###############################################################################
+    ###############################################################################
 
     def get_holiday_list(self,
                          year: float):
@@ -1042,14 +1061,14 @@ class Calendar:
         holidayList = []
         while start_date < end_date:
             if self.is_business_day(start_date) is False and \
-              start_date.is_weekend() is False:
+                    start_date.is_weekend() is False:
                 holidayList.append(start_date.__str__())
 
             start_date = start_date.add_days(1)
 
         return holidayList
 
-###############################################################################
+    ###############################################################################
 
     def easter_monday(self,
                       year: float):
@@ -1057,24 +1076,22 @@ class Calendar:
         easy to compute so we rely on a pre-calculated array. """
 
         if year > 2100:
-            raise FinError(
+            raise finpy_error(
                 "Unable to determine Easter monday in year " + str(year))
 
         emDays = easterMondayDay[year - 1901]
         start_date = Date(1, 1, year)
-        em = start_date.add_days(emDays-1)
+        em = start_date.add_days(emDays - 1)
         return em
 
-###############################################################################
+    ###############################################################################
 
     def __str__(self):
         s = self._type.name
         return s
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = self._type
         return s
-
-###############################################################################

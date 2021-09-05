@@ -1,85 +1,77 @@
-##############################################################################
-# Copyright (C) 2018, 2019, 2020 Dominic O'Kane
-##############################################################################
+"""Copyright (C) Dominic O'Kane.
 
+A useful source for these definitions can be found at
+https://developers.opengamma.com/quantitative-research/Interest-Rate-Instruments-and-Market-Conventions.pdf
+and https://en.wikipedia.org/wiki/Day_count_convention
+http://www.fairmat.com/documentation/usermanual/topics/download/mediawiki/index.php/Day_Count_Conventions.htm
+http://www.eclipsesoftware.biz/DayCountConventions.html
+
+    THIRTY_360_BOND = 1  # 30E/360 ISDA 2006 4.16f, German, Eurobond(ISDA 2000)
+    THIRTY_E_360 = 2  # ISDA 2006 4.16(g) 30/360 ISMA, ICMA
+    THIRTY_E_360_ISDA = 3  # ISDA 2006 4.16(h)
+    THIRTY_E_PLUS_360 = 4  # ROLLS D2 TO NEXT MONTH IF D2 = 31
+    ACT_ACT_ISDA = 5  # SPLITS ACCRUAL PERIOD INTO LEAP YEAR AND NON LEAP YEAR
+    ACT_ACT_ICMA = 6  # METHOD FOR ALL US TREASURY NOTES AND BONDS
+    ACT_365F = 7  # Denominator is always Fixed at 365, even in a leap year
+    ACT_360 = 8
+    ACT_365L = 9  # the 29 Feb is counted if it is in the date range
+
+"""
 from .date import Date, monthDaysLeapYear, monthDaysNotLeapYear, datediff
 from .date import is_leap_year
-from .error import FinError
-from .frequency import FrequencyTypes, annual_frequency
-from .global_vars import gDaysInYear
+from .error import finpy_error
+from .frequency import frequency_types, annual_frequency
+from .global_vars import g_days_in_year
 
 from enum import Enum
-
-# A useful source for these definitions can be found at
-# https://developers.opengamma.com/quantitative-research/Interest-Rate-Instruments-and-Market-Conventions.pdf
-# and https://en.wikipedia.org/wiki/Day_count_convention
-# http://www.fairmat.com/documentation/usermanual/topics/download/mediawiki/index.php/Day_Count_Conventions.htm
-# http://www.eclipsesoftware.biz/DayCountConventions.html
-
-###############################################################################
 
 
 def is_last_day_of_feb(dt: Date):
     # Return true if we are on the last day of February
     if dt._m == 2:
-        is_leap = is_leap_year(dt._y)
-        if is_leap is True and dt._d == 29:
+        is_leap: bool = is_leap_year(dt._y)
+        if is_leap and dt._d == 29:
             return True
-        if is_leap is False and dt._d == 28:
+        if not is_leap and dt._d == 28:
             return True
     else:
         return False
 
-###############################################################################
 
-###############################################################################
-#    THIRTY_360_BOND = 1  # 30E/360 ISDA 2006 4.16f, German, Eurobond(ISDA 2000)
-#    THIRTY_E_360 = 2  # ISDA 2006 4.16(g) 30/360 ISMA, ICMA
-#    THIRTY_E_360_ISDA = 3  # ISDA 2006 4.16(h)
-#    THIRTY_E_PLUS_360 = 4  # ROLLS D2 TO NEXT MONTH IF D2 = 31
-#    ACT_ACT_ISDA = 5  # SPLITS ACCRUAL PERIOD INTO LEAP YEAR AND NON LEAP YEAR
-#    ACT_ACT_ICMA = 6  # METHOD FOR ALL US TREASURY NOTES AND BONDS
-#    ACT_365F = 7  # Denominator is always Fixed at 365, even in a leap year
-#    ACT_360 = 8
-#    ACT_365L = 9  # the 29 Feb is counted if it is in the date range
-###############################################################################
-        
-class DayCountTypes(Enum):
-    THIRTY_360_BOND = 1  
-    THIRTY_E_360 = 2  
-    THIRTY_E_360_ISDA = 3  
-    THIRTY_E_PLUS_360 = 4  
-    ACT_ACT_ISDA = 5  
-    ACT_ACT_ICMA = 6  
-    ACT_365F = 7  
+class day_count_types(Enum):
+    THIRTY_360_BOND = 1
+    THIRTY_E_360 = 2
+    THIRTY_E_360_ISDA = 3
+    THIRTY_E_PLUS_360 = 4
+    ACT_ACT_ISDA = 5
+    ACT_ACT_ICMA = 6
+    ACT_365F = 7
     ACT_360 = 8
     ACT_365L = 9
-    SIMPLE = 10 # actual divided by gDaysInYear
-
-###############################################################################
+    SIMPLE = 10  # actual divided by gDaysInYear
 
 
-class DayCount:
+class day_count:
     """ Calculate the fractional day count between two dates according to a
     specified day count convention. """
 
     def __init__(self,
-                 dccType: DayCountTypes):
+                 dccType: day_count_types):
         """ Create Day Count convention by passing in the Day Count Type. """
 
-        if dccType not in DayCountTypes:
-            raise FinError("Need to pass FinDayCountType")
+        if dccType not in day_count_types:
+            raise finpy_error("Need to pass FinDayCountType")
 
         self._type = dccType
 
-###############################################################################
+    ###############################################################################
 
     def year_frac(self,
-                 dt1: Date,  # Start of coupon period
-                 dt2: Date,  # Settlement (for bonds) or period end(swaps)
-                 dt3: Date = None,  # End of coupon period for accrued
-                 freq_type: FrequencyTypes = FrequencyTypes.ANNUAL,
-                 isTerminationDate: bool = False):  # Is dt2 a termination date
+                  dt_1: Date,  # Start of coupon period
+                  dt_2: Date,  # Settlement (for bonds) or period end(swaps)
+                  dt_3: Date = None,  # End of coupon period for accrued
+                  freq_type: frequency_types = frequency_types.ANNUAL,
+                  is_termination_date: bool = False):  # Is dt2 a termination date
         """ This method performs two functions:
 
         1) It calculates the year fraction between dates dt1 and dt2 using the
@@ -104,167 +96,164 @@ class DayCount:
         http://data.cbonds.info/files/cbondscalc/Calculator.pdf
         """
 
-        d1 = dt1._d
-        m1 = dt1._m
-        y1 = dt1._y
+        d_1 = dt_1._d
+        m_1 = dt_1._m
+        y_1 = dt_1._y
 
-        d2 = dt2._d
-        m2 = dt2._m
-        y2 = dt2._y
+        d_2 = dt_2._d
+        m_2 = dt_2._m
+        y_2 = dt_2._y
 
-        num = 0
-        den = 0
-
-        if self._type == DayCountTypes.THIRTY_360_BOND:
+        if self._type == day_count_types.THIRTY_360_BOND:
             # It is in accordance with section 4.16(f) of ISDA 2006 Definitions
             # Also known as 30/360, Bond Basis, 30A/360, 30-360 US Municipal
             # This method does not consider February as a special case.
 
-            if d1 == 31:
-                d1 = 30
+            if d_1 == 31:
+                d_1 = 30
 
-            if d2 == 31 and d1 == 30: 
-                d2 = 30
+            if d_2 == 31 and d_1 == 30:
+                d_2 = 30
 
-            num = 360 * (y2 - y1) + 30 * (m2 - m1) + (d2 - d1)
+            num = 360 * (y_2 - y_1) + 30 * (m_2 - m_1) + (d_2 - d_1)
             den = 360
             acc_factor = num / den
             return (acc_factor, num, den)
 
-        elif self._type == DayCountTypes.THIRTY_E_360:
+        elif self._type == day_count_types.THIRTY_E_360:
             # This is in section 4.16(g) of ISDA 2006 Definitions
             # Also known as 30/360 Eurobond, 30/360 ISMA, 30/360 ICMA,
             # 30/360 European, Special German, Eurobond basis (ISDA 2006)
             # Unlike 30/360 BOND the adjustment to dt2 does not depend on dt1
 
-            if d1 == 31:
-                d1 = 30
+            if d_1 == 31:
+                d_1 = 30
 
-            if d2 == 31:
-                d2 = 30
+            if d_2 == 31:
+                d_2 = 30
 
-            num = 360 * (y2 - y1) + 30 * (m2 - m1) + (d2 - d1)
+            num = 360 * (y_2 - y_1) + 30 * (m_2 - m_1) + (d_2 - d_1)
             den = 360
             acc_factor = num / den
             return (acc_factor, num, den)
 
-        elif self._type == DayCountTypes.THIRTY_E_360_ISDA:
+        elif self._type == day_count_types.THIRTY_E_360_ISDA:
             # This is 30E/360 (ISDA 2000), 30E/360 (ISDA) section 4.16(h)
             # of ISDA 2006 Definitions, German, Eurobond basis (ISDA 2000)
 
-            if d1 == 31:
-                d1 = 30
+            if d_1 == 31:
+                d_1 = 30
 
-            lastDayOfFeb1 = is_last_day_of_feb(dt1)
+            lastDayOfFeb1 = is_last_day_of_feb(dt_1)
             if lastDayOfFeb1 is True:
-                d1 = 30
+                d_1 = 30
 
-            if d2 == 31:
-                d2 = 30
+            if d_2 == 31:
+                d_2 = 30
 
-            lastDayOfFeb2 = is_last_day_of_feb(dt2)
-            if lastDayOfFeb2 is True and isTerminationDate is False:
-                d2 = 30
+            lastDayOfFeb2 = is_last_day_of_feb(dt_2)
+            if lastDayOfFeb2 is True and is_termination_date is False:
+                d_2 = 30
 
-            num = 360 * (y2 - y1) + 30 * (m2 - m1) + (d2 - d1)
+            num = 360 * (y_2 - y_1) + 30 * (m_2 - m_1) + (d_2 - d_1)
             den = 360
             acc_factor = num / den
             return acc_factor, num, den
 
-        elif self._type == DayCountTypes.THIRTY_E_PLUS_360:
+        elif self._type == day_count_types.THIRTY_E_PLUS_360:
 
-            if d1 == 31:
-                d1 = 30
+            if d_1 == 31:
+                d_1 = 30
 
-            if d2 == 31:
-                m2 = m2 + 1  # May roll to 13 but we are doing a difference
-                d2 = 1
+            if d_2 == 31:
+                m_2 = m_2 + 1  # May roll to 13 but we are doing a difference
+                d_2 = 1
 
-            num = 360 * (y2 - y1) + 30 * (m2 - m1) + (d2 - d1)
+            num = 360 * (y_2 - y_1) + 30 * (m_2 - m_1) + (d_2 - d_1)
             den = 360
             acc_factor = num / den
             return acc_factor, num, den
 
-        elif self._type == DayCountTypes.ACT_ACT_ISDA:
+        elif self._type == day_count_types.ACT_ACT_ISDA:
 
-            if is_leap_year(y1):
-                denom1 = 366
+            if is_leap_year(y_1):
+                denom_1 = 366
             else:
-                denom1 = 365
+                denom_1 = 365
 
-            if is_leap_year(y2):
-                denom2 = 366
+            if is_leap_year(y_2):
+                denom_2 = 366
             else:
-                denom2 = 365
+                denom_2 = 365
 
-            if y1 == y2:
-                num = dt2 - dt1
-                den = denom1
-                acc_factor = (dt2 - dt1) / denom1
+            if y_1 == y_2:
+                num = dt_2 - dt_1
+                den = denom_1
+                acc_factor = (dt_2 - dt_1) / denom_1
                 return (acc_factor, num, den)
             else:
-                daysYear1 = datediff(dt1, Date(1, 1, y1 + 1))
-                daysYear2 = datediff(Date(1, 1, y2), dt2)
-                acc_factor1 = daysYear1 / denom1
-                acc_factor2 = daysYear2 / denom2
-                yearDiff = y2 - y1 - 1.0
+                days_year_1 = datediff(dt_1, Date(1, 1, y_1 + 1))
+                days_year_2 = datediff(Date(1, 1, y_2), dt_2)
+                acc_factor_1 = days_year_1 / denom_1
+                acc_factor_2 = days_year_2 / denom_2
+                year_diff = y_2 - y_1 - 1.0
                 # Note that num/den does not equal acc_factor
                 # I do need to pass num back
-                num = daysYear1 + daysYear2
-                den = denom1 + denom2
-                acc_factor = acc_factor1 + acc_factor2 + yearDiff
+                num = days_year_1 + days_year_2
+                den = denom_1 + denom_2
+                acc_factor = acc_factor_1 + acc_factor_2 + year_diff
                 return (acc_factor, num, den)
 
-        elif self._type == DayCountTypes.ACT_ACT_ICMA:
+        elif self._type == day_count_types.ACT_ACT_ICMA:
 
             freq = annual_frequency(freq_type)
 
-            if dt3 is None or freq is None:
-                raise FinError("ACT_ACT_ICMA requires three dates and a freq")
+            if dt_3 is None or freq is None:
+                raise finpy_error("ACT_ACT_ICMA requires three dates and a freq")
 
-            num = dt2 - dt1
-            den = freq * (dt3 - dt1)
+            num = dt_2 - dt_1
+            den = freq * (dt_3 - dt_1)
             acc_factor = num / den
             return (acc_factor, num, den)
 
-        elif self._type == DayCountTypes.ACT_365F:
+        elif self._type == day_count_types.ACT_365F:
 
-            num = dt2 - dt1
+            num = dt_2 - dt_1
             den = 365
             acc_factor = num / den
             return (acc_factor, num, den)
 
-        elif self._type == DayCountTypes.ACT_360:
+        elif self._type == day_count_types.ACT_360:
 
-            num = dt2 - dt1
+            num = dt_2 - dt_1
             den = 360
             acc_factor = num / den
             return (acc_factor, num, den)
 
-        elif self._type == DayCountTypes.ACT_365L:
+        elif self._type == day_count_types.ACT_365L:
 
             # The ISDA calculator sheet appears to split this across the
             # non-leap and the leap year which I do not see in any conventions.
 
             frequency = annual_frequency(freq_type)
 
-            if dt3 is None:
-                y3 = y2
+            if dt_3 is None:
+                y3 = y_2
             else:
-                y3 = dt3._y
+                y3 = dt_3._y
 
-            num = dt2 - dt1
+            num = dt_2 - dt_1
             den = 365
 
-            if is_leap_year(y1):
-                feb29 = Date(29, 2, y1)
+            if is_leap_year(y_1):
+                feb29 = Date(29, 2, y_1)
             elif is_leap_year(y3):
                 feb29 = Date(29, 2, y3)
             else:
                 feb29 = Date(1, 1, 1900)
 
             if frequency == 1:
-                if feb29 > dt1 and feb29 <= dt3:
+                if feb29 > dt_1 and feb29 <= dt_3:
                     den = 366
             else:
                 if is_leap_year(y3) is True:
@@ -273,22 +262,18 @@ class DayCount:
             acc_factor = num / den
             return (acc_factor, num, den)
 
-        elif self._type == DayCountTypes.SIMPLE:
-            
-            num = dt2 - dt1
-            den = gDaysInYear
+        elif self._type == day_count_types.SIMPLE:
+
+            num = dt_2 - dt_1
+            den = g_days_in_year
             acc_factor = num / den
             return (acc_factor, num, den)
 
         else:
 
-            raise FinError(str(self._type) +
+            raise finpy_error(str(self._type) +
                            " is not one of DayCountTypes")
 
-###############################################################################
-
     def __repr__(self):
-        """ Returns the calendar type as a string. """
+        """ Returns the calendar type as a string."""
         return str(self._type)
-
-###############################################################################

@@ -4,14 +4,14 @@
 
 import numpy as np
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.math import test_monotonicity
+from ...utils.math import arr_is_monotonic
 from ...utils.helpers import label_to_string
 from ...utils.helpers import times_from_dates
 from ...utils.helpers import check_argument_types
 from ...utils.date import days_in_month
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 
 ###############################################################################
 
@@ -35,13 +35,13 @@ class FinInflationIndexCurve():
 
         # Validate curve
         if len(indexDates) == 0:
-            raise FinError("Dates has zero length")
+            raise finpy_error("Dates has zero length")
 
         if len(indexDates) != len(indexValues):
-            raise FinError("Dates and Values are not the same length")
+            raise finpy_error("Dates and Values are not the same length")
 
         if lagInMonths < 0:
-            raise FinError("Lag must be positive.")
+            raise finpy_error("Lag must be positive.")
 
         self._indexDates = np.array(indexDates)
         self._indexValues = np.array(indexValues)
@@ -50,8 +50,8 @@ class FinInflationIndexCurve():
 
         self._indexTimes = times_from_dates(indexDates, self._baseDate)
 
-        if test_monotonicity(self._indexTimes) is False:
-            raise FinError("Times or dates are not sorted in increasing order")
+        if arr_is_monotonic(self._indexTimes) is False:
+            raise finpy_error("Times or dates are not sorted in increasing order")
 
 ###############################################################################
 
@@ -63,8 +63,8 @@ class FinInflationIndexCurve():
         cpiFirstDate = Date(1, lagMonthsAgoDt._m, lagMonthsAgoDt._y)
         cpiSecondDate = cpiFirstDate.add_months(1)
         
-        cpiFirstTime = (cpiFirstDate - self._baseDate) / gDaysInYear
-        cpiSecondTime = (cpiSecondDate - self._baseDate) / gDaysInYear
+        cpiFirstTime = (cpiFirstDate - self._baseDate) / g_days_in_year
+        cpiSecondTime = (cpiSecondDate - self._baseDate) / g_days_in_year
        
         cpiFirstValue = np.interp(cpiFirstTime,
                                   self._indexTimes,

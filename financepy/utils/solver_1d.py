@@ -1,46 +1,44 @@
-###############################################################################
-# Copyright (C) 2020 Saeed Amen, Dominic O'Kane
-###############################################################################
+"""Copyright (C) Saeed Amen,Dominic O'Kane.
+
+from https://quanteconpy.readthedocs.io/en/latest/_modules/quantecon/optimize/root_finding.html #####################
+
+"""
+
+from collections import namedtuple
+import operator
 
 from numba import njit
 import numpy as np
-import operator
 
-from .error import FinError
+from .error import finpy_error
 
-###############################################################################
-## from https://quanteconpy.readthedocs.io/en/latest/_modules/quantecon/optimize/root_finding.html #####################
-
-_ECONVERGED = 0
-_ECONVERR = -1
+_econverged = 0
+_econverr = -1
 
 _iter = 100
 _xtol = 2e-12
-_rtol = 4*np.finfo(float).eps
-
-from collections import namedtuple
+_rtol = 4 * np.finfo(float).eps
 
 results = namedtuple('results', 'root function_calls iterations converged')
 
-###############################################################################
 
 @njit(cache=True, fastmath=True)
 def _results(r):
-    r"""Select from a tuple of(root, funccalls, iterations, flag)"""
-    x, funcalls, iterations, flag = r
-    return x# results(x, funcalls, iterations, flag == 0)
+    """Select from a tuple of(root, funccalls, iterations, flag).
 
-###############################################################################
-# DO NOT TOUCH THIS FUNCTION AS IT IS USED IN FX VOL CALIBRATION !!!!!!!!!
-# IT NEEDS TO PASS IN ARGS AS A TUPLE AS ONE OF THE ARGS IS AN NDARRAY
-###############################################################################
+    results(x, funcalls, iterations, flag == 0)
+    """
+    return list(r)[0]
+
 
 @njit(fastmath=True, cache=True)
-def newton_secant(func, x0, args=(), tol=1.48e-8, maxiter=50,
-                  disp=True):
+def newton_secant(func, x_0, args=(), tol: float = 1.48e-8, maxiter: int = 50, disp: bool = True):
     """
     Find a zero from the secant method using the jitted version of
     Scipy's secant method.
+
+    DO NOT TOUCH THIS FUNCTION AS IT IS USED IN FX VOL CALIBRATION !!!!!!!!!
+    IT NEEDS TO PASS IN ARGS AS A TUPLE AS ONE OF THE ARGS IS AN NDARRAY
 
     Note that `func` must be jitted via Numba.
 
@@ -50,7 +48,7 @@ def newton_secant(func, x0, args=(), tol=1.48e-8, maxiter=50,
         The function whose zero is wanted. It must be a function of a
         single variable of the form f(x,a,b,c...), where a,b,c... are extra
         arguments that can be passed in the `args` parameter.
-    x0 : float
+    x_0 : float
         An initial estimate of the zero that should be somewhere near the
         actual zero.
     args : tuple, optional(default=())
@@ -75,19 +73,19 @@ def newton_secant(func, x0, args=(), tol=1.48e-8, maxiter=50,
     """
 
     if tol <= 0.0:
-        raise FinError("Tolerance should be positive.")
+        raise finpy_error("Tolerance should be positive.")
 
     if maxiter < 1:
-        raise FinError("maxiter must be greater than 0")
+        raise finpy_error("maxiter must be greater than 0")
 
     # Convert to float (don't use float(x0); this works also for complex x0)
     eps = 1e-4
-    p0 = 1.0 * x0
+    p0 = 1.0 * x_0
     funcalls = 0
-    status = _ECONVERR
+    status = _econverr
 
-    p1 = x0 * (1.0 + eps)
-    
+    p1 = x_0 * (1.0 + eps)
+
     if p1 > 0.0:
         p1 = p1 + eps
     else:
@@ -102,13 +100,13 @@ def newton_secant(func, x0, args=(), tol=1.48e-8, maxiter=50,
         p0, p1, q0, q1 = p1, p0, q1, q0
 
     for _ in range(maxiter):
-        
+
         if q1 == q0:
             if p1 != p0:
-                raise FinError("Tolerance reached")
+                raise finpy_error("Tolerance reached")
 
             p = (p1 + p0) / 2.0
-            status = _ECONVERGED
+            status = _econverged
             break
         else:
             if np.abs(q1) > np.abs(q0):
@@ -117,7 +115,7 @@ def newton_secant(func, x0, args=(), tol=1.48e-8, maxiter=50,
                 p = (-q1 / q0 * p0 + p1) / (1.0 - q1 / q0)
 
         if np.abs(p - p1) < tol:
-            status = _ECONVERGED
+            status = _econverged
             return p
 
         p0, q0 = p1, q1
@@ -125,20 +123,17 @@ def newton_secant(func, x0, args=(), tol=1.48e-8, maxiter=50,
         q1 = func(p1, *args)
         funcalls += 1
 
-    if disp and status == _ECONVERR:
+    if disp and status == _econverr:
         msg = "Failed to converge"
-        raise FinError(msg)
+        raise finpy_error(msg)
 
     return p
 
-###############################################################################
 
-#@jit
-def newton(func, x0, fprime=None, args=None, tol=1.48e-8, maxiter=50,
-           fprime2=None, x1=None, rtol=0.0, full_output=False, disp=False):
-    """
-    
-    TAKEN FROM SCIPY
+# @jit
+def newton(func, x_0, fprime=None, args=None, tol=1.48e-8, max_iter=50,
+           fprime_2=None, x_1=None, rtol=0.0, full_output=False, disp=False):
+    """TAKEN FROM SCIPY.
     
     Find a zero of a real or complex function using the Newton-Raphson
     (or secant or Halley's) method.
@@ -157,7 +152,7 @@ def newton(func, x0, fprime=None, args=None, tol=1.48e-8, maxiter=50,
         The function whose zero is wanted. It must be a function of a
         single variable of the form ``f(x,a,b,c...)``, where ``a,b,c...``
         are extra arguments that can be passed in the `args` parameter.
-    x0 : float, sequence, or ndarray
+    x_0 : float, sequence, or ndarray
         An initial estimate of the zero that should be somewhere near the
         actual zero. If not scalar, then `func` must be vectorized and return
         a sequence or array of the same shape as its first argument.
@@ -170,14 +165,14 @@ def newton(func, x0, fprime=None, args=None, tol=1.48e-8, maxiter=50,
         The allowable error of the zero value. If `func` is complex-valued,
         a larger `tol` is recommended as both the real and imaginary parts
         of `x` contribute to ``|x - x0|``.
-    maxiter : int, optional
+    max_iter : int, optional
         Maximum number of iterations.
-    fprime2 : callable, optional
+    fprime_2 : callable, optional
         The second order derivative of the function when available and
         convenient. If it is None (default), then the normal Newton-Raphson
         or the secant method is used. If it is not None, then Halley's method
         is used.
-    x1 : float, optional
+    x_1 : float, optional
         Another estimate of the zero that should be somewhere near the
         actual zero. Used if `fprime` is not provided.
     rtol : float, optional
@@ -247,7 +242,7 @@ def newton(func, x0, fprime=None, args=None, tol=1.48e-8, maxiter=50,
     >>> root = optimize.newton(f, 1.5)
     >>> root
     1.0000000000000016
-    >>> root = optimize.newton(f, 1.5, fprime2=lambda x: 6 * x)
+    >>> root = optimize.newton(f, 1.5, fprime_2=lambda x: 6 * x)
     >>> root
     1.0000000000000016
     Only ``fprime`` is provided, use the Newton-Raphson method:
@@ -256,7 +251,7 @@ def newton(func, x0, fprime=None, args=None, tol=1.48e-8, maxiter=50,
     1.0
     Both ``fprime2`` and ``fprime`` are provided, use Halley's method:
     >>> root = optimize.newton(f, 1.5, fprime=lambda x: 3 * x**2,
-    ...                        fprime2=lambda x: 6 * x)
+    ...                        fprime_2=lambda x: 6 * x)
     >>> root
     1.0
     When we want to find zeros for a set of related starting values and/or
@@ -269,7 +264,7 @@ def newton(func, x0, fprime=None, args=None, tol=1.48e-8, maxiter=50,
     >>> vec_res = optimize.newton(f, x, fprime=fder, args=(a, ))
     The above is the equivalent of solving for each value in ``(x, a)``
     separately in a for-loop, just faster:
-    >>> loop_res = [optimize.newton(f, x0, fprime=fder, args=(a0,))
+    >>> loop_res = [optimize.newton(f, x_0, fprime=fder, args=(a0,))
     ...             for x0, a0 in zip(x, a)]
     >>> np.allclose(vec_res, loop_res)
     True
@@ -283,40 +278,40 @@ def newton(func, x0, fprime=None, args=None, tol=1.48e-8, maxiter=50,
     >>> ax.set_ylabel('$x$ where $f(x, a)=0$')
     >>> plt.show()
     """
-    
-    if tol <= 0.0:
-        raise FinError("tol too small")
 
-    maxiter = operator.index(maxiter)
-    if maxiter < 1:
-        raise FinError("maxiter must be greater than 0")
+    if tol <= 0.0:
+        raise finpy_error("tol too small")
+
+    max_iter = operator.index(max_iter)
+    if max_iter < 1:
+        raise finpy_error("maxiter must be greater than 0")
 
     # Convert to float (don't use float(x0); this works also for complex x0)
-    p0 = 1.0 * x0
+    p_0 = 1.0 * x_0
     funcalls = 0
     if fprime is not None:
         # Newton-Raphson method
-        for itr in range(maxiter):
+        for itr in range(max_iter):
             # first evaluate fval
-            fval = func(p0, args)
+            fval = func(p_0, args)
             funcalls += 1
             # If fval is 0, a root has been found, then terminate
             if fval == 0:
-                return p0
-            fder = fprime(p0, args)
+                return p_0
+            fder = fprime(p_0, args)
             funcalls += 1
 
-#            print("==>", itr, p0, fval, fder)
+            # print("==>", itr, p0, fval, fder)
 
             if fder == 0:
                 if disp is True:
                     print("Derivative is zero. Newton Failed to converge " +
-                          "after ", str(itr+1), "iterations, value is ", p0)
+                          "after ", str(itr + 1), "iterations, value is ", p_0)
                 return None
 
             newton_step = fval / fder
-            if fprime2:
-                fder2 = fprime2(p0, args)
+            if fprime_2:
+                fder2 = fprime_2(p_0, args)
                 funcalls += 1
                 # Halley's method:
                 #   newton_step /= (1.0 - 0.5 * newton_step * fder2 / fder)
@@ -327,59 +322,58 @@ def newton(func, x0, fprime=None, args=None, tol=1.48e-8, maxiter=50,
                 adj = newton_step * fder2 / fder / 2
                 if np.abs(adj) < 1:
                     newton_step /= 1.0 - adj
-            p = p0 - newton_step
-            if np.isclose(p, p0, rtol=rtol, atol=tol):
+            p = p_0 - newton_step
+            if np.isclose(p, p_0, rtol=rtol, atol=tol):
                 return p
-            p0 = p
+            p_0 = p
     else:
         # Secant method
-        if x1 is not None:
-            if x1 == x0:
+        if x_1 is not None:
+            if x_1 == x_0:
                 raise ValueError("x1 and x0 must be different")
-            p1 = x1
+            p_1 = x_1
         else:
             eps = 1e-4
-            p1 = x0 * (1 + eps)
-            p1 += (eps if p1 >= 0 else -eps)
-        q0 = func(p0, args)
+            p_1 = x_0 * (1 + eps)
+            p_1 += (eps if p_1 >= 0 else -eps)
+        q_0 = func(p_0, args)
         funcalls += 1
-        q1 = func(p1, args)
+        q_1 = func(p_1, args)
         funcalls += 1
-        if abs(q1) < abs(q0):
-            p0, p1, q0, q1 = p1, p0, q1, q0
-        for itr in range(maxiter):
-            if q1 == q0:
-                if p1 != p0:
+        if abs(q_1) < abs(q_0):
+            p_0, p_1, q_0, q_1 = p_1, p_0, q_1, q_0
+        for itr in range(max_iter):
+            if q_1 == q_0:
+                if p_1 != p_0:
                     if disp:
-                        print("Tolerance reached. Failed to converge after ", 
-                              str(itr+1), "iterations, value is ", str(p1))
+                        print("Tolerance reached. Failed to converge after ",
+                              str(itr + 1), "iterations, value is ", str(p_1))
                     return None
-                p = (p1 + p0) / 2.0
+                p = (p_1 + p_0) / 2.0
                 return p
             else:
-                if abs(q1) > abs(q0):
-                    p = (-q0 / q1 * p1 + p0) / (1 - q0 / q1)
+                if abs(q_1) > abs(q_0):
+                    p = (-q_0 / q_1 * p_1 + p_0) / (1 - q_0 / q_1)
                 else:
-                    p = (-q1 / q0 * p0 + p1) / (1 - q1 / q0)
-            if np.isclose(p, p1, rtol=rtol, atol=tol):
+                    p = (-q_1 / q_0 * p_0 + p_1) / (1 - q_1 / q_0)
+            if np.isclose(p, p_1, rtol=rtol, atol=tol):
                 return p
-            p0, q0 = p1, q1
-            p1 = p
-            q1 = func(p1, *args)
+            p_0, q_0 = p_1, q_1
+            p_1 = p
+            q_1 = func(p_1, *args)
             funcalls += 1
 
     if disp:
-        print("Failed to converge after ", str(itr+1),
+        print("Failed to converge after ", str(itr + 1),
               "iterations, value is ", str(p))
 
     return p
 
-###############################################################################
 
 @njit(fastmath=True, cache=True)
-def brent_max(func, a, b, args, xtol=1e-5, maxiter=500):
-    """
-    Uses a jitted version of the maximization routine from SciPy's fminbound.
+def brent_max(func, lower_bound, upper_bound, args, xtol: float = 1e-5, max_iter: int = 500):
+    """Uses a jitted version of the maximization routine from SciPy's fminbound.
+
     The algorithm is identical except that it's been switched to maximization
     rather than minimization, and the tests for convergence have been stripped
     out to allow for jit compilation.
@@ -389,13 +383,11 @@ def brent_max(func, a, b, args, xtol=1e-5, maxiter=500):
     Parameters
     ----------
     func : jitted function
-    a : scalar
-        Lower bound for search
-    b : scalar
-        Upper bound for search
+    lower_bound : scalar for search
+    upper_bound : scalar  for search
     args : tuple, optional
         Extra arguments passed to the objective function.
-    maxiter : int, optional
+    max_iter : int, optional
         Maximum number of iterations to perform.
     xtol : float, optional
         Absolute error in solution `xopt` acceptable for convergence.
@@ -421,22 +413,22 @@ def brent_max(func, a, b, args, xtol=1e-5, maxiter=500):
     >>> xf, fval, info = brent_max(f, -2, 2)
 
     """
-    if not np.isfinite(a):
+    if not np.isfinite(lower_bound):
         raise ValueError("a must be finite.")
 
-    if not np.isfinite(b):
+    if not np.isfinite(upper_bound):
         raise ValueError("b must be finite.")
 
-    if not a < b:
+    if not lower_bound < upper_bound:
         raise ValueError("a must be less than b.")
 
-    maxfun = maxiter
+    maxfun = max_iter
     status_flag = 0
 
     sqrt_eps = np.sqrt(2.2e-16)
     golden_mean = 0.5 * (3.0 - np.sqrt(5.0))
 
-    fulc = a + golden_mean * (b - a)
+    fulc = lower_bound + golden_mean * (upper_bound - lower_bound)
     nfc, xf = fulc, fulc
     rat = e = 0.0
     x = xf
@@ -444,14 +436,14 @@ def brent_max(func, a, b, args, xtol=1e-5, maxiter=500):
     num = 1
 
     ffulc = fnfc = fx
-    xm = 0.5 * (a + b)
-    tol1 = sqrt_eps * np.abs(xf) + xtol / 3.0
-    tol2 = 2.0 * tol1
+    xm = 0.5 * (lower_bound + upper_bound)
+    to_l1 = sqrt_eps * np.abs(xf) + xtol / 3.0
+    to_l2 = 2.0 * to_l1
 
-    while (np.abs(xf - xm) > (tol2 - 0.5 * (b - a))):
+    while (np.abs(xf - xm) > (to_l2 - 0.5 * (upper_bound - lower_bound))):
         golden = 1
         # Check for parabolic fit
-        if np.abs(e) > tol1:
+        if np.abs(e) > to_l1:
             golden = 0
             r = (xf - nfc) * (fx - ffulc)
             q = (xf - fulc) * (fx - fnfc)
@@ -464,55 +456,55 @@ def brent_max(func, a, b, args, xtol=1e-5, maxiter=500):
             e = rat
 
             # Check for acceptability of parabola
-            if ((np.abs(p) < np.abs(0.5*q*r)) and (p > q*(a - xf)) and
-                    (p < q * (b - xf))):
+            if ((np.abs(p) < np.abs(0.5 * q * r)) and (p > q * (lower_bound - xf)) and
+                    (p < q * (upper_bound - xf))):
                 rat = (p + 0.0) / q
                 x = xf + rat
 
-                if ((x - a) < tol2) or ((b - x) < tol2):
+                if ((x - lower_bound) < to_l2) or ((upper_bound - x) < to_l2):
                     si = np.sign(xm - xf) + ((xm - xf) == 0)
-                    rat = tol1 * si
-            else:      # do a golden section step
+                    rat = to_l1 * si
+            else:  # do a golden section step
                 golden = 1
 
         if golden:  # Do a golden-section step
             if xf >= xm:
-                e = a - xf
+                e = lower_bound - xf
             else:
-                e = b - xf
-            rat = golden_mean*e
+                e = upper_bound - xf
+            rat = golden_mean * e
 
         if rat == 0:
             si = np.sign(rat) + 1
         else:
             si = np.sign(rat)
 
-        x = xf + si * np.maximum(np.abs(rat), tol1)
+        x = xf + si * np.maximum(np.abs(rat), to_l1)
         fu = -func(x, *args)
         num += 1
 
         if fu <= fx:
             if x >= xf:
-                a = xf
+                lower_bound = xf
             else:
-                b = xf
+                upper_bound = xf
             fulc, ffulc = nfc, fnfc
             nfc, fnfc = xf, fx
             xf, fx = x, fu
         else:
             if x < xf:
-                a = x
+                lower_bound = x
             else:
-                b = x
+                upper_bound = x
             if (fu <= fnfc) or (nfc == xf):
                 fulc, ffulc = nfc, fnfc
                 nfc, fnfc = x, fu
             elif (fu <= ffulc) or (fulc == xf) or (fulc == nfc):
                 fulc, ffulc = x, fu
 
-        xm = 0.5 * (a + b)
-        tol1 = sqrt_eps * np.abs(xf) + xtol / 3.0
-        tol2 = 2.0 * tol1
+        xm = 0.5 * (lower_bound + upper_bound)
+        to_l1 = sqrt_eps * np.abs(xf) + xtol / 3.0
+        to_l2 = 2.0 * to_l1
 
         if num >= maxfun:
             status_flag = 1
@@ -523,63 +515,65 @@ def brent_max(func, a, b, args, xtol=1e-5, maxiter=500):
 
     return xf, fval, info
 
-###############################################################################
 
-#@jit(fastmath=True, cache=True)
-def bisection(func, x1, x2, args, xtol=1e-6, maxIter=100):
-    """ Bisection algorithm. You need to supply root brackets x1 and x2. """
+def bisection(func, x_1, x_2, args, xtol: float = 1e-6, max_iter: float = 100):
+    """Bisection algorithm.
 
-    if np.abs(x1-x2) < 1e-10:
-        raise FinError("Brackets should not be equal")
+    You need to supply root brackets x1 and x2.
+    TODO : @jit(fastmath=True, cache=True)
+    """
 
-    if x1 > x2:
-        raise FinError("Bracket x2 should be greater than x1")
+    if np.abs(x_1 - x_2) < 1e-10:
+        raise finpy_error("Brackets should not be equal")
 
-    f1 = func(x1, args)
-    fmid = func(x2, args)
+    if x_1 > x_2:
+        raise finpy_error("Bracket x2 should be greater than x1")
 
-    if np.abs(f1) < xtol:
-        return x1
-    elif np.abs(fmid) < xtol:
-        return x2
+    f_1 = func(x_1, args)
+    f_mid = func(x_2, args)
 
-    if f1 * fmid >= 0:
+    if np.abs(f_1) < xtol:
+        return x_1
+    elif np.abs(f_mid) < xtol:
+        return x_2
+
+    if f_1 * f_mid >= 0:
         print("Root not bracketed")
         return None
 
-    for i in range(0, maxIter):
+    for i in range(0, max_iter):
 
-        xmid = (x1 + x2)/2.0
-        fmid = func(xmid, args)
-        
-        if f1 * fmid < 0:
-            x2 = xmid
+        xmid = (x_1 + x_2) / 2.0
+        f_mid = func(xmid, args)
+
+        if f_1 * f_mid < 0:
+            x_2 = xmid
         else:
-            x1 = xmid
-        
-        if np.abs(fmid) < xtol:
+            x_1 = xmid
+
+        if np.abs(f_mid) < xtol:
             return xmid
 
-    print("Bisection exceeded number of iterations", maxIter)
+    print("Bisection exceeded number of iterations", max_iter)
     return None
 
-###############################################################################
-## https://github.com/linesd/minimize/blob/master/optimizer/minimize.py
-
-# The function uses conjugate gradients and approximate linesearches based 
-# on polynomial interpolation with Wolfe-Powel conditions
 
 @njit(cache=True, fastmath=True)
-def minimize_wolfe_powel(f, X, length, fargs=(), reduction=None, verbose=False, concise=False):
-    """
-    Minimize a differentiable multivariate function.
+def minimize_wolfe_powel(f, x, length, fargs=(), reduction=None, verbose=False, concise=False):
+    """Minimize a differentiable multivariate function.
+
+    credit : https://github.com/linesd/minimize/blob/master/optimizer/minimize.py
+
+    The function uses conjugate gradients and approximate linesearches based
+    On polynomial interpolation with Wolfe-Powel conditions
+
     Parameters
     ----------
     f : function to minimize. The function must return the value
         of the function (float) and a numpy array of partial
         derivatives of shape (D,) with respect to X, where D is
         the dimensionality of the function.
-    X : numpy array - Shape : (D, 1)
+    x : numpy array - Shape : (D, 1)
         initial guess.
     length : int
         The length of the run. If positive, length gives the maximum
@@ -616,9 +610,9 @@ def minimize_wolfe_powel(f, X, length, fargs=(), reduction=None, verbose=False, 
      Copyright (C) 2001 - 2006 by Carl Edward Rasmussen (2006-09-08).
      Converted to python by David Lines (2019-23-08)
     """
-    INT = 0.1  # don't reevaluate within 0.1 of the limit of the current bracket
-    EXT = 3.0  # extrapolate maximum 3 times the current step size
-    MAX = 20  # max 20 function evaluations per line search
+    _int = 0.1  # don't reevaluate within 0.1 of the limit of the current bracket
+    _ext = 3.0  # extrapolate maximum 3 times the current step size
+    max = 20  # max 20 function evaluations per line search
     RATIO = 10  # maximum allowed slope ratio
     SIG = 0.1
     RHO = SIG / 2
@@ -642,139 +636,144 @@ def minimize_wolfe_powel(f, X, length, fargs=(), reduction=None, verbose=False, 
 
     i = 0  # run length counter
     ls_failed = 0  # no previous line search has failed
-    f0, df0 = f(X, fargs)  # get initial function value and gradient
-    df0 = df0.reshape(-1, 1)
+    f_0, df_0 = f(x, fargs)  # get initial function value and gradient
+    df_0 = df_0.reshape(-1, 1)
     fX = []
-    fX.append(f0)
-    Xd = []
-    Xd.append(X)
+    fX.append(f_0)
+    x_d = []
+    x_d.append(x)
     i += (length < 0)  # count epochs
-    s = -df0  # get column vec
-    d0 = -s.T @ s  # initial search direction (steepest) and slope
-    x3 = red / (1 - d0)  # initial step is red/(|s|+1)
+    s = -df_0  # get column vec
+    d_0 = -s.T @ s  # initial search direction (steepest) and slope
+    x_3 = red / (1 - d_0)  # initial step is red/(|s|+1)
 
     while i < abs(length):  # while not finished
         i += (length > 0)  # count iterations
 
-        X0 = X;
-        F0 = f0;
-        dF0 = df0  # copy current vals
-        M = MAX if length > 0 else min(MAX, -length - i)
+        X_0 = x
+        dF_0 = df_0  # copy current vals
+        M = max if length > 0 else min(max, -length - i)
 
         while 1:  # extrapolate as long as necessary
-            x2 = 0
-            f2 = f0
-            d2 = d0
-            f3 = f0
-            df3 = df0
+            x_2 = 0
+            f_2 = f_0
+            d_2 = d_0
+            f_3 = f_0
+            df_3 = df_0
             success = False
 
             while not success and M > 0:
                 try:
                     M -= 1
                     i += (length < 0)  # count epochs
-                    f3, df3 = f(X + x3 * s, *list(*fargs))
-                    df3 = df3.reshape(-1, 1)
-                    if np.isnan(f3) or np.isinf(f3) or np.any(np.isnan(df3) + np.isinf(df3)):
+                    f_3, df_3 = f(x + x_3 * s, *list(*fargs))
+                    df_3 = df_3.reshape(-1, 1)
+                    if np.isnan(f_3) or np.isinf(f_3) or np.any(np.isnan(df_3) + np.isinf(df_3)):
                         raise Exception('Either nan or inf in function eval or gradients')
                     success = True
                 except:  # catch any error occuring in f
-                    x3 = (x2 + x3) / 2  # bisect and try again
+                    x_3 = (x_2 + x_3) / 2  # bisect and try again
 
-            if f3 < F0:
-                X0 = X + x3 * s
-                F0 = f3
-                dF0 = df3  # keep best values
+            if f_3 < F_0:
+                X_0 = x + x_3 * s
+                F_0 = f_3
+                dF_0 = df_3  # keep best values
 
-            d3 = df3.T @ s  # new slope
-            if d3 > SIG * d0 or f3 > f0 + x3 * RHO * d0 or M == 0:
+            d_3 = df_3.T @ s  # new slope
+            if d_3 > SIG * d_0 or f_3 > f_0 + x_3 * RHO * d_0 or M == 0:
                 break  # finished extrapolating
 
-            x1 = x2
-            f1 = f2
-            d1 = d2  # move point 2 to point 1
-            x2 = x3
-            f2 = f3
-            d2 = d3  # move point 3 to point 2
-            A = 6 * (f1 - f2) + 3 * (d2 + d1) * (x2 - x1)  # make cubic extrapolation
-            B = 3 * (f2 - f1) - (2 * d1 + d2) * (x2 - x1)
-            x3 = x1 - d1 * (x2 - x1) ** 2 / (B + np.sqrt(B * B - A * d1 * (x2 - x1)))  # num. error possible, ok!
+            x1 = x_2
+            f1 = f_2
+            d1 = d_2  # move point 2 to point 1
+            x_2 = x_3
+            f_2 = f_3
+            d_2 = d_3  # move point 3 to point 2
+            A = 6 * (f1 - f_2) + 3 * (d_2 + d1) * (x_2 - x1)  # make cubic extrapolation
+            B = 3 * (f_2 - f1) - (2 * d1 + d_2) * (x_2 - x1)
+            x_3 = x1 - d1 * (x_2 - x1) ** 2 / (B + np.sqrt(B * B - A * d1 * (x_2 - x1)))  # num. error possible, ok!
 
-            if np.iscomplex(x3) or np.isnan(x3) or np.isinf(x3) or x3 < 0:  # num prob | wrong sign
-                x3 = x2 * EXT
-            elif x3 > x2 * EXT:
-                x3 = x2 * EXT
-            elif x3 < x2 + INT * (x2 - x1):
-                x3 = x2 + INT * (x2 - x1)
+            if np.iscomplex(x_3) or np.isnan(x_3) or np.isinf(x_3) or x_3 < 0:  # num prob | wrong sign
+                x_3 = x_2 * _ext
+            elif x_3 > x_2 * _ext:
+                x_3 = x_2 * _ext
+            elif x_3 < x_2 + _int * (x_2 - x1):
+                x_3 = x_2 + _int * (x_2 - x1)
 
-        while (abs(d3) > -SIG * d0 or f3 > f0 + x3 * RHO * d0) and M > 0:  # keep interpolating
+        while (abs(d_3) > -SIG * d_0 or f_3 > f_0 + x_3 * RHO * d_0) and M > 0:  # keep interpolating
 
-            if d3 > 0 or f3 > f0 + x3 * RHO * d0:  # choose subinterval
-                x4 = x3
-                f4 = f3
-                d4 = d3  # move point 3 to point 4
+            if d_3 > 0 or f_3 > f_0 + x_3 * RHO * d_0:  # choose subinterval
+                x4 = x_3
+                f4 = f_3
+                d4 = d_3  # move point 3 to point 4
             else:
-                x2 = x3
-                f2 = f3
-                d2 = d3  # move point 3 to point 2
+                x_2 = x_3
+                f_2 = f_3
+                d_2 = d_3  # move point 3 to point 2
 
-            if f4 > f0:
-                x3 = x2 - (0.5 * d2 * (x4 - x2) ** 2) / (f4 - f2 - d2 * (x4 - x2))  # quadratic interpolation
+            if f4 > f_0:
+                x_3 = x_2 - (0.5 * d_2 * (x4 - x_2) ** 2) / (f4 - f_2 - d_2 * (x4 - x_2))  # quadratic interpolation
             else:
-                A = 6 * (f2 - f4) / (x4 - x2) + 3 * (d4 + d2)  # cubic interpolation
-                B = 3 * (f4 - f2) - (2 * d2 + d4) * (x4 - x2)
-                x3 = x2 + (np.sqrt(B * B - A * d2 * (x4 - x2) ** 2) - B) / A  # num. error possible, ok!
+                A = 6 * (f_2 - f4) / (x4 - x_2) + 3 * (d4 + d_2)  # cubic interpolation
+                B = 3 * (f4 - f_2) - (2 * d_2 + d4) * (x4 - x_2)
+                x_3 = x_2 + (np.sqrt(B * B - A * d_2 * (x4 - x_2) ** 2) - B) / A  # num. error possible, ok!
 
-            if np.isnan(x3) or np.isinf(x3):
-                x3 = (x2 + x4) / 2  # if we had a numerical problem then bisect
+            if np.isnan(x_3) or np.isinf(x_3):
+                # if we had a numerical problem then bisect
+                x_3 = (x_2 + x4) / 2
 
-            x3 = max(min(x3, x4 - INT * (x4 - x2)), x2 + INT * (x4 - x2))  # don't accept too close
-            f3, df3 = f(X + x3 * s, *list(fargs))
-            df3 = df3.reshape(-1, 1)
+                # don't accept too close
+            x_3 = max(min(x_3, x4 - _int * (x4 - x_2)), x_2 + _int * (x4 - x_2))
+            f_3, df_3 = f(x + x_3 * s, *list(fargs))
+            df_3 = df_3.reshape(-1, 1)
 
-            if f3 < F0:
-                X0 = X + x3 * s
-                F0 = f3
-                dF0 = df3  # keep best values
+            if f_3 < F_0:
+                X_0 = x + x_3 * s
+                F_0 = f_3
+                # keep best values
+                dF_0 = df_3
 
             M -= 1
-            i += (length < 0)  # count epochs?!
-            d3 = df3.T @ s  # new slope
+            # count epochs?!
+            i += (length < 0)
+            # new slope
+            d_3 = df_3.T @ s
 
-        if abs(d3) < -SIG * d0 and f3 < f0 + x3 * RHO * d0:  # if line search succeeded
-            X = X + x3 * s
-            f0 = f3
-            fX.append(f0)
-            Xd.append(X)  # update variables
+        if abs(d_3) < -SIG * d_0 and f_3 < f_0 + x_3 * RHO * d_0:  # if line search succeeded
+            x = x + x_3 * s
+            f_0 = f_3
+            fX.append(f_0)
+            x_d.append(x)  # update variables
             if verbose:
-                print('%s %6i;  Value %4.6e\r' % (S, i, f0))
-            s = (df3.T @ df3 - df0.T @ df3) / (df0.T @ df0) * s - df3  # Polack-Ribiere CG direction
-            df0 = df3  # swap derivatives
-            d3 = d0
-            d0 = df0.T @ s
-            if d0 > 0:  # new slope must be negative
-                s = -df0.reshape(-1, 1);
-                d0 = -s.T @ s  # otherwise use steepest direction
-            x3 = x3 * min(RATIO, d3 / (d0 - np.finfo(np.double).tiny))  # slope ratio but max RATIO
+                print('%s %6i;  Value %4.6e\r' % (S, i, f_0))
+            s = (df_3.T @ df_3 - df_0.T @ df_3) / (df_0.T @ df_0) * s - df_3  # Polack-Ribiere CG direction
+            df_0 = df_3  # swap derivatives
+            d_3 = d_0
+            d_0 = df_0.T @ s
+            if d_0 > 0:  # new slope must be negative
+                s = -df_0.reshape(-1, 1);
+                d_0 = -s.T @ s  # otherwise use steepest direction
+            x_3 = x_3 * min(RATIO, d_3 / (d_0 - np.finfo(np.double).tiny))  # slope ratio but max RATIO
             ls_failed = False  # this line search did not fail
         else:
-            X = X0
-            f0 = F0
-            df0 = dF0  # restore best point so far
-            if ls_failed or i > abs(length):  # line search failed twice in a row
-                break  # or we ran out of time, so we give up
-            s = -df0.reshape(-1, 1)
-            d0 = -s.T @ s  # try steepest
-            x3 = 1 / (1 - d0)
-            ls_failed = True  # this line search failed
+            x = X_0
+            f_0 = F_0
+            # restore best point so far
+            df_0 = dF_0
+            # line search failed twice in a row
+            if ls_failed or i > abs(length):
+                # or we ran out of time, so we give up
+                break
+            s = -df_0.reshape(-1, 1)
+            # try steepest
+            d_0 = -s.T @ s
+            x_3 = 1 / (1 - d_0)
+            # this line search failed
+            ls_failed = True
 
     if concise:
         convergence = fX[-1]  # return only the minimum function value
     else:
-        convergence = np.hstack((np.array(fX).reshape(-1, 1), np.array(Xd)[:, :, 0]))  # bundle convergence info
+        convergence = np.hstack((np.array(fX).reshape(-1, 1), np.array(x_d)[:, :, 0]))  # bundle convergence info
 
-    Xs = X  # solution
-
-    return Xs, convergence, i
-
-###############################################################################
+    return x, convergence, i

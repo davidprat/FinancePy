@@ -11,10 +11,10 @@ from financepy.models.black import Black
 from financepy.products.rates.bermudan_swaption import IborBermudanSwaption
 from financepy.products.rates.ibor_swap import IborSwap
 from financepy.products.rates.ibor_swaption import IborSwaption
-from financepy.utils.global_types import FinExerciseTypes
-from financepy.utils.global_types import SwapTypes
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.global_types import exercise_types
+from financepy.utils.global_types import swap_types
+from financepy.utils.frequency import frequency_types
+from financepy.utils.day_count import day_count_types
 from financepy.utils.date import Date
 import sys
 sys.path.append("..")
@@ -35,17 +35,17 @@ def test_IborBermudanSwaptionBKModel():
     swapMaturityDate = settlement_date.add_years(4)
 
     swapFixedCoupon = 0.060
-    swapFixedFrequencyType = FrequencyTypes.SEMI_ANNUAL
-    swapFixedDayCountType = DayCountTypes.ACT_365F
+    swapFixedFrequencyType = frequency_types.SEMI_ANNUAL
+    swapFixedDayCountType = day_count_types.ACT_365F
 
     libor_curve = DiscountCurveFlat(valuation_date,
                                     0.0625,
-                                    FrequencyTypes.SEMI_ANNUAL,
-                                    DayCountTypes.ACT_365F)
+                                    frequency_types.SEMI_ANNUAL,
+                                    day_count_types.ACT_365F)
 
     fwdPAYSwap = IborSwap(exercise_date,
                           swapMaturityDate,
-                          SwapTypes.PAY,
+                          swap_types.PAY,
                           swapFixedCoupon,
                           swapFixedFrequencyType,
                           swapFixedDayCountType)
@@ -58,7 +58,7 @@ def test_IborBermudanSwaptionBKModel():
     # fwdPAYSwap.print_fixed_leg_pv()
 
     # Now we create the European swaptions
-    fixed_leg_type = SwapTypes.PAY
+    fixed_leg_type = swap_types.PAY
     europeanSwaptionPay = IborSwaption(settlement_date,
                                        exercise_date,
                                        swapMaturityDate,
@@ -67,7 +67,7 @@ def test_IborBermudanSwaptionBKModel():
                                        swapFixedFrequencyType,
                                        swapFixedDayCountType)
 
-    fixed_leg_type = SwapTypes.RECEIVE
+    fixed_leg_type = swap_types.RECEIVE
     europeanSwaptionRec = IborSwaption(settlement_date,
                                        exercise_date,
                                        swapMaturityDate,
@@ -164,8 +164,8 @@ def test_IborBermudanSwaptionBKModel():
     ###########################################################################
 
     # Now we create the Bermudan swaptions but only allow European exercise
-    fixed_leg_type = SwapTypes.PAY
-    exercise_type = FinExerciseTypes.EUROPEAN
+    fixed_leg_type = swap_types.PAY
+    exercise_type = exercise_types.EUROPEAN
 
     bermudan_swaption_pay = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
@@ -176,8 +176,8 @@ def test_IborBermudanSwaptionBKModel():
                                                     swapFixedFrequencyType,
                                                     swapFixedDayCountType)
 
-    fixed_leg_type = SwapTypes.RECEIVE
-    exercise_type = FinExerciseTypes.EUROPEAN
+    fixed_leg_type = swap_types.RECEIVE
+    exercise_type = exercise_types.EUROPEAN
 
     bermudan_swaption_rec = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
@@ -228,8 +228,8 @@ def test_IborBermudanSwaptionBKModel():
     # Now we create the Bermudan swaptions but allow Bermudan exercise
     ###########################################################################
 
-    fixed_leg_type = SwapTypes.PAY
-    exercise_type = FinExerciseTypes.BERMUDAN
+    fixed_leg_type = swap_types.PAY
+    exercise_type = exercise_types.BERMUDAN
 
     bermudan_swaption_pay = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
@@ -240,8 +240,8 @@ def test_IborBermudanSwaptionBKModel():
                                                     swapFixedFrequencyType,
                                                     swapFixedDayCountType)
 
-    fixed_leg_type = SwapTypes.RECEIVE
-    exercise_type = FinExerciseTypes.BERMUDAN
+    fixed_leg_type = swap_types.RECEIVE
+    exercise_type = exercise_types.BERMUDAN
 
     bermudan_swaption_rec = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
@@ -339,8 +339,8 @@ def test_IborBermudanSwaptionBKModel():
     ###########################################################################
 
     # Now we create the Bermudan swaptions but only allow European exercise
-    fixed_leg_type = SwapTypes.PAY
-    exercise_type = FinExerciseTypes.EUROPEAN
+    fixed_leg_type = swap_types.PAY
+    exercise_type = exercise_types.EUROPEAN
 
     bermudan_swaption_pay = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
@@ -351,7 +351,7 @@ def test_IborBermudanSwaptionBKModel():
                                                     swapFixedFrequencyType,
                                                     swapFixedDayCountType)
 
-    fixed_leg_type = SwapTypes.RECEIVE
+    fixed_leg_type = swap_types.RECEIVE
     bermudan_swaption_rec = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
                                                     swapMaturityDate,
@@ -399,8 +399,8 @@ def test_IborBermudanSwaptionBKModel():
     # Now we create the Bermudan swaptions but allow Bermudan exercise
     ###########################################################################
 
-    fixed_leg_type = SwapTypes.PAY
-    exercise_type = FinExerciseTypes.BERMUDAN
+    fixed_leg_type = swap_types.PAY
+    exercise_type = exercise_types.BERMUDAN
 
     bermudan_swaption_pay = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
@@ -411,7 +411,7 @@ def test_IborBermudanSwaptionBKModel():
                                                     swapFixedFrequencyType,
                                                     swapFixedDayCountType)
 
-    fixed_leg_type = SwapTypes.RECEIVE
+    fixed_leg_type = swap_types.RECEIVE
     bermudan_swaption_rec = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
                                                     swapMaturityDate,
@@ -508,8 +508,8 @@ def test_IborBermudanSwaptionBKModel():
     ###########################################################################
 
     # Now we create the Bermudan swaptions but only allow European exercise
-    fixed_leg_type = SwapTypes.PAY
-    exercise_type = FinExerciseTypes.EUROPEAN
+    fixed_leg_type = swap_types.PAY
+    exercise_type = exercise_types.EUROPEAN
 
     bermudan_swaption_pay = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
@@ -520,7 +520,7 @@ def test_IborBermudanSwaptionBKModel():
                                                     swapFixedFrequencyType,
                                                     swapFixedDayCountType)
 
-    fixed_leg_type = SwapTypes.RECEIVE
+    fixed_leg_type = swap_types.RECEIVE
     bermudan_swaption_rec = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
                                                     swapMaturityDate,
@@ -567,8 +567,8 @@ def test_IborBermudanSwaptionBKModel():
     # Now we create the Bermudan swaptions but allow Bermudan exercise
     ###########################################################################
 
-    fixed_leg_type = SwapTypes.PAY
-    exercise_type = FinExerciseTypes.BERMUDAN
+    fixed_leg_type = swap_types.PAY
+    exercise_type = exercise_types.BERMUDAN
 
     bermudan_swaption_pay = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
@@ -579,7 +579,7 @@ def test_IborBermudanSwaptionBKModel():
                                                     swapFixedFrequencyType,
                                                     swapFixedDayCountType)
 
-    fixed_leg_type = SwapTypes.RECEIVE
+    fixed_leg_type = swap_types.RECEIVE
     bermudan_swaption_rec = IborBermudanSwaption(settlement_date,
                                                     exercise_date,
                                                     swapMaturityDate,

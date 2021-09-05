@@ -3,15 +3,15 @@
 ##############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_types import FinExerciseTypes
+from financepy.utils.global_types import exercise_types
 from financepy.utils.helpers import print_tree
 from financepy.models.bdt_tree import BDTTree
 from financepy.market.curves.discount_curve_zeros import DiscountCurveZeros
-from financepy.utils.global_vars import gDaysInYear
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.global_vars import g_days_in_year
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 from financepy.models.black import Black
-from financepy.products.rates.ibor_swaption import SwapTypes
+from financepy.products.rates.ibor_swaption import swap_types
 from financepy.products.rates.ibor_swaption import IborSwaption
 from financepy.products.bonds.bond import Bond
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
@@ -39,19 +39,19 @@ def testBlackModelCheck():
 
     valuation_date = Date(1, 1, 2020)
     libor_curve = DiscountCurveFlat(valuation_date, 0.06,
-                                    FrequencyTypes.SEMI_ANNUAL)
+                                    frequency_types.SEMI_ANNUAL)
 
     settlement_date = Date(1, 1, 2020)
     exercise_date = Date(1, 1, 2021)
     maturity_date = Date(1, 1, 2024)
 
     fixed_coupon = 0.06
-    fixed_frequency_type = FrequencyTypes.SEMI_ANNUAL
-    fixed_day_count_type = DayCountTypes.THIRTY_E_360_ISDA
+    fixed_frequency_type = frequency_types.SEMI_ANNUAL
+    fixed_day_count_type = day_count_types.THIRTY_E_360_ISDA
     notional = 100.0
 
     # Pricing a PAY
-    swaptionType = SwapTypes.PAY
+    swaptionType = swap_types.PAY
     swaption = IborSwaption(settlement_date,
                             exercise_date,
                             maturity_date,
@@ -87,7 +87,7 @@ def test_BDTExampleOne():
     curve = DiscountCurveZeros(valuation_date,
                                zero_dates,
                                zero_rates,
-                               FrequencyTypes.ANNUAL)
+                               frequency_types.ANNUAL)
 
     yieldVol = 0.16
 
@@ -119,8 +119,8 @@ def test_BDTExampleTwo():
     expiry_date = settlement_date.add_tenor("18m")
     maturity_date = settlement_date.add_tenor("10Y")
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     bond = Bond(issue_date, maturity_date, coupon, freq_type, accrual_type)
 
     coupon_times = []
@@ -132,13 +132,13 @@ def test_BDTExampleTwo():
         pcd = bond._flow_dates[i-1]
         ncd = bond._flow_dates[i]
         if pcd < settlement_date and ncd > settlement_date:
-            flow_time = (pcd - settlement_date) / gDaysInYear
+            flow_time = (pcd - settlement_date) / g_days_in_year
             coupon_times.append(flow_time)
             coupon_flows.append(cpn)
 
     for flow_date in bond._flow_dates:
         if flow_date > settlement_date:
-            flow_time = (flow_date - settlement_date) / gDaysInYear
+            flow_time = (flow_date - settlement_date) / g_days_in_year
             coupon_times.append(flow_time)
             coupon_flows.append(cpn)
 
@@ -148,8 +148,8 @@ def test_BDTExampleTwo():
     strike_price = 105.0
     face = 100.0
 
-    tmat = (maturity_date - settlement_date) / gDaysInYear
-    texp = (expiry_date - settlement_date) / gDaysInYear
+    tmat = (maturity_date - settlement_date) / g_days_in_year
+    texp = (expiry_date - settlement_date) / g_days_in_year
     times = np.linspace(0, tmat, 11)
     dates = settlement_date.add_years(times)
     dfs = np.exp(-0.05*times)
@@ -166,7 +166,7 @@ def test_BDTExampleTwo():
 
     # Test convergence
     num_steps_list = [5]  # [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-    exercise_type = FinExerciseTypes.AMERICAN
+    exercise_type = exercise_types.AMERICAN
 
     testCases.header("Values")
     treeVector = []
@@ -210,8 +210,8 @@ def test_BDTExampleThree():
     curve = DiscountCurve(settlement_date, dates, dfs)
 
     coupon = 0.06
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     strike_price = 100.0
     face = 100.0
     # Andersen paper
@@ -220,8 +220,8 @@ def test_BDTExampleThree():
     testCases.header("ExerciseType", "Sigma", "NumSteps", "Texp", "Tmat",
                      "V_Fixed", "V_pay", "V_rec")
 
-    for exercise_type in [FinExerciseTypes.EUROPEAN,
-                          FinExerciseTypes.BERMUDAN]:
+    for exercise_type in [exercise_types.EUROPEAN,
+                          exercise_types.BERMUDAN]:
 
         for years_to_maturity in [4.0, 5.0, 10.0, 20.0]:
 
@@ -239,8 +239,8 @@ def test_BDTExampleThree():
 
                 expiry_date = settlement_date.add_years(expiryYears)
 
-                tmat = (maturity_date - settlement_date) / gDaysInYear
-                texp = (expiry_date - settlement_date) / gDaysInYear
+                tmat = (maturity_date - settlement_date) / g_days_in_year
+                texp = (expiry_date - settlement_date) / g_days_in_year
 
                 bond = Bond(issue_date, maturity_date,
                             coupon, freq_type, accrual_type)
@@ -250,7 +250,7 @@ def test_BDTExampleThree():
                 cpn = bond._coupon/bond._frequency
                 for flow_date in bond._flow_dates:
                     if flow_date > expiry_date:
-                        flow_time = (flow_date - settlement_date) / gDaysInYear
+                        flow_time = (flow_date - settlement_date) / g_days_in_year
                         coupon_times.append(flow_time)
                         coupon_flows.append(cpn)
 

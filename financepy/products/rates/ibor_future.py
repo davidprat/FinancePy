@@ -8,9 +8,9 @@
 
 import numpy as np
 
-from ...utils.error import FinError
-from ...utils.day_count import DayCountTypes
-from ...utils.global_vars import gDaysInYear
+from ...utils.error import finpy_error
+from ...utils.day_count import day_count_types
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import ONE_MILLION
 from ...utils.date import Date
 
@@ -30,7 +30,7 @@ class IborFuture:
                  todayDate: Date,
                  futureNumber: int,  # The number of the future after todayDate
                  futureTenor: str = "3M",  # '1M', '2M', '3M'
-                 accrual_type: DayCountTypes = DayCountTypes.ACT_360,
+                 accrual_type: day_count_types = day_count_types.ACT_360,
                  contract_size: float = ONE_MILLION):
         """ Create an interest rate futures contract which has the same
         conventions as those traded on the CME. The current date, the tenor of
@@ -40,10 +40,10 @@ class IborFuture:
         check_argument_types(self.__init__, locals())
 
         if futureNumber < 1:
-            raise FinError("Future number must be 1 or more")
+            raise finpy_error("Future number must be 1 or more")
 
         if futureTenor != "3M" and futureTenor != "3m":
-            raise FinError("Only 3M IMM futures handled currently.")
+            raise finpy_error("Only 3M IMM futures handled currently.")
 
         self._delivery_date = todayDate.next_imm_date()
 
@@ -110,8 +110,8 @@ class IborFuture:
 
         a = mean_reversion
         t0 = 0.0
-        t1 = (self._lastTradingDate - valuation_date) / gDaysInYear
-        t2 = (self._endOfInterestPeriod - valuation_date) / gDaysInYear
+        t1 = (self._lastTradingDate - valuation_date) / g_days_in_year
+        t2 = (self._endOfInterestPeriod - valuation_date) / g_days_in_year
 
         # Hull White model for short rate dr = (theta(t)-ar) dt + sigma * dz
         # This reduces to Ho-Lee when a = 0 so to avoid divergences I provide

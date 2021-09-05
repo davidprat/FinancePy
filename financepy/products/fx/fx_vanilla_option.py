@@ -8,9 +8,9 @@ from numba import njit
 
 from ...utils.date import Date
 from ...utils.math import nprime
-from ...utils.global_vars import gDaysInYear, gSmall
-from ...utils.error import FinError
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_vars import g_days_in_year, g_small
+from ...utils.error import finpy_error
+from ...utils.global_types import option_types
 #from ...products.fx.FinFXModelTypes import FinFXModel
 #from ...products.fx.FinFXModelTypes import FinFXModelBlackScholes
 #from ...products.fx.FinFXModelTypes import FinFXModelSABR
@@ -104,7 +104,7 @@ def fast_delta(s, t, k, rd, rf, vol, deltaTypeValue, option_type_value):
         pct_fwd_delta_prem_adj = np.exp(rf*t) * (pips_spot_delta - vpctf)
         return pct_fwd_delta_prem_adj
     else:
-        raise FinError("Unknown FinFXDeltaMethod")
+        raise finpy_error("Unknown FinFXDeltaMethod")
 
 ###############################################################################
 
@@ -184,7 +184,7 @@ class FXVanillaOption():
                  # 1 unit of foreign in domestic
                  strike_fx_rate: (float, np.ndarray),
                  currency_pair: str,  # FORDOM
-                 option_type: (FinOptionTypes, list),
+                 option_type: (option_types, list),
                  notional: float,
                  prem_currency: str,
                  spot_days: int = 0):
@@ -205,16 +205,16 @@ class FXVanillaOption():
         price in USD (CCY2) of 1 unit of EUR (CCY1)"""
 
         if delivery_date < expiry_date:
-            raise FinError("Delivery date must be on or after expiry date.")
+            raise finpy_error("Delivery date must be on or after expiry date.")
 
         if len(currency_pair) != 6:
-            raise FinError("Currency pair must be 6 characters.")
+            raise finpy_error("Currency pair must be 6 characters.")
 
         self._expiry_date = expiry_date
         self._delivery_date = delivery_date
 
         if np.any(strike_fx_rate < 0.0):
-            raise FinError("Negative strike.")
+            raise finpy_error("Negative strike.")
 
         self._strike_fx_rate = strike_fx_rate
 
@@ -223,17 +223,17 @@ class FXVanillaOption():
         self._domName = self._currency_pair[3:6]
 
         if prem_currency != self._domName and prem_currency != self._forName:
-            raise FinError("Premium currency not in currency pair.")
+            raise finpy_error("Premium currency not in currency pair.")
 
         self._prem_currency = prem_currency
 
         self._notional = notional
 
-        if option_type != FinOptionTypes.EUROPEAN_CALL and \
-           option_type != FinOptionTypes.EUROPEAN_PUT and\
-           option_type != FinOptionTypes.AMERICAN_CALL and \
-           option_type != FinOptionTypes.AMERICAN_PUT:
-            raise FinError("Unknown Option Type:" + option_type)
+        if option_type != option_types.EUROPEAN_CALL and \
+           option_type != option_types.EUROPEAN_PUT and\
+           option_type != option_types.AMERICAN_CALL and \
+           option_type != option_types.AMERICAN_PUT:
+            raise finpy_error("Unknown Option Type:" + option_type)
 
         self._option_type = option_type
         self._spot_days = spot_days
@@ -253,17 +253,17 @@ class FXVanillaOption():
 
         if type(valuation_date) == Date:
             spot_date = valuation_date.add_weekdays(self._spot_days)
-            tdel = (self._delivery_date - spot_date) / gDaysInYear
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            tdel = (self._delivery_date - spot_date) / g_days_in_year
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             tdel = valuation_date
             texp = tdel
 
         if np.any(spot_fx_rate <= 0.0):
-            raise FinError("spot_fx_rate must be greater than zero.")
+            raise finpy_error("spot_fx_rate must be greater than zero.")
 
         if tdel < 0.0:
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         tdel = np.maximum(tdel, 1e-10)
 
@@ -291,30 +291,30 @@ class FXVanillaOption():
                                                F0T, K, tdel)
 
             if np.any(volatility < 0.0):
-                raise FinError("Volatility should not be negative.")
+                raise finpy_error("Volatility should not be negative.")
 
             v = np.maximum(volatility, 1e-10)
 
-            if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+            if self._option_type == option_types.EUROPEAN_CALL:
 
                 vdf = bs_value(S0, texp, K, rd, rf, v,
-                               FinOptionTypes.EUROPEAN_CALL.value)
+                               option_types.EUROPEAN_CALL.value)
 
-            elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+            elif self._option_type == option_types.EUROPEAN_PUT:
 
                 vdf = bs_value(S0, texp, K, rd, rf, v,
-                               FinOptionTypes.EUROPEAN_PUT.value)
+                               option_types.EUROPEAN_PUT.value)
 
-            elif self._option_type == FinOptionTypes.AMERICAN_CALL:
+            elif self._option_type == option_types.AMERICAN_CALL:
                 num_steps_per_year = 100
                 vdf = crr_tree_val_avg(S0, rd, rf, volatility, num_steps_per_year,
-                                       texp, FinOptionTypes.AMERICAN_CALL.value, K)['value']
-            elif self._option_type == FinOptionTypes.AMERICAN_PUT:
+                                       texp, option_types.AMERICAN_CALL.value, K)['value']
+            elif self._option_type == option_types.AMERICAN_PUT:
                 num_steps_per_year = 100
                 vdf = crr_tree_val_avg(S0, rd, rf, volatility, num_steps_per_year,
-                                       texp, FinOptionTypes.AMERICAN_PUT.value, K)['value']
+                                       texp, option_types.AMERICAN_PUT.value, K)['value']
             else:
-                raise FinError("Unknown option type")
+                raise finpy_error("Unknown option type")
 
         # The option value v is in domestic currency terms but the value of
         # the option may be quoted in either currency terms and so we calculate
@@ -327,7 +327,7 @@ class FXVanillaOption():
             notional_dom = self._notional * self._strike_fx_rate
             notional_for = self._notional
         else:
-            raise FinError("Invalid notional currency.")
+            raise finpy_error("Invalid notional currency.")
 
         vdf = vdf
         pips_dom = vdf
@@ -401,17 +401,17 @@ class FXVanillaOption():
 
         if type(valuation_date) == Date:
             spot_date = valuation_date.add_weekdays(self._spot_days)
-            tdel = (self._delivery_date - spot_date) / gDaysInYear
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            tdel = (self._delivery_date - spot_date) / g_days_in_year
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             tdel = valuation_date
             texp = tdel
 
         if np.any(spot_fx_rate <= 0.0):
-            raise FinError("Spot FX Rate must be greater than zero.")
+            raise finpy_error("Spot FX Rate must be greater than zero.")
 
         if np.any(tdel < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         tdel = np.maximum(tdel, 1e-10)
 
@@ -429,9 +429,9 @@ class FXVanillaOption():
             v = model._volatility
 
             if np.any(v < 0.0):
-                raise FinError("Volatility should not be negative.")
+                raise finpy_error("Volatility should not be negative.")
 
-            v = np.maximum(v, gSmall)
+            v = np.maximum(v, g_small)
 
             pips_spot_delta = bs_delta(
                 S0, texp, K, rd, rf, v, self._option_type.value)
@@ -495,15 +495,15 @@ class FXVanillaOption():
         """
 
         if type(valuation_date) == Date:
-            t = (self._expiry_date - valuation_date) / gDaysInYear
+            t = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             t = valuation_date
 
         if np.any(spot_fx_rate <= 0.0):
-            raise FinError("FX Rate must be greater than zero.")
+            raise finpy_error("FX Rate must be greater than zero.")
 
         if np.any(t < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         t = np.maximum(t, 1e-10)
 
@@ -521,7 +521,7 @@ class FXVanillaOption():
             volatility = model._volatility
 
             if np.any(volatility) < 0.0:
-                raise FinError("Volatility should not be negative.")
+                raise finpy_error("Volatility should not be negative.")
 
             volatility = np.maximum(volatility, 1e-10)
 
@@ -534,7 +534,7 @@ class FXVanillaOption():
             gamma = np.exp(-rf * t) * nprime(d1)
             gamma = gamma / S0 / den
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return gamma
 
@@ -550,15 +550,15 @@ class FXVanillaOption():
         """
 
         if type(valuation_date) == Date:
-            t = (self._expiry_date - valuation_date) / gDaysInYear
+            t = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             t = valuation_date
 
         if np.any(spot_fx_rate <= 0.0):
-            raise FinError("Spot FX Rate must be greater than zero.")
+            raise finpy_error("Spot FX Rate must be greater than zero.")
 
         if np.any(t < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         t = np.maximum(t, 1e-10)
 
@@ -576,7 +576,7 @@ class FXVanillaOption():
             volatility = model._volatility
 
             if np.any(volatility) < 0.0:
-                raise FinError("Volatility should not be negative.")
+                raise finpy_error("Volatility should not be negative.")
 
             volatility = np.maximum(volatility, 1e-10)
 
@@ -588,7 +588,7 @@ class FXVanillaOption():
             d1 = (lnS0k + (mu + v2 / 2.0) * t) / den
             vega = S0 * sqrtT * np.exp(-rf * t) * nprime(d1)
         else:
-            raise FinError("Unknown Model type")
+            raise finpy_error("Unknown Model type")
 
         return vega
 
@@ -603,15 +603,15 @@ class FXVanillaOption():
         """ This function calculates the time decay of the FX option. """
 
         if type(valuation_date) == Date:
-            t = (self._expiry_date - valuation_date) / gDaysInYear
+            t = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             t = valuation_date
 
         if np.any(spot_fx_rate <= 0.0):
-            raise FinError("Spot FX Rate must be greater than zero.")
+            raise finpy_error("Spot FX Rate must be greater than zero.")
 
         if np.any(t < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         t = np.maximum(t, 1e-10)
 
@@ -629,7 +629,7 @@ class FXVanillaOption():
             vol = model._volatility
 
             if np.any(vol) < 0.0:
-                raise FinError("Volatility should not be negative.")
+                raise finpy_error("Volatility should not be negative.")
 
             vol = np.maximum(vol, 1e-10)
 
@@ -641,19 +641,19 @@ class FXVanillaOption():
             d1 = (lnS0k + (mu + v2 / 2.0) * t) / den
             d2 = (lnS0k + (mu - v2 / 2.0) * t) / den
 
-            if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+            if self._option_type == option_types.EUROPEAN_CALL:
                 v = - S0 * np.exp(-rf * t) * nprime(d1) * vol / 2.0 / sqrtT
                 v = v + rf * S0 * np.exp(-rf * t) * N(d1)
                 v = v - rd * K * np.exp(-rd * t) * N(d2)
-            elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+            elif self._option_type == option_types.EUROPEAN_PUT:
                 v = - S0 * np.exp(-rf * t) * nprime(d1) * vol / 2.0 / sqrtT
                 v = v + rd * K * np.exp(-rd * t) * N(-d2)
                 v = v - rf * S0 * np.exp(-rf * t) * N(-d1)
             else:
-                raise FinError("Unknown option type")
+                raise finpy_error("Unknown option type")
 
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return v
 
@@ -695,10 +695,10 @@ class FXVanillaOption():
         if isinstance(model, BlackScholes):
             volatility = model._volatility
         else:
-            raise FinError("Model Type invalid")
+            raise finpy_error("Model Type invalid")
 
         np.random.seed(seed)
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
 
         domDF = dom_discount_curve.df(self._expiry_date)
         forDF = for_discount_curve.df(self._expiry_date)
@@ -718,14 +718,14 @@ class FXVanillaOption():
         s_1 = s * m
         s_2 = s / m
 
-        if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+        if self._option_type == option_types.EUROPEAN_CALL:
             payoff_a_1 = np.maximum(s_1 - K, 0.0)
             payoff_a_2 = np.maximum(s_2 - K, 0.0)
-        elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+        elif self._option_type == option_types.EUROPEAN_PUT:
             payoff_a_1 = np.maximum(K - s_1, 0.0)
             payoff_a_2 = np.maximum(K - s_2, 0.0)
         else:
-            raise FinError("Unknown option type.")
+            raise finpy_error("Unknown option type.")
 
         payoff = np.mean(payoff_a_1) + np.mean(payoff_a_2)
         v = payoff * np.exp(-rd * t) / 2.0

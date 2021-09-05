@@ -1,10 +1,7 @@
-###############################################################################
-# Copyright (C) 2018, 2019, 2020 Dominic O'Kane
-###############################################################################
-
+"""Copyright (C) Dominic O'Kane."""
 
 import numpy as np
-from .error import FinError
+from .error import finpy_error
 
 
 class FinDistribution():
@@ -15,7 +12,7 @@ class FinDistribution():
         density times dx values. """
 
         if len(x) != len(y):
-            raise FinError("Length of x and y not the same")
+            raise finpy_error("Length of x and y not the same")
 
         self._x = np.array(x)
         self._densitydx = np.array(y)

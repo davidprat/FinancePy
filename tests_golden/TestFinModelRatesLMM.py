@@ -17,11 +17,11 @@ from financepy.models.lmm_mc import lmm_simulate_fwds_1f
 from financepy.models.lmm_mc import lmm_simulate_fwds_nf
 from financepy.utils.helpers import check_vector_differences
 from financepy.products.rates.ibor_swaption import IborSwaption
-from financepy.products.rates.ibor_swaption import SwapTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.products.rates.ibor_swaption import swap_types
+from financepy.utils.frequency import frequency_types
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 from financepy.models.black import Black
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.day_count import day_count_types
 from financepy.utils.date import Date
 from financepy.market.volatility.ibor_cap_vol_curve import IborCapVolCurve
 import time as time

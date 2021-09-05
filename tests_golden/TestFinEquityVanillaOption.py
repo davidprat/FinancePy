@@ -3,12 +3,12 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.error import FinError
+from financepy.utils.error import finpy_error
 from financepy.utils.date import Date
 from financepy.models.black_scholes import BlackScholes
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 from financepy.products.equity.equity_vanilla_option import EquityVanillaOption
-from financepy.utils.global_types import FinOptionTypes
+from financepy.utils.global_types import option_types
 import numpy as np
 import time
 
@@ -40,7 +40,7 @@ def test_EquityVanillaOption():
     for num_paths in num_paths_list:
 
         call_option = EquityVanillaOption(
-            expiry_date, 100.0, FinOptionTypes.EUROPEAN_CALL)
+            expiry_date, 100.0, option_types.EUROPEAN_CALL)
         value = call_option.value(valuation_date, stock_price, discount_curve,
                                  dividend_curve, model)
         start = time.time()
@@ -62,7 +62,7 @@ def test_EquityVanillaOption():
     for stock_price in stock_prices:
 
         call_option = EquityVanillaOption(expiry_date, 100.0,
-                                         FinOptionTypes.EUROPEAN_CALL)
+                                          option_types.EUROPEAN_CALL)
 
         value = call_option.value(valuation_date, stock_price, discount_curve,
                                  dividend_curve, model)
@@ -92,7 +92,7 @@ def test_EquityVanillaOption():
     for stock_price in stock_prices:
 
         put_option = EquityVanillaOption(expiry_date, 100.0,
-                                        FinOptionTypes.EUROPEAN_PUT)
+                                         option_types.EUROPEAN_PUT)
 
         value = put_option.value(valuation_date, stock_price, discount_curve,
                                 dividend_curve, model)
@@ -122,7 +122,7 @@ def test_EquityVanillaOption():
     for stock_price in stock_prices:
 
         call_option = EquityVanillaOption(expiry_date, 100.0,
-                                         FinOptionTypes.EUROPEAN_CALL)
+                                          option_types.EUROPEAN_CALL)
         value = call_option.value(valuation_date, stock_price, discount_curve,
                                  dividend_curve, model)
         delta = call_option.delta(valuation_date, stock_price, discount_curve,
@@ -145,7 +145,7 @@ def test_EquityVanillaOption():
     for stock_price in stock_prices:
 
         put_option = EquityVanillaOption(expiry_date, 100.0,
-                                        FinOptionTypes.EUROPEAN_PUT)
+                                         option_types.EUROPEAN_PUT)
 
         value = put_option.value(valuation_date, stock_price, discount_curve,
                                 dividend_curve, model)
@@ -174,7 +174,7 @@ def testImpliedVolatility_NEW():
     strikes = np.linspace(50, 150, 11)
     timesToExpiry = [0.003, 0.01, 0.1, 0.5, 1.0, 2.0, 5.0]
     sigmas = np.arange(1, 100, 5) / 100.0
-    option_types = [FinOptionTypes.EUROPEAN_CALL, FinOptionTypes.EUROPEAN_PUT]
+    option_types = [option_types.EUROPEAN_CALL, option_types.EUROPEAN_PUT]
 
     testCases.header("OPT_TYPE", "TEXP", "STOCK_PRICE", "STRIKE", "INTRINSIC",
                      "VALUE", "INPUT_VOL", "IMPLIED_VOL")

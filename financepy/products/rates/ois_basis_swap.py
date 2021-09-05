@@ -2,15 +2,15 @@
 # Copyright (C) 2018, 2019, 2020 Dominic O'Kane
 ##############################################################################
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.day_count import DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.calendar import CalendarTypes, DateGenRuleTypes
-from ...utils.calendar import Calendar, BusDayAdjustTypes
+from ...utils.day_count import day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.calendar import calendar_types, date_gen_rule_types
+from ...utils.calendar import calendar, bus_day_adjust_types
 from ...utils.helpers import check_argument_types, label_to_string
 from ...utils.math import ONE_MILLION
-from ...utils.global_types import SwapTypes
+from ...utils.global_types import swap_types
 from ...market.curves.discount_curve import DiscountCurve
 
 from .swap_float_leg import SwapFloatLeg
@@ -32,18 +32,18 @@ class OISBasisSwap:
     def __init__(self,
                  effective_date: Date,  # Date interest starts to accrue
                  termination_date_or_tenor: (Date, str),  # Date contract ends
-                 iborType: SwapTypes,
-                 iborFreqType: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 iborDayCountType: DayCountTypes  = DayCountTypes.THIRTY_E_360,
+                 iborType: swap_types,
+                 iborFreqType: frequency_types = frequency_types.QUARTERLY,
+                 iborDayCountType: day_count_types  = day_count_types.THIRTY_E_360,
                  iborSpread: float = 0.0,
-                 oisFreqType: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 oisDayCountType: DayCountTypes = DayCountTypes.THIRTY_E_360,
+                 oisFreqType: frequency_types = frequency_types.QUARTERLY,
+                 oisDayCountType: day_count_types = day_count_types.THIRTY_E_360,
                  oisSpread: float = 0.0,
                  oisPaymentLag: int = 0,
                  notional: float = ONE_MILLION,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Create a Ibor basis swap contract giving the contract start
         date, its maturity, frequency and day counts on the two floating 
         legs and notional. The floating leg parameters have default
@@ -60,16 +60,16 @@ class OISBasisSwap:
         else:
             self._termination_date = effective_date.add_tenor(termination_date_or_tenor)
 
-        calendar = Calendar(calendar_type)
+        calendar = calendar(calendar_type)
         self._maturity_date = calendar.adjust(self._termination_date,
                                              bus_day_adjust_type)
 
         if effective_date > self._maturity_date:
-            raise FinError("Start date after maturity date")
+            raise finpy_error("Start date after maturity date")
 
-        oisType = SwapTypes.PAY
-        if iborType == SwapTypes.PAY:
-            oisType = SwapTypes.RECEIVE
+        oisType = swap_types.PAY
+        if iborType == swap_types.PAY:
+            oisType = swap_types.RECEIVE
         
         principal = 0.0
 

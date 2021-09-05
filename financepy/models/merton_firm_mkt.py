@@ -9,7 +9,7 @@ from ..utils.math import N
 from scipy import optimize
 
 from ..utils.helpers import label_to_string, check_argument_types
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 from .merton_firm import MertonFirm
 
 ###############################################################################
@@ -94,22 +94,22 @@ class MertonFirmMkt(MertonFirm):
                    len(self._vE))
 
         if len(self._E) != nmax and len(self._E) > 1:
-            raise FinError("Len E must be 1 or maximum length of arrays")
+            raise finpy_error("Len E must be 1 or maximum length of arrays")
 
         if len(self._L) != nmax and len(self._L) > 1:
-            raise FinError("Len L must be 1 or maximum length of arrays")
+            raise finpy_error("Len L must be 1 or maximum length of arrays")
 
         if len(self._t) != nmax and len(self._t) > 1:
-            raise FinError("Len T must be 1 or maximum length of arrays")
+            raise finpy_error("Len T must be 1 or maximum length of arrays")
 
         if len(self._r) != nmax and len(self._r) > 1:
-            raise FinError("Len r must be 1 or maximum length of arrays")
+            raise finpy_error("Len r must be 1 or maximum length of arrays")
 
         if len(self._mu) != nmax and len(self._mu) > 1:
-            raise FinError("Len mu must be 1 or maximum length of arrays")
+            raise finpy_error("Len mu must be 1 or maximum length of arrays")
 
         if len(self._vE) != nmax and len(self._vE) > 1:
-            raise FinError("Len mu must be 1 or maximum length of arrays")
+            raise finpy_error("Len mu must be 1 or maximum length of arrays")
 
         self._nmax = nmax
         self._solve_for_asset_value_and_vol()

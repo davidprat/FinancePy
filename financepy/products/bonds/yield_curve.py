@@ -6,9 +6,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import scale
 from ...utils.helpers import label_to_string
 
@@ -51,7 +51,7 @@ class BondYieldCurve():
 
         yearsToMaturities = []
         for bond in bonds:
-            years_to_maturity = (bond._maturity_date-settlement_date)/gDaysInYear
+            years_to_maturity = (bond._maturity_date-settlement_date) / g_days_in_year
             yearsToMaturities.append(years_to_maturity)
         self._yearsToMaturity = np.array(yearsToMaturities)
 
@@ -99,7 +99,7 @@ class BondYieldCurve():
             fit._spline = spline
 
         else:
-            raise FinError("Unrecognised curve fit type.")
+            raise finpy_error("Unrecognised curve fit type.")
 
 ###############################################################################
 
@@ -107,7 +107,7 @@ class BondYieldCurve():
                            maturity_date: Date):
 
         if type(maturity_date) is Date:
-            t = (maturity_date - self._settlement_date) / gDaysInYear
+            t = (maturity_date - self._settlement_date) / g_days_in_year
         elif type(maturity_date) is list:
             t = maturity_date
         elif type(maturity_date) is np.ndarray:
@@ -115,7 +115,7 @@ class BondYieldCurve():
         elif type(maturity_date) is float or type(maturity_date) is np.float64:
             t = maturity_date
         else:
-            raise FinError("Unknown date type.")
+            raise finpy_error("Unknown date type.")
 
         fit = self._curveFit
 

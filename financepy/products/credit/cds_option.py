@@ -5,16 +5,16 @@
 from math import sqrt, log
 from scipy import optimize
 
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes, DateGenRuleTypes
-from ...utils.day_count import DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.global_vars import gDaysInYear
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types, date_gen_rule_types
+from ...utils.day_count import day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import ONE_MILLION, N
 from ...products.credit.cds import CDS
 from ...utils.helpers import check_argument_types
 from ...utils.date import Date
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 
 
 ###############################################################################
@@ -51,11 +51,11 @@ class CDSOption:
                  notional: float = ONE_MILLION,
                  long_protection: bool = True,
                  knockout_flag: bool = True,
-                 freq_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 freq_type: frequency_types = frequency_types.QUARTERLY,
+                 day_count_type: day_count_types = day_count_types.ACT_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Create a FinCDSOption object with the option expiry date, the
         maturity date of the underlying CDS, the option strike coupon,
         notional, whether the option knocks out or not in the event of a credit
@@ -64,10 +64,10 @@ class CDSOption:
         check_argument_types(self.__init__, locals())
 
         if maturity_date < expiry_date:
-            raise FinError("Maturity date must be after option expiry date")
+            raise finpy_error("Maturity date must be after option expiry date")
 
         if strike_coupon < 0.0:
-            raise FinError("Strike must be greater than zero")
+            raise finpy_error("Strike must be greater than zero")
 
         self._expiry_date = expiry_date
         self._maturity_date = maturity_date
@@ -93,10 +93,10 @@ class CDSOption:
         TODO - Should the CDS be created in the init method ? """
 
         if valuation_date > self._expiry_date:
-            raise FinError("Expiry date is now or in the past")
+            raise finpy_error("Expiry date is now or in the past")
 
         if volatility < 0.0:
-            raise FinError("Volatility must be greater than zero")
+            raise finpy_error("Volatility must be greater than zero")
 
         # The underlying is a forward starting option that steps in on
         # the expiry date and matures on the expiry date with a coupon
@@ -116,7 +116,7 @@ class CDSOption:
         forward_spread = cds.par_spread(valuation_date, issuer_curve)
         forward_rpv01 = cds.risky_pv01(valuation_date, issuer_curve)['full_rpv01']
 
-        time_to_expiry = (self._expiry_date - valuation_date) / gDaysInYear
+        time_to_expiry = (self._expiry_date - valuation_date) / g_days_in_year
         logMoneyness = log(forward_spread / strike)
 
         halfVolSquaredT = 0.5 * volatility * volatility * time_to_expiry

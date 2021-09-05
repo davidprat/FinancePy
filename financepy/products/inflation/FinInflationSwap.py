@@ -3,12 +3,12 @@
 ##############################################################################
 
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.calendar import Calendar
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.day_count import DayCount, DayCountTypes
+from ...utils.calendar import calendar
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.day_count import day_count, day_count_types
 from ...utils.helpers import label_to_string, check_argument_types
 
 ###############################################################################
@@ -43,15 +43,15 @@ class FinInflationSwap():
                  start_date: Date,  # The date the FRA starts to accrue
                  maturity_date_or_tenor: (Date, str),  # End of the Ibor rate period
                  fraRate: float,  # The fixed contractual FRA rate
-                 day_count_type: DayCountTypes,  # For interest period
+                 day_count_type: day_count_types,  # For interest period
                  notional: float = 100.0,
                  payFixedRate: bool = True,  # True if the FRA rate is being paid
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.MODIFIED_FOLLOWING):
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.MODIFIED_FOLLOWING):
         """ Create a Forward Rate Agreeement object. """
 
         print("DO NOT USE")
-        raise FinError("DO NOT USE")
+        raise finpy_error("DO NOT USE")
         
         check_argument_types(self.__init__, locals())
 
@@ -62,12 +62,12 @@ class FinInflationSwap():
             maturity_date = maturity_date_or_tenor
         else:
             maturity_date = start_date.add_tenor(maturity_date_or_tenor)
-            calendar = Calendar(self._calendar_type)
+            calendar = calendar(self._calendar_type)
             maturity_date = calendar.adjust(maturity_date,
                                             self._bus_day_adjust_type)
 
         if start_date > maturity_date:
-            raise FinError("Settlement date after maturity date")
+            raise finpy_error("Settlement date after maturity date")
 
         self._start_date = start_date
         self._maturity_date = maturity_date
@@ -83,7 +83,7 @@ class FinInflationSwap():
         market FRA rate. The same curve is used for calculating the forward
         Ibor and for doing discounting on the expected forward payment. """
 
-        dc = DayCount(self._day_count_type)
+        dc = day_count(self._day_count_type)
         acc_factor = dc.year_frac(self._start_date, self._maturity_date)[0]
         df1 = libor_curve.df(self._start_date)
         df2 = libor_curve.df(self._maturity_date)
@@ -105,7 +105,7 @@ class FinInflationSwap():
         """ Determine the maturity date discount factor needed to refit
         the FRA given the libor curve anbd the contract FRA rate. """
 
-        dc = DayCount(self._day_count_type)
+        dc = day_count(self._day_count_type)
         df1 = libor_curve.df(self._start_date)
         acc_factor = dc.year_frac(self._start_date, self._maturity_date)[0]
         df2 = df1 / (1.0 + acc_factor * self._fraRate)
@@ -117,7 +117,7 @@ class FinInflationSwap():
         """ Determine the value of the Deposit given a Ibor curve. """
 
         flow_settle = self._notional
-        dc = DayCount(self._day_count_type)
+        dc = day_count(self._day_count_type)
         acc_factor = dc.year_frac(self._start_date, self._maturity_date)[0]
         flow_maturity = (1.0 + acc_factor * self._fraRate) * self._notional
 

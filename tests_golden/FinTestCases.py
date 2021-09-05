@@ -9,7 +9,7 @@ from os.path import join, exists, split
 import time
 
 from enum import Enum
-from financepy.utils.error import FinError
+from financepy.utils.error import finpy_error
 
 class FinTestCaseMode(Enum):
     SAVE_TEST_CASES = 1
@@ -75,7 +75,7 @@ class FinTestCases():
         if mode in FinTestCaseMode:
             self._mode = mode
         else:
-            raise FinError("Unknown TestCase Mode")
+            raise finpy_error("Unknown TestCase Mode")
 
         if mode == FinTestCaseMode.DEBUG_TEST_CASES:
             # Don't do anything
@@ -176,9 +176,9 @@ class FinTestCases():
         elif len(self._headerFields) != len(args):
             n1 = len(self._headerFields)
             n2 = len(args)
-            raise FinError("ERROR: Number of data columns is " + str(n1)
-                           + " but must equal " + str(n2)
-                           + " to align with headers.")
+            raise finpy_error("ERROR: Number of data columns is " + str(n1)
+                              + " but must equal " + str(n2)
+                              + " to align with headers.")
 
         if self._mode == FinTestCaseMode.SAVE_TEST_CASES:
             filename = self._goldenFilename

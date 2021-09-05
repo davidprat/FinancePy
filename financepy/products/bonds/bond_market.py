@@ -5,9 +5,9 @@
 # TODO  Add Japan
 
 
-from ...utils.frequency import FrequencyTypes
-from ...utils.day_count import DayCountTypes
-from ...utils.calendar import CalendarTypes
+from ...utils.frequency import frequency_types
+from ...utils.day_count import day_count_types
+from ...utils.calendar import calendar_types
 
 
 from enum import Enum
@@ -60,10 +60,10 @@ def get_bond_market_conventions(country):
     and the number of days from trade date to settlement date.
     This is for Treasury markets. And for secondary bond markets. """
 
-    annual = FrequencyTypes.ANNUAL
-    semi_annual = FrequencyTypes.SEMI_ANNUAL
-    act_act = DayCountTypes.ACT_ACT_ICMA
-    thirtye360 = DayCountTypes.THIRTY_E_360
+    annual = frequency_types.ANNUAL
+    semi_annual = frequency_types.SEMI_ANNUAL
+    act_act = day_count_types.ACT_ACT_ICMA
+    thirtye360 = day_count_types.THIRTY_E_360
 
     # TODO: CHECK CONVENTIONS
 
@@ -76,7 +76,7 @@ def get_bond_market_conventions(country):
     if country == BondMarkets.AUSTRIA:
         return (act_act, annual, 2, 0, None)
     elif country == BondMarkets.AUSTRALIA:
-        return (act_act, annual, 2, 7, CalendarTypes.NONE)
+        return (act_act, annual, 2, 7, calendar_types.NONE)
     elif country == BondMarkets.BELGIUM:
         return (act_act, annual, 2, 0, None)
     elif country == BondMarkets.CYPRUS:
@@ -132,7 +132,7 @@ def get_bond_market_conventions(country):
     elif country == BondMarkets.ROMANIA:
         return (act_act, semi_annual, 2, 0, None)
     elif country == BondMarkets.SOUTH_AFRICA:
-        return (act_act, annual, 2, 10, CalendarTypes.NONE)  # CHECK
+        return (act_act, annual, 2, 10, calendar_types.NONE)  # CHECK
     elif country == BondMarkets.SWEDEN:
         return (thirtye360, annual, 2, 0, None)
     elif country == BondMarkets.JAPAN:
@@ -142,7 +142,7 @@ def get_bond_market_conventions(country):
     elif country == BondMarkets.UNITED_STATES:
         return (act_act, semi_annual, 2, 0, None)
     elif country == BondMarkets.UNITED_KINGDOM:
-        return (act_act, semi_annual, 1, 6, CalendarTypes.UNITED_KINGDOM)  # OR 7 DAYS ?
+        return (act_act, semi_annual, 1, 6, calendar_types.UNITED_KINGDOM)  # OR 7 DAYS ?
     else:
         print("Unknown Country:", country)
         return (None, None, None, None, None)

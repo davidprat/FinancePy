@@ -7,10 +7,10 @@ from scipy import integrate
 from math import exp, log, pi
 import numpy as np  # I USE NUMPY FOR EXP, LOG AND SQRT AS THEY HANDLE IMAGINARY PARTS
 
-from ..utils.global_vars import gDaysInYear
-from ..utils.global_types import FinOptionTypes
+from ..utils.global_vars import g_days_in_year
+from ..utils.global_types import option_types
 from ..utils.math import norminvcdf
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 
 ##########################################################################
 # Heston Process
@@ -139,7 +139,7 @@ def get_paths(s0, r, q, v0, kappa, theta, sigma, rho, t, dt, num_paths,
                 sPaths[iPath, iStep] = exp(x)
                 vn = vnp
     else:
-        raise FinError("Unknown FinHestonNumericalSchme")
+        raise finpy_error("Unknown FinHestonNumericalSchme")
 
     return sPaths
 
@@ -174,7 +174,7 @@ class Heston():
                  seed,
                  scheme=HestonNumericalScheme.EULERLOG):
 
-        tau = (option._expiry_date - valuation_date) / gDaysInYear
+        tau = (option._expiry_date - valuation_date) / g_days_in_year
 
         K = option._strike_price
         dt = 1.0 / num_steps_per_year
@@ -194,12 +194,12 @@ class Heston():
                            seed,
                            schemeValue)
 
-        if option._option_type == FinOptionTypes.EUROPEAN_CALL:
+        if option._option_type == option_types.EUROPEAN_CALL:
             path_payoff = np.maximum(sPaths[:, -1] - K, 0.0)
-        elif option._option_type == FinOptionTypes.EUROPEAN_PUT:
+        elif option._option_type == option_types.EUROPEAN_PUT:
             path_payoff = np.maximum(K - sPaths[:, -1], 0.0)
         else:
-            raise FinError("Unknown option type.")
+            raise finpy_error("Unknown option type.")
 
         payoff = np.mean(path_payoff)
         v = payoff * exp(-interest_rate * tau)
@@ -214,7 +214,7 @@ class Heston():
                     interest_rate,
                     dividend_yield):
 
-        tau = (option._expiry_date - valuation_date) / gDaysInYear
+        tau = (option._expiry_date - valuation_date) / g_days_in_year
 
         rho = self._rho
         sigma = self._sigma
@@ -262,7 +262,7 @@ class Heston():
                           interest_rate,
                           dividend_yield):
 
-        tau = (option._expiry_date - valuation_date) / gDaysInYear
+        tau = (option._expiry_date - valuation_date) / g_days_in_year
 
         rho = self._rho
         sigma = self._sigma
@@ -306,7 +306,7 @@ class Heston():
                     interest_rate,
                     dividend_yield):
 
-        tau = (option._expiry_date - valuation_date) / gDaysInYear
+        tau = (option._expiry_date - valuation_date) / g_days_in_year
 
         rho = self._rho
         sigma = self._sigma
@@ -352,7 +352,7 @@ class Heston():
                        interest_rate,
                        dividend_yield):
 
-        tau = (option._expiry_date - valuation_date) / gDaysInYear
+        tau = (option._expiry_date - valuation_date) / g_days_in_year
 
         rho = self._rho
         sigma = self._sigma

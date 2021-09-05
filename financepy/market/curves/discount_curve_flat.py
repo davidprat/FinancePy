@@ -8,8 +8,8 @@ import numpy as np
 ###############################################################################
 
 from ...utils.date import Date
-from ...utils.day_count import DayCountTypes
-from ...utils.frequency import FrequencyTypes
+from ...utils.day_count import day_count_types
+from ...utils.frequency import frequency_types
 from ...utils.helpers import label_to_string
 from ...utils.helpers import check_argument_types
 from ...market.curves.discount_curve import DiscountCurve
@@ -33,8 +33,8 @@ class DiscountCurveFlat(DiscountCurve):
     def __init__(self,
                  valuation_date: Date,
                  flat_rate: (float, np.ndarray),
-                 freq_type: FrequencyTypes = FrequencyTypes.CONTINUOUS,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_ACT_ISDA):
+                 freq_type: frequency_types = frequency_types.CONTINUOUS,
+                 day_count_type: day_count_types = day_count_types.ACT_ACT_ISDA):
         """ Create a discount curve which is flat. This is very useful for
         quick testing and simply requires a curve date a rate and a compound
         frequency. As we have entered a rate, a corresponding day count

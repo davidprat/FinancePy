@@ -1,42 +1,39 @@
-###############################################################################
-# Copyright (C) 2018, 2019, 2020 Dominic O'Kane
-###############################################################################
+"""Copyright (C) Dominic O'Kane.
 
-# THIS IS IN PROGRESS
-from numba import njit, boolean, int64, float64, vectorize
+THIS IS IN PROGRESS :  to use : from numba import njit, boolean, int64, float64, vectorize
+
+******NOTICE***************
+    optimize.py module by Travis E. Oliphant
+    You may copy and use this module as you see fit with no
+    guarantee implied provided you keep this notice in all copies.
+*****END NOTICE************
+
+ A collection of optimization algorithms. Version 0.5
+ CHANGES
+  -Added fminbound (July 2001)
+  -Added brute (Aug. 2002)
+  -Finished line search satisfying strong Wolfe conditions (Mar. 2004)
+  -Updated strong Wolfe conditions line search to use
+  -cubic-interpolation (Mar. 2004)
+"""
+
 import numpy as np
-
-# ******NOTICE***************
-# optimize.py module by Travis E. Oliphant
-#
-# You may copy and use this module as you see fit with no
-# guarantee implied provided you keep this notice in all copies.
-# *****END NOTICE************
-
-# A collection of optimization algorithms. Version 0.5
-# CHANGES
-#  Added fminbound (July 2001)
-#  Added brute (Aug. 2002)
-#  Finished line search satisfying strong Wolfe conditions (Mar. 2004)
-#  Updated strong Wolfe conditions line search to use
-#  cubic-interpolation (Mar. 2004)
-
-###############################################################################
+from scipy.optimize._differentiable_functions import ScalarFunction
 
 Inf = np.inf
 _epsilon = 1e-20
 
-def fmin_cg(f, x0, fprime=None, fargs=(), gtol=1e-5, norm=Inf, epsilon=_epsilon,
+
+def fmin_cg(f, x_0, fprime=None, fargs=(), gtol=1e-5, norm=Inf, epsilon=_epsilon,
             maxiter=None, full_output=0, disp=1, retall=0, callback=None):
-    """
-    Minimize a function using a nonlinear conjugate gradient algorithm.
+    """Minimize a function using a nonlinear conjugate gradient algorithm.
     Parameters
     ----------
     f : callable, ``f(x, *args)``
         Objective function to be minimized. Here `x` must be a 1-D array of
         the variables that are to be changed in the search for a minimum, and
         `args` are the other (fixed) parameters of `f`.
-    x0 : ndarray
+    x_0 : ndarray
         A user-supplied initial estimate of `xopt`, the optimal value of `x`.
         It must be a 1-D array of values.
     fprime : callable, ``fprime(x, *args)``, optional
@@ -134,7 +131,7 @@ def fmin_cg(f, x0, fprime=None, fargs=(), gtol=1e-5, norm=Inf, epsilon=_epsilon,
     ...     return np.asarray((gu, gv))
     >>> x0 = np.asarray((0, 0))  # Initial guess.
     >>> from scipy import optimize
-    >>> res1 = optimize.fmin_cg(f, x0, fprime=gradf, args=args)
+    >>> res1 = optimize.fmin_cg(f, x_0, fprime=gradf, args=args)
     Optimization terminated successfully.
              Current function value: 1.617021
              Iterations: 4
@@ -151,7 +148,7 @@ def fmin_cg(f, x0, fprime=None, fargs=(), gtol=1e-5, norm=Inf, epsilon=_epsilon,
     ...         'gtol' : 1e-5,    # default value.
     ...         'norm' : np.inf,  # default value.
     ...         'eps' : 1.4901161193847656e-08}  # default value.
-    >>> res2 = optimize.minimize(f, x0, jac=gradf, args=args,
+    >>> res2 = optimize.minimize(f, x_0, jac=gradf, args=args,
     ...                          method='CG', options=opts)
     Optimization terminated successfully.
             Current function value: 1.617021
@@ -168,18 +165,19 @@ def fmin_cg(f, x0, fprime=None, fargs=(), gtol=1e-5, norm=Inf, epsilon=_epsilon,
             'maxiter': maxiter,
             'return_all': retall}
 
-    res = _minimize_cg(f, x0, fargs, fprime, callback=callback, **opts)
+    res = _minimize_cg(f, x_0, fargs, fprime, callback=callback, **opts)
 
     if full_output:
         retlist = res['x'], res['fun'], res['nfev'], res['njev'], res['status']
         if retall:
-            retlist += (res['allvecs'], )
+            retlist += (res['allvecs'],)
         return retlist
     else:
         if retall:
             return res['x'], res['allvecs']
         else:
             return res['x']
+
 
 def _check_unknown_options(unknown_options):
     if unknown_options:
@@ -188,9 +186,7 @@ def _check_unknown_options(unknown_options):
         # called from another function in SciPy. Level 4 is the first
         # level in user code.
         print("Unknown solver options")
-        
 
-from scipy.optimize._differentiable_functions import ScalarFunction
 
 def _prepare_scalar_function(fun, x0, jac=None, args=(), bounds=None,
                              epsilon=None, finite_diff_rel_step=None,
@@ -246,11 +242,11 @@ def _prepare_scalar_function(fun, x0, jac=None, args=(), bounds=None,
     """
     if callable(jac):
         grad = jac
-#    elif jac in FD_METHODS:
-#        # epsilon is set to None so that ScalarFunction is made to use
-#        # rel_step
-#        epsilon = None
-#        grad = jac
+    #    elif jac in FD_METHODS:
+    #        # epsilon is set to None so that ScalarFunction is made to use
+    #        # rel_step
+    #        epsilon = None
+    #        grad = jac
     else:
         # default (jac is None) is to do 2-point finite differences with
         # absolute step size. ScalarFunction has to be provided an
@@ -279,14 +275,16 @@ def _prepare_scalar_function(fun, x0, jac=None, args=(), bounds=None,
 
 
 def vecnorm(x, ord=2):
+    """Calculates the xth norm of a vector."""
     if ord == Inf:
         return np.amax(np.abs(x))
     elif ord == -Inf:
         return np.amin(np.abs(x))
     else:
-        return np.sum(np.abs(x)**ord, axis=0)**(1.0 / ord)
+        return np.sum(np.abs(x) ** ord, axis=0) ** (1.0 / ord)
 
-class OptimizeResult(dict):
+
+class optimize_result(dict):
     """ Represents the optimization result.
     Attributes
     ----------
@@ -345,8 +343,7 @@ class OptimizeResult(dict):
 
 def _line_search_wolfe12(f, fprime, xk, pk, gfk, old_fval, old_old_fval,
                          **kwargs):
-    """
-    Same as line_search_wolfe1, but fall back to line_search_wolfe2 if
+    """Same as line_search_wolfe1, but fall back to line_search_wolfe2 if
     suitable step length is not found, and raise an exception if a
     suitable step length is not found.
     Raises
@@ -385,12 +382,12 @@ def _line_search_wolfe12(f, fprime, xk, pk, gfk, old_fval, old_old_fval,
 
     return ret
 
+
 def _minimize_cg(fun, x0, args=(), jac=None, callback=None,
                  gtol=1e-5, norm=Inf, eps=_epsilon, maxiter=None,
                  disp=False, return_all=False, finite_diff_rel_step=None,
                  **unknown_options):
-    """
-    Minimization of scalar function of one or more variables using the
+    """Minimization of scalar function of one or more variables using the
     conjugate gradient algorithm.
     Options
     -------
@@ -489,9 +486,9 @@ def _minimize_cg(fun, x0, args=(), jac=None, callback=None,
 
         try:
             alpha_k, fc, gc, old_fval, old_old_fval, gfkp1 = \
-                     _line_search_wolfe12(f, myfprime, xk, pk, gfk, old_fval,
-                                          old_old_fval, c2=0.4, amin=1e-100, amax=1e100,
-                                          extra_condition=descent_condition)
+                _line_search_wolfe12(f, myfprime, xk, pk, gfk, old_fval,
+                                     old_old_fval, c2=0.4, amin=1e-100, amax=1e100,
+                                     extra_condition=descent_condition)
         except _LineSearchError:
             # Line search failed to find a better solution.
             warnflag = 2
@@ -528,10 +525,10 @@ def _minimize_cg(fun, x0, args=(), jac=None, callback=None,
         print("         Function evaluations: %d" % sf.nfev)
         print("         Gradient evaluations: %d" % sf.ngev)
 
-    result = OptimizeResult(fun=fval, jac=gfk, nfev=sf.nfev,
-                            njev=sf.ngev, status=warnflag,
-                            success=(warnflag == 0), message=msg, x=xk,
-                            nit=k)
+    result = optimize_result(fun=fval, jac=gfk, nfev=sf.nfev,
+                             njev=sf.ngev, status=warnflag,
+                             success=(warnflag == 0), message=msg, x=xk,
+                             nit=k)
     if retall:
         result['allvecs'] = allvecs
     return result

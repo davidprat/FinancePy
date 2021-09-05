@@ -9,11 +9,11 @@
 
 import numpy as np
 
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...models.gbm_process_simulator import FinGBMProcess
 
-from ...utils.error import FinError
-from ...utils.global_types import FinOptionTypes
+from ...utils.error import finpy_error
+from ...utils.global_types import option_types
 from ...utils.helpers import label_to_string, check_argument_types
 from ...utils.helpers import _func_name
 from ...utils.date import Date
@@ -34,7 +34,7 @@ class EquityBasketOption:
     def __init__(self,
                  expiry_date: Date,
                  strike_price: float,
-                 option_type: FinOptionTypes,
+                 option_type: option_types,
                  num_assets: int):
         """ Define the EquityBasket option by specifying its expiry date,
         its strike price, whether it is a put or call, and the number of
@@ -56,42 +56,42 @@ class EquityBasketOption:
                   correlations):
 
         if len(stock_prices) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Stock prices must have a length " + str(self._num_assets))
 
         if len(dividend_yields) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Dividend yields must have a length " + str(self._num_assets))
 
         if len(volatilities) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Volatilities must have a length " + str(self._num_assets))
 
         if correlations.ndim != 2:
-            raise FinError(
+            raise finpy_error(
                 "Correlation must be a 2D matrix ")
 
         if correlations.shape[0] != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Correlation cols must have a length " + str(self._num_assets))
 
         if correlations.shape[1] != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "correlation rows must have a length " + str(self._num_assets))
 
         for i in range(0, self._num_assets):
             if correlations[i, i] != 1.0:
-                raise FinError("Corr matrix must have 1.0 on the diagonal")
+                raise finpy_error("Corr matrix must have 1.0 on the diagonal")
 
             for j in range(0, i):
                 if abs(correlations[i, j]) > 1.0:
-                    raise FinError("Correlations must be [-1, +1]")
+                    raise finpy_error("Correlations must be [-1, +1]")
 
                 if abs(correlations[j, i]) > 1.0:
-                    raise FinError("Correlations must be [-1, +1]")
+                    raise finpy_error("Correlations must be [-1, +1]")
 
                 if correlations[i, j] != correlations[j, i]:
-                    raise FinError("Correlation matrix must be symmetric")
+                    raise finpy_error("Correlation matrix must be symmetric")
 
 ###############################################################################
 
@@ -109,10 +109,10 @@ class EquityBasketOption:
 
     # https://pdfs.semanticscholar.org/16ed/c0e804379e22ff36dcbab7e9bb06519faa43.pdf
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         if valuation_date > self._expiry_date:
-            raise FinError("Value date after expiry date.")
+            raise finpy_error("Value date after expiry date.")
 
         qs = []
         for curve in dividend_curves:
@@ -168,14 +168,14 @@ class EquityBasketOption:
         d1 = (lnS0k + (mu + vhat2 / 2.0) * texp) / den
         d2 = (lnS0k + (mu - vhat2 / 2.0) * texp) / den
 
-        if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+        if self._option_type == option_types.EUROPEAN_CALL:
             v = smean * np.exp(-qhat * texp) * N(d1)
             v = v - self._strike_price * np.exp(-r * texp) * N(d2)
-        elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+        elif self._option_type == option_types.EUROPEAN_PUT:
             v = self._strike_price * np.exp(-r * texp) * N(-d2)
             v = v - smean * np.exp(-qhat * texp) * N(-d1)
         else:
-            raise FinError("Unknown option type")
+            raise finpy_error("Unknown option type")
 
         return v
 
@@ -199,9 +199,9 @@ class EquityBasketOption:
         check_argument_types(getattr(self, _func_name(), None), locals())
 
         if valuation_date > self._expiry_date:
-            raise FinError("Value date after expiry date.")
+            raise finpy_error("Value date after expiry date.")
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         dividend_yields = []
         for curve in dividend_curves:
@@ -237,12 +237,12 @@ class EquityBasketOption:
                                       corr_matrix,
                                       seed)
 
-        if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+        if self._option_type == option_types.EUROPEAN_CALL:
             payoff = np.maximum(np.mean(Sall, axis=1) - k, 0.0)
-        elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+        elif self._option_type == option_types.EUROPEAN_PUT:
             payoff = np.maximum(k - np.mean(Sall, axis=1), 0.0)
         else:
-            raise FinError("Unknown option type.")
+            raise finpy_error("Unknown option type.")
 
         payoff = np.mean(payoff)
         v = payoff * np.exp(-r * texp)

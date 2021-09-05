@@ -8,8 +8,8 @@ import os
 import sys
 sys.path.append("..")
 
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.frequency import frequency_types
+from financepy.utils.day_count import day_count_types
 from financepy.utils.date import Date, from_datetime
 from financepy.products.bonds.bond import Bond
 from financepy.products.bonds.yield_curve import BondYieldCurve
@@ -34,8 +34,8 @@ def test_BondYieldCurve():
     bondDataFrame = pd.read_csv(path, sep='\t')
     bondDataFrame['mid'] = 0.5*(bondDataFrame['bid'] + bondDataFrame['ask'])
 
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     settlement = Date(19, 9, 2012)
 
     bonds = []

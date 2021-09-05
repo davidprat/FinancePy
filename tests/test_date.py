@@ -9,9 +9,9 @@ from financepy.utils.date import Date, date_range
 
 # Not under test
 
-from financepy.utils.date import DateFormatTypes, set_date_format
+from financepy.utils.date import date_format_types, set_date_format
 
-set_date_format(DateFormatTypes.UK_LONGEST)
+set_date_format(date_format_types.UK_LONGEST)
 
 # new sample tests
 
@@ -183,15 +183,15 @@ def test_DateFormat():
     dt = Date(20, 10, 2019)
     
     #Date format in Bloomberg
-    set_date_format(DateFormatTypes.BLOOMBERG)
+    set_date_format(date_format_types.BLOOMBERG)
     assert str(dt) == "10/20/19"
 
     #Date format in Datetime
-    set_date_format(DateFormatTypes.DATETIME)
+    set_date_format(date_format_types.DATETIME)
     assert str(dt) == "20/10/2019 00:00:00"
 
     #Date format in UK_LONGEST
-    set_date_format(DateFormatTypes.UK_LONGEST)
+    set_date_format(date_format_types.UK_LONGEST)
     assert str(dt) == "SUN 20 OCT 2019"
 
 

@@ -5,12 +5,12 @@
 import numpy as np
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.math import test_monotonicity
-from ...utils.frequency import FrequencyTypes
+from ...utils.error import finpy_error
+from ...utils.math import arr_is_monotonic
+from ...utils.frequency import frequency_types
 from ...utils.helpers import label_to_string
 from ...utils.helpers import check_argument_types
-from ...utils.day_count import DayCountTypes
+from ...utils.day_count import day_count_types
 from ...utils.helpers import times_from_dates
 from ...market.curves.discount_curve import DiscountCurve
 
@@ -28,8 +28,8 @@ class DiscountCurvePWL(DiscountCurve):
                  valuation_date: Date,
                  zero_dates: (Date, list),
                  zero_rates: (list, np.ndarray),
-                 freq_type: FrequencyTypes = FrequencyTypes.CONTINUOUS,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_ACT_ISDA):
+                 freq_type: frequency_types = frequency_types.CONTINUOUS,
+                 day_count_type: day_count_types = day_count_types.ACT_ACT_ISDA):
         """ Curve is defined by a vector of increasing times and zero rates."""
 
         check_argument_types(self.__init__, locals())
@@ -37,10 +37,10 @@ class DiscountCurvePWL(DiscountCurve):
         self._valuation_date = valuation_date
 
         if len(zero_dates) != len(zero_rates):
-            raise FinError("Dates and rates vectors must have same length")
+            raise finpy_error("Dates and rates vectors must have same length")
 
         if len(zero_dates) == 0:
-            raise FinError("Dates vector must have length > 0")
+            raise finpy_error("Dates vector must have length > 0")
 
         self._zero_rates = np.array(zero_rates)
         self._zero_dates = zero_dates
@@ -53,8 +53,8 @@ class DiscountCurvePWL(DiscountCurve):
 
         self._times = np.array(dc_times)
 
-        if test_monotonicity(self._times) is False:
-            raise FinError("Times are not sorted in increasing order")
+        if arr_is_monotonic(self._times) is False:
+            raise finpy_error("Times are not sorted in increasing order")
 
     ###############################################################################
 
@@ -68,7 +68,7 @@ class DiscountCurvePWL(DiscountCurve):
             times = np.array([times])
 
         if np.any(times < 0.0):
-            raise FinError("All times must be positive")
+            raise finpy_error("All times must be positive")
 
         times = np.maximum(times, 1e-6)
 

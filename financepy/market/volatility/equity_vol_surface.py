@@ -8,10 +8,10 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from numba import njit, float64, int64
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.global_vars import gDaysInYear
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_vars import g_days_in_year
+from ...utils.global_types import option_types
 from ...models.option_implied_dbn import option_implied_dbn
 from ...utils.helpers import check_argument_types, label_to_string
 from ...market.curves.discount_curve import DiscountCurve
@@ -33,7 +33,7 @@ from ...utils.distribution import FinDistribution
 
 from ...utils.solver_1d import newton_secant
 from ...utils.solver_nm import nelder_mead
-from ...utils.global_types import FinSolverTypes
+from ...utils.global_types import solver_types
 
 ###############################################################################
 # ISSUES
@@ -103,20 +103,20 @@ def _solve_to_horizon(s, t, r, q,
     # to converge, so for those cases try again with CG
     # Numba version is quicker, but can be slightly away from CG output
     try:
-        if finSolverType == FinSolverTypes.NELDER_MEAD_NUMBA:
+        if finSolverType == solver_types.NELDER_MEAD_NUMBA:
             xopt = nelder_mead(_obj, np.array(x_inits),
                                bounds=np.array([[], []]).T, 
                                args=args, tol_f=tol,
                                tol_x=tol, max_iter=1000)
-        elif finSolverType == FinSolverTypes.NELDER_MEAD:
+        elif finSolverType == solver_types.NELDER_MEAD:
             opt = minimize(_obj, x_inits, args, method="Nelder-Mead", tol=tol)
             xopt = opt.x
-        elif finSolverType == FinSolverTypes.CONJUGATE_GRADIENT:
+        elif finSolverType == solver_types.CONJUGATE_GRADIENT:
             opt = minimize(_obj, x_inits, args, method="CG", tol=tol)
             xopt = opt.x
     except:
         # If convergence fails try again with CG if necessary
-        if finSolverType != FinSolverTypes.CONJUGATE_GRADIENT:
+        if finSolverType != solver_types.CONJUGATE_GRADIENT:
             print('Failed to converge, will try CG')
             opt = minimize(_obj, x_inits, args, method="CG", tol=tol)
             xopt = opt.x
@@ -158,7 +158,7 @@ def vol_function(vol_function_type_value, params, f, k, t):
         vol = vol_function_ssvi(params, f, k, t)
         return vol
     else:
-        raise FinError("Unknown Model Type")
+        raise finpy_error("Unknown Model Type")
 
 ###############################################################################
 
@@ -212,7 +212,7 @@ def _solver_for_smile_strike(s, t, r, q,
                  inverseDeltaTarget, 
                  parameters)
 
-     K = newton_secant(_delta_fit, x0=initialGuess, args=argtuple,
+     K = newton_secant(_delta_fit, x_0=initialGuess, args=argtuple,
                        tol=1e-8, maxiter=50)
 
      return K
@@ -238,7 +238,7 @@ class EquityVolSurface:
                  strikes: (list, np.ndarray),
                  volatility_grid: (list, np.ndarray),
                  volatility_function_type:FinVolFunctionTypes=FinVolFunctionTypes.CLARK,
-                 finSolverType:FinSolverTypes=FinSolverTypes.NELDER_MEAD):
+                 finSolverType:solver_types=solver_types.NELDER_MEAD):
         """ Create the EquitySurface object by passing in market vol data
         for a list of strikes and expiry dates. """
 
@@ -256,10 +256,10 @@ class EquityVolSurface:
         m = len(volatility_grid[0])
         
         if n != nExpiryDates:
-            raise FinError("1st dimension of vol grid is not nExpiryDates")
+            raise finpy_error("1st dimension of vol grid is not nExpiryDates")
 
         if m != nStrikes:
-            raise FinError("2nd dimension of the vol matrix is not nStrikes")
+            raise finpy_error("2nd dimension of the vol matrix is not nStrikes")
 
         self._strikes = strikes
         self._num_strikes = len(strikes)
@@ -285,7 +285,7 @@ class EquityVolSurface:
         interpolation is done in variance space and then converted back to a 
         lognormal volatility."""
 
-        texp = (expiry_date - self._valuation_date) / gDaysInYear
+        texp = (expiry_date - self._valuation_date) / g_days_in_year
 
         vol_type_value = self._volatility_function_type.value
 
@@ -347,7 +347,7 @@ class EquityVolSurface:
             vart = ((texp-t0) * vart1 + (t1-texp) * vart0) / (t1 - t0)
 
             if vart < 0.0:
-                raise FinError("Negative variance.")
+                raise finpy_error("Negative variance.")
 
             volt = np.sqrt(vart/texp)
 
@@ -464,7 +464,7 @@ class EquityVolSurface:
         interpolation is done in variance space and then converted back to a 
         lognormal volatility."""
 
-        texp = (expiry_date - self._valuation_date) / gDaysInYear
+        texp = (expiry_date - self._valuation_date) / g_days_in_year
 
         vol_type_value = self._volatility_function_type.value
 
@@ -511,13 +511,13 @@ class EquityVolSurface:
         initialGuess = self._stock_price
 
         K0 = _solver_for_smile_strike(s,
-                                  texp,
-                                  self._r[index0],
-                                  self._q[index0],
-                                  FinOptionTypes.EUROPEAN_CALL.value,
-                                  vol_type_value, callDelta,
-                                  initialGuess,
-                                  self._parameters[index0])
+                                      texp,
+                                      self._r[index0],
+                                      self._q[index0],
+                                      option_types.EUROPEAN_CALL.value,
+                                      vol_type_value, callDelta,
+                                      initialGuess,
+                                      self._parameters[index0])
 
         vol0 = vol_function(vol_type_value, self._parameters[index0],
                            fwd0, K0, t0)
@@ -525,12 +525,12 @@ class EquityVolSurface:
         if index1 != index0:
 
             K1 = _solver_for_smile_strike(s, texp,
-                                      self._r[index1], 
-                                      self._q[index1],
-                                      FinOptionTypes.EUROPEAN_CALL.value,
-                                      vol_type_value, callDelta,
-                                      initialGuess,
-                                      self._parameters[index1])
+                                          self._r[index1],
+                                          self._q[index1],
+                                          option_types.EUROPEAN_CALL.value,
+                                          vol_type_value, callDelta,
+                                          initialGuess,
+                                          self._parameters[index1])
 
             vol1 = vol_function(vol_type_value, self._parameters[index1],
                                fwd1, K1, t1)
@@ -548,7 +548,7 @@ class EquityVolSurface:
             kt = ((texp-t0) * K1 + (t1-texp) * K0) / (t1 - t0)
 
             if vart < 0.0:
-                raise FinError("Failed interpolation due to negative variance.")
+                raise finpy_error("Failed interpolation due to negative variance.")
 
             volt = np.sqrt(vart/texp)
 
@@ -561,7 +561,7 @@ class EquityVolSurface:
 
 ###############################################################################
 
-    def _build_vol_surface(self, finSolverType=FinSolverTypes.NELDER_MEAD):
+    def _build_vol_surface(self, finSolverType=solver_types.NELDER_MEAD):
         """ Main function to construct the vol surface. """
 
         s = self._stockPrice
@@ -599,7 +599,7 @@ class EquityVolSurface:
             self._parameters[:, 4] = 0.048            
         else:
             print(self._volatilityFunctionType)
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         self._texp = np.zeros(numExpiryDates)
 
@@ -616,7 +616,7 @@ class EquityVolSurface:
         for i in range(0, numExpiryDates):
 
             expiry_date = self._expiry_dates[i]
-            texp = (expiry_date - spot_date) / gDaysInYear
+            texp = (expiry_date - spot_date) / g_days_in_year
 
             disDF = self._discount_curve._df(texp)
             divDF = self._dividend_curve._df(texp)

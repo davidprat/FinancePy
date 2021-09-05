@@ -9,8 +9,8 @@ from enum import Enum
 import numpy as np
 from numba import jit, njit, float64, int64
 
-from ...utils.error import FinError
-from ...utils.global_vars import gDaysInYear
+from ...utils.error import finpy_error
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import heaviside
 from ...utils.helpers import label_to_string
 
@@ -54,10 +54,10 @@ def _validate_payoff(payoff_type, payoff_params):
     elif payoff_type == EquityTreePayoffTypes.LOG_OPTION.value:
         num_params = 1
     else:
-        raise FinError("Unknown payoff type")
+        raise finpy_error("Unknown payoff type")
 
     if len(payoff_params) != num_params:
-        raise FinError(
+        raise finpy_error(
             "Number of parameters required for " +
             str(payoff_type) +
             " must be " +
@@ -88,7 +88,7 @@ def _payoff_value(s, payoff_type, payoff_params):
     elif payoff_type == EquityTreePayoffTypes.LOG_OPTION.value:
         payoff = max(log(s) - payoff_params[0], 0.0)
     else:
-        raise FinError("Unknown payoff type")
+        raise finpy_error("Unknown payoff type")
 
     return payoff
 
@@ -217,7 +217,7 @@ class EquityBinomialTree():
               payoff_params):
 
         # do some validation
-        texp = (expiry_date - valuation_date) / gDaysInYear
+        texp = (expiry_date - valuation_date) / g_days_in_year
         r = discount_curve.zero_rate(expiry_date)
 
         dq = dividend_curve.df(expiry_date)

@@ -9,7 +9,7 @@ import numpy as np
 
 from ..utils.math import N
 from ..utils.math import normpdf, norminvcdf, M
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 
 ###############################################################################
 
@@ -30,7 +30,7 @@ def tr_surv_prob_lhp(k1,
         return 0.0
 
     if k1 >= k2:
-        raise FinError("K1 >= K2")
+        raise finpy_error("K1 >= K2")
 
     p = 0.0
     portfolioEL = 0.0

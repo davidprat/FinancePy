@@ -3,11 +3,11 @@
 ##############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_types import FinExerciseTypes
+from financepy.utils.global_types import exercise_types
 from financepy.utils.helpers import print_tree
-from financepy.utils.global_vars import gDaysInYear
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.global_vars import g_days_in_year
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 from financepy.products.bonds.bond import Bond
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 from financepy.models.hw_tree import HWTree, FinHWEuropeanCalcType
@@ -39,7 +39,7 @@ def test_HullWhiteExampleOne():
     a = 0.1
     num_time_steps = 3
     model = HWTree(sigma, a, num_time_steps)
-    treeMat = (end_date - start_date)/gDaysInYear
+    treeMat = (end_date - start_date) / g_days_in_year
     model.build_tree(treeMat, times, dfs)
 #   print_tree(model._Q)
 #   print("")
@@ -73,8 +73,8 @@ def test_HullWhiteExampleTwo():
     expiry_date = start_date.add_tenor("3Y")
     maturity_date = start_date.add_tenor("9Y")
 
-    texp = (expiry_date - start_date)/gDaysInYear
-    tmat = (maturity_date - start_date)/gDaysInYear
+    texp = (expiry_date - start_date) / g_days_in_year
+    tmat = (maturity_date - start_date) / g_days_in_year
 
     num_time_steps = None
     model = HWTree(sigma, a, num_time_steps)
@@ -128,8 +128,8 @@ def test_HullWhiteBondOption():
     expiry_date = settlement_date.add_tenor("18m")
     maturity_date = settlement_date.add_tenor("10Y")
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     bond = Bond(issue_date, maturity_date, coupon, freq_type, accrual_type)
 
     coupon_times = []
@@ -145,11 +145,11 @@ def test_HullWhiteBondOption():
         if ncd > settlement_date:
 
             if len(coupon_times) == 0:
-                flow_time = (pcd - settlement_date) / gDaysInYear
+                flow_time = (pcd - settlement_date) / g_days_in_year
                 coupon_times.append(flow_time)
                 coupon_flows.append(cpn)
 
-            flow_time = (ncd - settlement_date) / gDaysInYear
+            flow_time = (ncd - settlement_date) / g_days_in_year
             coupon_times.append(flow_time)
             coupon_flows.append(cpn)
 
@@ -168,7 +168,7 @@ def test_HullWhiteBondOption():
 
     #  Test convergence
     num_steps_list = range(50, 500, 50)
-    texp = (expiry_date - settlement_date)/gDaysInYear
+    texp = (expiry_date - settlement_date) / g_days_in_year
 
     vJam = model.european_bond_option_jamshidian(texp, strike_price, face,
                                                  coupon_times, coupon_flows,
@@ -187,7 +187,7 @@ def test_HullWhiteBondOption():
                        FinHWEuropeanCalcType.EXPIRY_ONLY)
         model.build_tree(texp, times, dfs)
 
-        exercise_type = FinExerciseTypes.EUROPEAN
+        exercise_type = exercise_types.EUROPEAN
 
         v1 = model.bond_option(texp, strike_price, face,
                                coupon_times, coupon_flows, exercise_type)
@@ -225,8 +225,8 @@ def test_HullWhiteCallableBond():
     issue_date = Date(1, 12, 2018)
     maturity_date = settlement_date.add_tenor("10Y")
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     bond = Bond(issue_date, maturity_date, coupon, freq_type, accrual_type)
 
     coupon_times = []
@@ -236,7 +236,7 @@ def test_HullWhiteCallableBond():
     for flow_date in bond._flow_dates[1:]:
 
         if flow_date > settlement_date:
-            flow_time = (flow_date - settlement_date) / gDaysInYear
+            flow_time = (flow_date - settlement_date) / g_days_in_year
             coupon_times.append(flow_time)
             coupon_flows.append(cpn)
 
@@ -267,7 +267,7 @@ def test_HullWhiteCallableBond():
 
     call_times = []
     for dt in call_dates:
-        t = (dt - settlement_date) / gDaysInYear
+        t = (dt - settlement_date) / g_days_in_year
         call_times.append(t)
 
     put_dates = []
@@ -290,20 +290,20 @@ def test_HullWhiteCallableBond():
 
     put_times = []
     for dt in put_dates:
-        t = (dt - settlement_date) / gDaysInYear
+        t = (dt - settlement_date) / g_days_in_year
         put_times.append(t)
 
     ###########################################################################
 
-    tmat = (maturity_date - settlement_date) / gDaysInYear
-    curve = DiscountCurveFlat(settlement_date, 0.05, FrequencyTypes.CONTINUOUS)
+    tmat = (maturity_date - settlement_date) / g_days_in_year
+    curve = DiscountCurveFlat(settlement_date, 0.05, frequency_types.CONTINUOUS)
 
     dfs = []
     times = []
 
     for dt in bond._flow_dates:
         if dt > settlement_date:
-            t = (dt - settlement_date) / gDaysInYear
+            t = (dt - settlement_date) / g_days_in_year
             df = curve.df(dt)
             times.append(t)
             dfs.append(df)
@@ -320,7 +320,7 @@ def test_HullWhiteCallableBond():
 
     # Test convergence
     num_steps_list = [100, 200, 500, 1000]
-    tmat = (maturity_date - settlement_date)/gDaysInYear
+    tmat = (maturity_date - settlement_date) / g_days_in_year
 
     testCases.header("NUMSTEPS", "TIME", "BOND_ONLY", "CALLABLE_BOND")
 

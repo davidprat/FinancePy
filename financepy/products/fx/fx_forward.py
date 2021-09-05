@@ -6,8 +6,8 @@ import numpy as np
 
 
 from ...utils.date import Date
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
 from ...utils.helpers import label_to_string, check_argument_types
 
 ###############################################################################
@@ -40,10 +40,10 @@ class FXForward:
         price in USD (CCY2) of 1 unit of EUR (CCY1) """
 
         if delivery_date < expiry_date:
-            raise FinError("Delivery date must be on or after expiry date.")
+            raise finpy_error("Delivery date must be on or after expiry date.")
 
         if len(currency_pair) != 6:
-            raise FinError("Currency pair must be 6 characters.")
+            raise finpy_error("Currency pair must be 6 characters.")
 
         self._expiry_date = expiry_date
         self._delivery_date = delivery_date
@@ -54,7 +54,7 @@ class FXForward:
         self._domName = self._currency_pair[3:6]
 
         if notional_currency != self._domName and notional_currency != self._forName:
-            raise FinError("Notional currency not in currency pair.")
+            raise finpy_error("Notional currency not in currency pair.")
 
         self._notional = notional
         self._notional_currency = notional_currency
@@ -71,15 +71,15 @@ class FXForward:
         FX rate is the spot_fx_rate. """
 
         if type(valuation_date) == Date:
-            t = (self._expiry_date - valuation_date) / gDaysInYear
+            t = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             t = valuation_date
 
         if np.any(spot_fx_rate <= 0.0):
-            raise FinError("spot_fx_rate must be greater than zero.")
+            raise finpy_error("spot_fx_rate must be greater than zero.")
 
         if np.any(t < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         t = np.maximum(t, 1e-10)
 
@@ -97,7 +97,7 @@ class FXForward:
             self._notional_dom = self._notional * self._strike_fx_rate
             self._notional_for = self._notional
         else:
-            raise FinError("Invalid notional currency.")
+            raise finpy_error("Invalid notional currency.")
 
         if self._notional_currency == self._forName:
             v = (newFwdFXRate - self._strike_fx_rate)
@@ -128,15 +128,15 @@ class FXForward:
         contract equal to zero. """
 
         if type(valuation_date) == Date:
-            t = (self._delivery_date - valuation_date) / gDaysInYear
+            t = (self._delivery_date - valuation_date) / g_days_in_year
         else:
             t = valuation_date
 
         if np.any(spot_fx_rate <= 0.0):
-            raise FinError("spot_fx_rate must be greater than zero.")
+            raise finpy_error("spot_fx_rate must be greater than zero.")
 
         if np.any(t < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         t = np.maximum(t, 1e-10)
 

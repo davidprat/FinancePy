@@ -9,8 +9,8 @@ from financepy.products.inflation.FinInflationIndexCurve import FinInflationInde
 from financepy.products.bonds import YTMCalcType
 from financepy.products.inflation.FinInflationBond import FinInflationBond
 from financepy.utils.date import Date
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 
 import sys
 sys.path.append("..")
@@ -33,8 +33,8 @@ def test_FinInflationBondBBG():
     issue_date = Date(15, 7, 2010)
     maturity_date = Date(15, 7, 2020)
     coupon = 0.0125
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     face = 100.0
     baseCPIValue = 218.08532
 
@@ -148,8 +148,8 @@ def test_FinInflationBondStack():
     issue_date = Date(25, 9, 2013)
     maturity_date = Date(22, 3, 2068)
     coupon = 0.00125
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     face = 100.0
     baseCPIValue = 249.70
 
@@ -157,8 +157,8 @@ def test_FinInflationBondStack():
     # Discount curve
     discount_curve = DiscountCurveFlat(settlement_date,
                                        0.01033692,
-                                       FrequencyTypes.ANNUAL,
-                                       DayCountTypes.ACT_ACT_ISDA)
+                                       frequency_types.ANNUAL,
+                                       day_count_types.ACT_ACT_ISDA)
 
     lag = 3
     fixingCPI = 244.65884
@@ -239,8 +239,8 @@ def test_FinInflationBondStack():
     inflationZeroCurve = DiscountCurveZeros(settlement_date,
                                             zcDates,
                                             zcRates,
-                                            FrequencyTypes.ANNUAL,
-                                            DayCountTypes.ACT_ACT_ISDA)
+                                            frequency_types.ANNUAL,
+                                            day_count_types.ACT_ACT_ISDA)
 
 #    print(inflationZeroCurve)
 

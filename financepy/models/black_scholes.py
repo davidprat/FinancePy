@@ -6,8 +6,8 @@
 
 import numpy as np
 
-from ..utils.global_types import FinOptionTypes
-from ..utils.error import FinError
+from ..utils.global_types import option_types
+from ..utils.error import finpy_error
 
 from ..utils.helpers import check_argument_types
 
@@ -47,10 +47,10 @@ class BlackScholes(Model):
               strike_price: float,
               risk_free_rate: float,
               dividendRate: float,
-              option_type: FinOptionTypes):
+              option_type: option_types):
 
-        if option_type == FinOptionTypes.EUROPEAN_CALL \
-                or option_type == FinOptionTypes.EUROPEAN_PUT:
+        if option_type == option_types.EUROPEAN_CALL \
+                or option_type == option_types.EUROPEAN_PUT:
 
             if self._implementationType is BlackScholesTypes.DEFAULT:
                 self._implementationType = BlackScholesTypes.ANALYTICAL
@@ -74,19 +74,19 @@ class BlackScholes(Model):
 
             else:
 
-                raise FinError("Implementation not available for this product")
+                raise finpy_error("Implementation not available for this product")
 
-        elif option_type == FinOptionTypes.AMERICAN_CALL \
-                or option_type == FinOptionTypes.AMERICAN_PUT:
+        elif option_type == option_types.AMERICAN_CALL \
+                or option_type == option_types.AMERICAN_PUT:
 
             if self._implementationType is BlackScholesTypes.DEFAULT:
                 self._implementationType = BlackScholesTypes.CRR_TREE
 
             if self._implementationType == BlackScholesTypes.BARONE_ADESI:
 
-                if option_type == FinOptionTypes.AMERICAN_CALL:
+                if option_type == option_types.AMERICAN_CALL:
                     phi = +1
-                elif option_type == FinOptionTypes.AMERICAN_PUT:
+                elif option_type == option_types.AMERICAN_PUT:
                     phi = -1
 
                 v = baw_value(spotPrice, time_to_expiry, strike_price,
@@ -106,10 +106,10 @@ class BlackScholes(Model):
 
             else:
 
-                raise FinError("Implementation not available for this product")
+                raise finpy_error("Implementation not available for this product")
 
         else:
 
-            raise FinError("Should not be here")
+            raise finpy_error("Should not be here")
 
 ###############################################################################

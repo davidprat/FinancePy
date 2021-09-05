@@ -25,15 +25,15 @@ import numpy as np
 from scipy import optimize
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.frequency import annual_frequency, FrequencyTypes
-from ...utils.global_vars import gDaysInYear, gSmall
-from ...utils.day_count import DayCount, DayCountTypes
+from ...utils.error import finpy_error
+from ...utils.frequency import annual_frequency, frequency_types
+from ...utils.global_vars import g_days_in_year, g_small
+from ...utils.day_count import day_count, day_count_types
 from ...utils.schedule import Schedule
-from ...utils.calendar import Calendar
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.calendar import DateGenRuleTypes
+from ...utils.calendar import calendar
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.calendar import date_gen_rule_types
 from ...utils.helpers import label_to_string, check_argument_types
 from ...market.curves.discount_curve import DiscountCurve
 
@@ -94,8 +94,8 @@ class Bond:
                  issue_date: Date,
                  maturity_date: Date,
                  coupon: float,  # Annualised bond coupon
-                 freq_type: FrequencyTypes,
-                 accrual_type: DayCountTypes,
+                 freq_type: frequency_types,
+                 accrual_type: day_count_types,
                  face_amount: float = 100.0):
         """ Create Bond object by providing the issue date, maturity Date,
         coupon frequency, annualised coupon, the accrual convention type, face
@@ -104,7 +104,7 @@ class Bond:
         check_argument_types(self.__init__, locals())
 
         if issue_date >= maturity_date:
-            raise FinError("Issue Date must preceded maturity date.")
+            raise finpy_error("Issue Date must preceded maturity date.")
 
         self._issue_date = issue_date
         self._maturity_date = maturity_date
@@ -133,9 +133,9 @@ class Bond:
 
         # This should only be called once from init
 
-        calendar_type = CalendarTypes.NONE
-        bus_day_rule_type = BusDayAdjustTypes.NONE
-        date_gen_rule_type = DateGenRuleTypes.BACKWARD
+        calendar_type = calendar_types.NONE
+        bus_day_rule_type = bus_day_adjust_types.NONE
+        date_gen_rule_type = date_gen_rule_types.BACKWARD
 
         self._flow_dates = Schedule(self._issue_date,
                                     self._maturity_date,
@@ -166,7 +166,7 @@ class Bond:
         a number of standard conventions for calculating the YTM. """
 
         if convention not in YTMCalcType:
-            raise FinError("Yield convention unknown." + str(convention))
+            raise finpy_error("Yield convention unknown." + str(convention))
 
         self.calc_accrued_interest(settlement_date)
 
@@ -185,7 +185,7 @@ class Bond:
         n = n - 1
 
         if n < 0:
-            raise FinError("No coupons left")
+            raise finpy_error("No coupons left")
 
         if convention == YTMCalcType.UK_DMO:
             if n == 0:
@@ -218,7 +218,7 @@ class Bond:
                 term4 = self._redemption * (v ** n)
                 fp = (v ** (self._alpha)) * (term1 + term2 + term3 + term4)
         else:
-            raise FinError("Unknown yield convention")
+            raise finpy_error("Unknown yield convention")
 
         return fp * self._par
 
@@ -339,10 +339,10 @@ class Bond:
         """
 
         if settlement_date < discount_curve._valuation_date:
-            raise FinError("Bond settles before Discount curve date")
+            raise finpy_error("Bond settles before Discount curve date")
 
         if settlement_date > self._maturity_date:
-            raise FinError("Bond settles after it matures.")
+            raise finpy_error("Bond settles after it matures.")
 
         px = 0.0
         df = 1.0
@@ -385,8 +385,8 @@ class Bond:
         elif type(clean_price) is list or type(clean_price) is np.ndarray:
             clean_prices = np.array(clean_price)
         else:
-            raise FinError("Unknown type for clean_price "
-                           + str(type(clean_price)))
+            raise finpy_error("Unknown type for clean_price "
+                              + str(type(clean_price)))
 
         self.calc_accrued_interest(settlement_date)
         accrued_amount = self._accrued_interest * self._par / self._face_amount
@@ -416,7 +416,7 @@ class Bond:
     def calc_accrued_interest(self,
                               settlement_date: Date,
                               num_ex_dividend_days: int = 0,
-                              calendar_type: CalendarTypes=CalendarTypes.WEEKEND):
+                              calendar_type: calendar_types=calendar_types.WEEKEND):
         """ Calculate the amount of coupon that has accrued between the
         previous coupon date and the settlement date. Note that for some day
         count schemes (such as 30E/360) this is not actually the number of days
@@ -429,7 +429,7 @@ class Bond:
         num_flows = len(self._flow_dates)
 
         if num_flows == 0:
-            raise FinError("Accrued interest - not enough flow dates.")
+            raise finpy_error("Accrued interest - not enough flow dates.")
 
         for iFlow in range(1, num_flows):
             # coupons paid on a settlement date are paid
@@ -438,8 +438,8 @@ class Bond:
                 self._ncd = self._flow_dates[iFlow]
                 break
 
-        dc = DayCount(self._accrual_type)
-        cal = Calendar(calendar_type)
+        dc = day_count(self._accrual_type)
+        cal = calendar(calendar_type)
         exDividend_date = cal.add_business_days(self._ncd, -num_ex_dividend_days)
 
         (acc_factor, num, _) = dc.year_frac(self._pcd,
@@ -463,11 +463,11 @@ class Bond:
             settlement_date: Date,
             clean_price: float,
             discount_curve: DiscountCurve,
-            swapFloatDayCountConventionType=DayCountTypes.ACT_360,
-            swapFloatFrequencyType=FrequencyTypes.SEMI_ANNUAL,
-            swapFloatCalendarType=CalendarTypes.WEEKEND,
-            swapFloatBusDayAdjustRuleType=BusDayAdjustTypes.FOLLOWING,
-            swapFloatDateGenRuleType=DateGenRuleTypes.BACKWARD):
+            swapFloatDayCountConventionType=day_count_types.ACT_360,
+            swapFloatFrequencyType=frequency_types.SEMI_ANNUAL,
+            swapFloatCalendarType=calendar_types.WEEKEND,
+            swapFloatBusDayAdjustRuleType=bus_day_adjust_types.FOLLOWING,
+            swapFloatDateGenRuleType=date_gen_rule_types.BACKWARD):
         """ Calculate the par asset swap spread of the bond. The discount curve
         is a Ibor curve that is passed in. This function is vectorised with
         respect to the clean price. """
@@ -499,7 +499,7 @@ class Bond:
                             swapFloatBusDayAdjustRuleType,
                             swapFloatDateGenRuleType)
 
-        day_count = DayCount(swapFloatDayCountConventionType)
+        day_count = day_count(swapFloatDayCountConventionType)
 
         prev_date = self._pcd
         pv01 = 0.0
@@ -530,9 +530,9 @@ class Bond:
 
             # coupons paid on a settlement date are included
             if dt >= settlement_date:
-                t = (dt - settlement_date) / gDaysInYear
+                t = (dt - settlement_date) / g_days_in_year
 
-                t = np.maximum(t, gSmall)
+                t = np.maximum(t, g_small)
 
                 df = discount_curve.df(dt)
                 # determine the Ibor implied zero rate
@@ -559,8 +559,8 @@ class Bond:
         elif type(clean_price) is list or type(clean_price) is np.ndarray:
             clean_prices = np.array(clean_price)
         else:
-            raise FinError("Unknown type for clean_price "
-                           + str(type(clean_price)))
+            raise finpy_error("Unknown type for clean_price "
+                              + str(type(clean_price)))
 
         self.calc_accrued_interest(settlement_date)
 

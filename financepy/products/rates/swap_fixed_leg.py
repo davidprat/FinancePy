@@ -2,16 +2,16 @@
 # Copyright (C) 2018, 2019, 2020 Dominic O'Kane
 ##############################################################################
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
 from ...utils.math import ONE_MILLION
-from ...utils.day_count import DayCount, DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.calendar import CalendarTypes,  DateGenRuleTypes
-from ...utils.calendar import Calendar, BusDayAdjustTypes
+from ...utils.day_count import day_count, day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.calendar import calendar_types,  date_gen_rule_types
+from ...utils.calendar import calendar, bus_day_adjust_types
 from ...utils.schedule import Schedule
 from ...utils.helpers import label_to_string, check_argument_types
-from ...utils.global_types import SwapTypes
+from ...utils.global_types import swap_types
 from ...market.curves.discount_curve import DiscountCurve
 
 ##########################################################################
@@ -25,16 +25,16 @@ class SwapFixedLeg:
     def __init__(self,
                  effective_date: Date,  # Date interest starts to accrue
                  end_date: (Date, str),  # Date contract ends
-                 leg_type: SwapTypes,
+                 leg_type: swap_types,
                  coupon: (float),
-                 freq_type: FrequencyTypes,
-                 day_count_type: DayCountTypes,
+                 freq_type: frequency_types,
+                 day_count_type: day_count_types,
                  notional: float = ONE_MILLION,
                  principal: float = 0.0,
                  payment_lag: int = 0,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Create the fixed leg of a swap contract giving the contract start
         date, its maturity, fixed coupon, fixed leg frequency, fixed leg day
         count convention and notional.  """
@@ -46,13 +46,13 @@ class SwapFixedLeg:
         else:
             self._termination_date = effective_date.add_tenor(end_date)
 
-        calendar = Calendar(calendar_type)
+        calendar = calendar(calendar_type)
 
         self._maturity_date = calendar.adjust(self._termination_date,
                                              bus_day_adjust_type)
 
         if effective_date > self._maturity_date:
-            raise FinError("Effective date after maturity date")
+            raise finpy_error("Effective date after maturity date")
 
         self._effective_date = effective_date
         self._end_date = end_date
@@ -98,7 +98,7 @@ class SwapFixedLeg:
         scheduleDates = schedule._adjusted_dates
 
         if len(scheduleDates) < 2:
-            raise FinError("Schedule has none or only one date")
+            raise finpy_error("Schedule has none or only one date")
 
         self._startAccruedDates = []
         self._endAccruedDates = []
@@ -109,8 +109,8 @@ class SwapFixedLeg:
 
         prev_dt = scheduleDates[0]
         
-        day_counter = DayCount(self._day_count_type)
-        calendar = Calendar(self._calendar_type)
+        day_counter = day_count(self._day_count_type)
+        calendar = calendar(self._calendar_type)
 
         for next_dt in scheduleDates[1:]:
 
@@ -182,7 +182,7 @@ class SwapFixedLeg:
             legPV += paymentPV
             self._cumulativePVs[-1] = legPV
 
-        if self._leg_type == SwapTypes.PAY:
+        if self._leg_type == swap_types.PAY:
             legPV = legPV * (-1.0)
 
         return legPV

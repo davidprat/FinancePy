@@ -7,14 +7,14 @@ import numpy as np
 
 
 from ...utils.math import N
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
 # from ...products.equity.EquityOption import FinOption
 from ...utils.date import Date
 # from ...products.fx.FinFXModelTypes import FinFXModel
 from ...models.black_scholes import BlackScholes
 from ...utils.helpers import check_argument_types
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_types import option_types
 
 ###############################################################################
 
@@ -25,7 +25,7 @@ class FXDigitalOption:
                  expiry_date: Date,
                  strike_price: float,  # 1 unit of foreign in domestic
                  currency_pair: str,  # FORDOM
-                 option_type: FinOptionTypes,
+                 option_type: option_types,
                  notional: float,
                  prem_currency: str):
         """ Create the FX Digital Option object. Inputs include expiry date,
@@ -48,7 +48,7 @@ class FXDigitalOption:
         self._domName = self._currency_pair[3:6]
 
         if prem_currency != self._domName and prem_currency != self._forName:
-            raise FinError("Notional currency not in currency pair.")
+            raise finpy_error("Notional currency not in currency pair.")
 
 ###############################################################################
 
@@ -66,17 +66,17 @@ class FXDigitalOption:
 
         if type(valuation_date) == Date:
             spot_date = valuation_date.add_weekdays(self._spot_days)
-            tdel = (self._delivery_date - spot_date) / gDaysInYear
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            tdel = (self._delivery_date - spot_date) / g_days_in_year
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             tdel = valuation_date
             texp = tdel
 
         if np.any(spot_fx_rate <= 0.0):
-            raise FinError("spot_fx_rate must be greater than zero.")
+            raise finpy_error("spot_fx_rate must be greater than zero.")
 
         if np.any(tdel < 0.0):
-            raise FinError("Option time to maturity is less than zero.")
+            raise finpy_error("Option time to maturity is less than zero.")
 
         tdel = np.maximum(tdel, 1e-10)
 
@@ -98,20 +98,20 @@ class FXDigitalOption:
             mu = rd - rf
             d2 = (lnS0k + (mu - v2 / 2.0) * tdel) / den
 
-            if self._option_type == FinOptionTypes.DIGITAL_CALL and \
+            if self._option_type == option_types.DIGITAL_CALL and \
                     self._forName == self._prem_currency:
                 v = S0 * exp(-rf * tdel) * N(d2)
-            elif self._option_type == FinOptionTypes.DIGITAL_PUT and \
+            elif self._option_type == option_types.DIGITAL_PUT and \
                     self._forName == self._prem_currency:
                 v = S0 * exp(-rf * tdel) * N(-d2)
-            if self._option_type == FinOptionTypes.DIGITAL_CALL and \
+            if self._option_type == option_types.DIGITAL_CALL and \
                     self._domName == self._prem_currency:
                 v = exp(-rd * tdel) * N(d2)
-            elif self._option_type == FinOptionTypes.DIGITAL_PUT and \
+            elif self._option_type == option_types.DIGITAL_PUT and \
                     self._domName == self._prem_currency:
                 v = exp(-rd * tdel) * N(-d2)
             else:
-                raise FinError("Unknown option type")
+                raise finpy_error("Unknown option type")
 
             print("Prem_notional is an error ?")
             v = v * self.prem_notional

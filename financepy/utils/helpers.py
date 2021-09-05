@@ -1,15 +1,13 @@
-##############################################################################
-# Copyright (C) 2018, 2019, 2020 Dominic O'Kane
-##############################################################################
+"""Copyright (C) Dominic O'Kane."""
 
 import sys
 import numpy as np
 from numba import njit, float64
 from typing import Union
 from .date import Date
-from .global_vars import gDaysInYear, gSmall
-from .error import FinError
-from .day_count import DayCountTypes, DayCount
+from .global_vars import g_days_in_year, g_small
+from .error import finpy_error
+from .day_count import day_count_types, day_count
 
 
 ###############################################################################
@@ -27,11 +25,11 @@ def grid_index(t, gridTimes):
     n = len(gridTimes)
     for i in range(0, n):
         gridTime = gridTimes[i]
-        if abs(gridTime - t) < gSmall:
+        if abs(gridTime - t) < g_small:
             print(t, gridTimes, i)
             return i
 
-    raise FinError("Grid index not found")
+    raise finpy_error("Grid index not found")
 
 
 ###############################################################################
@@ -77,25 +75,25 @@ def pv01_times(t: float,
 
 def times_from_dates(dt: (Date, list),
                      valuation_date: Date,
-                     day_count_type: DayCountTypes = None):
+                     day_count_type: day_count_types = None):
     """ If a single date is passed in then return the year from valuation date
     but if a whole vector of dates is passed in then convert to a vector of
     times from the valuation date. The output is always a numpy vector of times
     which has only one element if the input is only one date. """
 
     if isinstance(valuation_date, Date) is False:
-        raise FinError("Valuation date is not a Date")
+        raise finpy_error("Valuation date is not a Date")
 
     if day_count_type is None:
         dcCounter = None
     else:
-        dcCounter = DayCount(day_count_type)
+        dcCounter = day_count(day_count_type)
 
     if isinstance(dt, Date):
         num_dates = 1
         times = [None]
         if dcCounter is None:
-            times[0] = (dt - valuation_date) / gDaysInYear
+            times[0] = (dt - valuation_date) / g_days_in_year
         else:
             times[0] = dcCounter.year_frac(valuation_date, dt)[0]
 
@@ -106,7 +104,7 @@ def times_from_dates(dt: (Date, list),
         times = []
         for i in range(0, num_dates):
             if dcCounter is None:
-                t = (dt[i] - valuation_date) / gDaysInYear
+                t = (dt[i] - valuation_date) / g_days_in_year
             else:
                 t = dcCounter.year_frac(valuation_date, dt[i])[0]
             times.append(t)
@@ -114,9 +112,9 @@ def times_from_dates(dt: (Date, list),
         return np.array(times)
 
     elif isinstance(dt, np.ndarray):
-        raise FinError("You passed an ndarray instead of dates.")
+        raise finpy_error("You passed an ndarray instead of dates.")
     else:
-        raise FinError("Discount factor must take dates.")
+        raise finpy_error("Discount factor must take dates.")
 
     return None
 
@@ -132,7 +130,7 @@ def check_vector_differences(x: np.ndarray,
     n1 = len(x)
     n2 = len(y)
     if n1 != n2:
-        raise FinError("Vectors x and y do not have same size.")
+        raise finpy_error("Vectors x and y do not have same size.")
 
     for i in range(0, n1):
         diff = x[i] - y[i]
@@ -147,7 +145,7 @@ def check_date(d: Date):
     """ Check that input d is a Date. """
 
     if isinstance(d, Date) is False:
-        raise FinError("Should be a date dummy!")
+        raise finpy_error("Should be a date dummy!")
 
 
 ###############################################################################
@@ -217,7 +215,7 @@ def input_time(dt: Date,
 
     def check(t):
         if t < 0.0:
-            raise FinError("Date " + str(dt) +
+            raise finpy_error("Date " + str(dt) +
                            " is before curve date " + str(curve._curve_date))
         elif t < small:
             t = small
@@ -227,16 +225,16 @@ def input_time(dt: Date,
         t = dt
         return check(t)
     elif isinstance(dt, Date):
-        t = (dt - curve._valuation_date) / gDaysInYear
+        t = (dt - curve._valuation_date) / g_days_in_year
         return check(t)
     elif isinstance(dt, np.ndarray):
         t = dt
         if np.any(t) < 0:
-            raise FinError("Date is before curve value date.")
+            raise finpy_error("Date is before curve value date.")
         t = np.maximum(small, t)
         return t
     else:
-        raise FinError("Unknown type.")
+        raise finpy_error("Unknown type.")
 
 
 ###############################################################################
@@ -248,7 +246,7 @@ def listdiff(a: np.ndarray,
     """ Calculate a vector of differences between two equal sized vectors. """
 
     if len(a) != len(b):
-        raise FinError("Cannot diff lists with different sizes")
+        raise finpy_error("Cannot diff lists with different sizes")
 
     diff = []
     for x, y in zip(a, b):
@@ -432,7 +430,7 @@ def accrued_tree(gridTimes: np.ndarray,
     numGridTimes = len(gridTimes)
 
     if len(gridFlows) != numGridTimes:
-        raise FinError("Grid flows not same size as grid times.")
+        raise finpy_error("Grid flows not same size as grid times.")
 
     accrued = np.zeros(numGridTimes)
 
@@ -446,7 +444,7 @@ def accrued_tree(gridTimes: np.ndarray,
         cpn_time = gridTimes[iGrid]
         cpn_flow = gridFlows[iGrid]
 
-        if gridFlows[iGrid] > gSmall:
+        if gridFlows[iGrid] > g_small:
             coupon_times = np.append(coupon_times, cpn_time)
             coupon_flows = np.append(coupon_flows, cpn_flow)
 
@@ -486,6 +484,6 @@ def check_argument_types(func, values):
             #            s += f"Mismatched Types: expected a "
             #            s += f"{valueName} of type '{usableType.__name__}', however"
             #            s += f" a value of type '{type(value).__name__}' was given."
-            raise FinError("Argument Type Error")
+            raise finpy_error("Argument Type Error")
 
 ###############################################################################

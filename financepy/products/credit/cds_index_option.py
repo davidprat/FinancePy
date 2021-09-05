@@ -6,13 +6,13 @@
 from math import exp, log, sqrt
 
 
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes, DateGenRuleTypes
-from ...utils.day_count import DayCount, DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.global_vars import gDaysInYear
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types, date_gen_rule_types
+from ...utils.day_count import day_count, day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import ONE_MILLION, INVROOT2PI, N
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...products.credit.cds_curve import CDSCurve
 from ...products.credit.cds import CDS
 from ...utils.helpers import check_argument_types
@@ -36,24 +36,24 @@ class CDSIndexOption:
                  strike_coupon: float,
                  notional: float = ONE_MILLION,
                  long_protection: bool = True,
-                 freq_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 freq_type: frequency_types = frequency_types.QUARTERLY,
+                 day_count_type: day_count_types = day_count_types.ACT_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Initialisation of the class object. Note that a large number of the
         inputs are set to default values in line with the standard contract."""
 
         check_argument_types(self.__init__, locals())
 
         if expiry_date > maturity_date:
-            raise FinError("Expiry date after end date")
+            raise finpy_error("Expiry date after end date")
 
         if index_coupon < 0.0:
-            raise FinError("Index coupon is negative")
+            raise finpy_error("Index coupon is negative")
 
         if strike_coupon < 0.0:
-            raise FinError("Index Option strike coupon is negative")
+            raise finpy_error("Index Option strike coupon is negative")
 
         self._expiry_date = expiry_date
         self._maturity_date = maturity_date
@@ -92,7 +92,7 @@ class CDSIndexOption:
 
         k = self._strike_coupon
         c = self._index_coupon
-        time_to_expiry = (self._expiry_date - valuation_date) / gDaysInYear
+        time_to_expiry = (self._expiry_date - valuation_date) / g_days_in_year
         df = libor_curve.df(self._expiry_date)
         qExpiryIndex = index_curve.survival_prob(time_to_expiry)
 
@@ -140,7 +140,7 @@ class CDSIndexOption:
         credit triangle to compute the forward RPV01. """
 
         num_credits = len(issuer_curves)
-        time_to_expiry = (self._expiry_date - valuation_date) / gDaysInYear
+        time_to_expiry = (self._expiry_date - valuation_date) / g_days_in_year
 #        timeToMaturity = (self._maturity_date - valuation_date) / gDaysInYear
         dfToExpiry = issuer_curves[0].df(time_to_expiry)
         libor_curve = issuer_curves[0]._libor_curve
@@ -225,7 +225,7 @@ class CDSIndexOption:
                                    indexRecovery, libor_curve) - expH
 
         if f * fmid >= 0.0:
-            raise FinError("Solution not bracketed.")
+            raise finpy_error("Solution not bracketed.")
 
         if f < 0.0:
             rtb = x1
@@ -292,7 +292,7 @@ class CDSIndexOption:
 
         flow_dates = self._cds_contract._adjusted_dates
         num_flows = len(flow_dates)
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
         dfToExpiry = libor_curve.df(self._expiry_date)
         lgd = 1.0 - indexRecovery
 
@@ -301,13 +301,13 @@ class CDSIndexOption:
 
         for iFlow in range(1, num_flows):
             expiryToFlowTimes[iFlow] = (
-                flow_dates[iFlow] - self._expiry_date) / gDaysInYear
+                flow_dates[iFlow] - self._expiry_date) / g_days_in_year
             fwdDfs[iFlow] = libor_curve.df(flow_dates[iFlow]) / dfToExpiry
 
         intH = 0.0
         intMaxH = 0.0
 
-        day_count = DayCount(self._day_count_type)
+        day_count = day_count(self._day_count_type)
         pcd = flow_dates[0]  # PCD
         eff = self._expiry_date
         accrual_factorPCDToExpiry = day_count.year_frac(pcd, eff)[0]

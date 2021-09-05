@@ -12,18 +12,18 @@ from ...models.gauss_copula_onefactor import tranche_surv_prob_adj_binomial
 from ...models.gauss_copula_onefactor import tranche_surv_prob_recursion
 from ...models.gauss_copula_lhp import tr_surv_prob_lhp
 
-from ...utils.day_count import DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes, DateGenRuleTypes
+from ...utils.day_count import day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types, date_gen_rule_types
 
 from ...products.credit.cds import CDS
 from ...products.credit.cds_curve import CDSCurve
 
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import ONE_MILLION
 from ...market.curves.interpolator import InterpTypes, interpolate
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 
 from ...utils.helpers import check_argument_types
 from ...utils.date import Date
@@ -53,16 +53,16 @@ class CDSTranche:
                  notional: float = ONE_MILLION,
                  running_coupon: float = 0.0,
                  long_protection: bool = True,
-                 freq_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 freq_type: frequency_types = frequency_types.QUARTERLY,
+                 day_count_type: day_count_types = day_count_types.ACT_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
 
         check_argument_types(self.__init__, locals())
 
         if k1 >= k2:
-            raise FinError("K1 must be less than K2")
+            raise finpy_error("K1 must be less than K2")
 
         self._k1 = k1
         self._k2 = k2
@@ -106,10 +106,10 @@ class CDSTranche:
         num_credits = len(issuer_curves)
         k1 = self._k1
         k2 = self._k2
-        tmat = (self._maturity_date - valuation_date) / gDaysInYear
+        tmat = (self._maturity_date - valuation_date) / g_days_in_year
 
         if tmat < 0.0:
-            raise FinError("Value date is after maturity date")
+            raise finpy_error("Value date is after maturity date")
 
         if abs(k1 - k2) < 0.00000001:
             output = np.zeros(4)
@@ -120,7 +120,7 @@ class CDSTranche:
             return output
 
         if k1 > k2:
-            raise FinError("K1 > K2")
+            raise finpy_error("K1 > K2")
 
         kappa = k2 / (k2 - k1)
 
@@ -152,7 +152,7 @@ class CDSTranche:
 
         for i in range(1, num_times):
 
-            t = (payment_dates[i] - valuation_date) / gDaysInYear
+            t = (payment_dates[i] - valuation_date) / g_days_in_year
 
             for j in range(0, num_credits):
                 issuer_curve = issuer_curves[j]
@@ -199,15 +199,15 @@ class CDSTranche:
                 qt2[i] = tr_surv_prob_lhp(
                     0.0, k2, num_credits, qVector, recovery_rates, beta2)
             else:
-                raise FinError(
+                raise finpy_error(
                     "Unknown model type only full and AdjBinomial allowed")
 
             if qt1[i] > qt1[i - 1]:
-                raise FinError(
+                raise finpy_error(
                     "Tranche K1 survival probabilities not decreasing.")
 
             if qt2[i] > qt2[i - 1]:
-                raise FinError(
+                raise finpy_error(
                     "Tranche K2 survival probabilities not decreasing.")
 
             trancheSurvivalCurve[i] = kappa * qt2[i] + (1.0 - kappa) * qt1[i]

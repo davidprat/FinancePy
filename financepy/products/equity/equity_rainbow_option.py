@@ -8,8 +8,8 @@ import numpy as np
 from typing import List
 
 from ...utils.math import N, M
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
 from ...models.gbm_process_simulator import FinGBMProcess
 from ...products.equity.equity_option import EquityOption
 from ...market.curves.discount_curve import DiscountCurve
@@ -57,7 +57,7 @@ def payoff_value(s, payoff_typeValue, payoff_params):
         assetn = ssorted[:, -n]
         payoff = np.maximum(k - assetn, 0.0)
     else:
-        raise FinError("Unknown payoff type")
+        raise finpy_error("Unknown payoff type")
 
     return payoff
 
@@ -131,23 +131,23 @@ class EquityRainbowOption(EquityOption):
                   betas):
 
         if len(stock_prices) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Stock prices must be a vector of length "
                 + str(self._num_assets))
 
         if len(dividend_curves) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Dividend discount must be a vector of length "
                 + str(self._num_assets))
 
         if len(volatilities) != self._num_assets:
-            raise FinError(
+            raise finpy_error(
                 "Volatilities must be a vector of length "
                 + str(self._num_assets))
 
         if len(betas) != self._num_assets:
-            raise FinError("Betas must be a vector of length " +
-                           str(self._num_assets))
+            raise finpy_error("Betas must be a vector of length " +
+                              str(self._num_assets))
 
 ###############################################################################
 
@@ -168,10 +168,10 @@ class EquityRainbowOption(EquityOption):
         elif payoff_type == EquityRainbowOptionTypes.PUT_ON_NTH:
             num_params = 2
         else:
-            raise FinError("Unknown payoff type")
+            raise finpy_error("Unknown payoff type")
 
         if len(payoff_params) != num_params:
-            raise FinError(
+            raise finpy_error(
                 "Number of parameters required for " +
                 str(payoff_type) +
                 " must be " +
@@ -181,7 +181,7 @@ class EquityRainbowOption(EquityOption):
            or payoff_type == EquityRainbowOptionTypes.PUT_ON_NTH:
             n = payoff_params[0]
             if n < 1 or n > num_assets:
-                raise FinError("Nth parameter must be 1 to " + str(num_assets))
+                raise finpy_error("Nth parameter must be 1 to " + str(num_assets))
 
 ###############################################################################
 
@@ -194,22 +194,22 @@ class EquityRainbowOption(EquityOption):
               corr_matrix: np.ndarray):
 
         if self._num_assets != 2:
-            raise FinError("Analytical results for two assets only.")
+            raise finpy_error("Analytical results for two assets only.")
 
         if corr_matrix.ndim != 2:
-            raise FinError("Corr matrix must be of size 2x2")
+            raise finpy_error("Corr matrix must be of size 2x2")
 
         if corr_matrix.shape[0] != 2:
-            raise FinError("Corr matrix must be of size 2x2")
+            raise finpy_error("Corr matrix must be of size 2x2")
 
         if corr_matrix.shape[1] != 2:
-            raise FinError("Corr matrix must be of size 2x2")
+            raise finpy_error("Corr matrix must be of size 2x2")
 
         if valuation_date > self._expiry_date:
-            raise FinError("Value date after expiry date.")
+            raise finpy_error("Value date after expiry date.")
 
         # Use result by Stulz (1982) given by Haug Page 211
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
         r = discount_curve.zero_rate(self._expiry_date)
 
         q1 = dividend_curves[0].zero_rate(self._expiry_date)
@@ -263,7 +263,7 @@ class EquityRainbowOption(EquityOption):
                 t), -rho2) - k * df * M(y1 - v1 * sqrt(t), y2 - v2 * sqrt(t), rho)
             v = k * df - cmin1 + cmin2
         else:
-            raise FinError("Unsupported Rainbow option type")
+            raise finpy_error("Unsupported Rainbow option type")
 
         return v
 
@@ -285,9 +285,9 @@ class EquityRainbowOption(EquityOption):
                        corr_matrix)
 
         if valuation_date > self._expiry_date:
-            raise FinError("Value date after expiry date.")
+            raise finpy_error("Value date after expiry date.")
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
 
         v = value_mc_fast(t,
                           stock_prices,

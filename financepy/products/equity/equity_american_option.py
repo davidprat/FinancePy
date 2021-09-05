@@ -6,9 +6,9 @@
 import numpy as np
 
 from ...utils.date import Date
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
+from ...utils.global_types import option_types
 from ...utils.helpers import check_argument_types, label_to_string
 from ...market.curves.discount_curve import DiscountCurve
 from ...products.equity.equity_option import EquityOption
@@ -29,7 +29,7 @@ class EquityAmericanOption(EquityOption):
     def __init__(self,
                  expiry_date: Date,
                  strike_price: float,
-                 option_type: FinOptionTypes,
+                 option_type: option_types,
                  num_options: float = 1.0):
         """ Class for American style options on simple vanilla calls and puts.
         Specify the expiry date, strike price, whether the option is a call or
@@ -37,11 +37,11 @@ class EquityAmericanOption(EquityOption):
 
         check_argument_types(self.__init__, locals())
 
-        if option_type != FinOptionTypes.EUROPEAN_CALL and \
-            option_type != FinOptionTypes.EUROPEAN_PUT and \
-            option_type != FinOptionTypes.AMERICAN_CALL and \
-                option_type != FinOptionTypes.AMERICAN_PUT:
-            raise FinError("Unknown Option Type" + str(option_type))
+        if option_type != option_types.EUROPEAN_CALL and \
+            option_type != option_types.EUROPEAN_PUT and \
+            option_type != option_types.AMERICAN_CALL and \
+                option_type != option_types.AMERICAN_PUT:
+            raise finpy_error("Unknown Option Type" + str(option_type))
 
         self._expiry_date = expiry_date
         self._strike_price = strike_price
@@ -60,18 +60,18 @@ class EquityAmericanOption(EquityOption):
         account the value of early exercise. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if isinstance(model, Model) is False:
-            raise FinError("Model is not inherited off type FinModel.")
+            raise finpy_error("Model is not inherited off type FinModel.")
 
         if np.any(texp < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         texp = np.maximum(texp, 1e-10)
 

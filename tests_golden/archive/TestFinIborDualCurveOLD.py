@@ -12,17 +12,17 @@ sys.path.append("..")
 from FinTestCases import FinTestCases, globalTestCaseMode
 
 from financepy.utils.date import Date
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.calendar import CalendarTypes
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
+from financepy.utils.calendar import calendar_types
 from financepy.products.rates.ibor_fra import IborFRA
 from financepy.products.rates.ibor_future import IborFuture
 from financepy.products.rates.ibor_deposit import IborDeposit
 from financepy.products.rates.IborSwapOLD import IborSwapOLD
-from financepy.utils.calendar import BusDayAdjustTypes
+from financepy.utils.calendar import bus_day_adjust_types
 from financepy.market.curves.interpolator import InterpTypes
 from financepy.utils.math import ONE_MILLION
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 from financepy.market.curves.interpolator import InterpTypes
 
 from financepy.products.rates.FinIborSingleCurveOLD import FinIborSingleCurveOLD
@@ -39,20 +39,20 @@ PLOT_GRAPHS = False
 def buildOIS(valuation_date):
     """ Build the OIS funding curve from futures (FRAs) and OIS """
 
-    dccType = DayCountTypes.THIRTY_E_360_ISDA
+    dccType = day_count_types.THIRTY_E_360_ISDA
     depos = []
 
     spot_days = 0
     spot_days = 0
     settlement_date = valuation_date.add_weekdays(spot_days)
-    fixed_leg_type = SwapTypes.PAY
+    fixed_leg_type = swap_types.PAY
 
     fras = []
     # 1 x 4 FRA
     
     swaps = []
-    fixedFreqType = FrequencyTypes.SEMI_ANNUAL
-    fixedDCCType = DayCountTypes.ACT_365F
+    fixedFreqType = frequency_types.SEMI_ANNUAL
+    fixedDCCType = day_count_types.ACT_365F
 
     swap_rate = 0.000022
     maturity_date = settlement_date.add_months(24)
@@ -61,7 +61,7 @@ def buildOIS(valuation_date):
     swaps.append(swap)
 
     swap_rate += 0.000
-    fixed_leg_type = SwapTypes.PAY
+    fixed_leg_type = swap_types.PAY
     maturity_date = settlement_date.add_months(36)
     swap = OIS(settlement_date, maturity_date, fixed_leg_type, swap_rate,
                fixedFreqType, fixedDCCType)
@@ -168,7 +168,7 @@ def test_bloombergPricingExample():
     # We do the O/N rate which settles on trade date
     spot_days = 0
     settlement_date = valuation_date.add_weekdays(spot_days)
-    depoDCCType = DayCountTypes.ACT_360
+    depoDCCType = day_count_types.ACT_360
     depos = []
     deposit_rate = 0.0231381
     maturity_date = settlement_date.add_months(3)
@@ -192,13 +192,13 @@ def test_bloombergPricingExample():
     fras[4] = futs[4].to_fra(97.1450, -0.00411)
     fras[5] = futs[5].to_fra(97.0750, -0.00589)
 
-    accrual = DayCountTypes.THIRTY_E_360
-    freq = FrequencyTypes.SEMI_ANNUAL
+    accrual = day_count_types.THIRTY_E_360
+    freq = frequency_types.SEMI_ANNUAL
 
     spot_days = 2
     settlement_date = valuation_date.add_weekdays(spot_days)
     notional = ONE_MILLION
-    fixed_leg_type = SwapTypes.PAY
+    fixed_leg_type = swap_types.PAY
     interp_type = InterpTypes.FLAT_FWD_RATES
 
     swaps = []
@@ -297,15 +297,15 @@ def test_swapValuationExample():
     start_date = Date(27, 12, 2017)
     maturity_date = Date(27, 12, 2067)
     notional = 10 * ONE_MILLION
-    fixed_leg_type = SwapTypes.RECEIVE
+    fixed_leg_type = swap_types.RECEIVE
     
     fixedRate = 0.0150
-    fixedDCCType = DayCountTypes.THIRTY_360_BOND
-    fixedFreqType = FrequencyTypes.ANNUAL
+    fixedDCCType = day_count_types.THIRTY_360_BOND
+    fixedFreqType = frequency_types.ANNUAL
     
     float_spread = 0.0
-    floatDCCType = DayCountTypes.ACT_360
-    floatFreqType = FrequencyTypes.SEMI_ANNUAL
+    floatDCCType = day_count_types.ACT_360
+    floatFreqType = frequency_types.SEMI_ANNUAL
 
     offMarketSwap = IborSwapOLD(start_date, maturity_date, fixed_leg_type,
                                 fixedRate, fixedFreqType, fixedDCCType,
@@ -314,7 +314,7 @@ def test_swapValuationExample():
     
     interp_type = InterpTypes.LINEAR_ZERO_RATES
     
-    depoDCCType = DayCountTypes.ACT_360
+    depoDCCType = day_count_types.ACT_360
     depos = []
     
     ###########################################################################
@@ -326,7 +326,7 @@ def test_swapValuationExample():
     depo = IborDeposit(settlement_date, "6M", -0.2510 / 100.0, depoDCCType); depos.append(depo)
     
     fras = []
-    fraDCCType = DayCountTypes.ACT_360
+    fraDCCType = day_count_types.ACT_360
     
     fra = IborFRA(settlement_date.add_tenor("1M"), "6M", -0.2450 / 100.0, fraDCCType); fras.append(fra)
     fra = IborFRA(settlement_date.add_tenor("2M"), "6M", -0.2435 / 100.0, fraDCCType); fras.append(fra)
@@ -342,9 +342,9 @@ def test_swapValuationExample():
     fra = IborFRA(settlement_date.add_tenor("12M"), "6M", -0.1360 / 100.0, fraDCCType); fras.append(fra)
     
     swaps = []
-    fixed_leg_type = SwapTypes.PAY
-    fixedDCCType = DayCountTypes.THIRTY_360_BOND
-    fixedFreqType = FrequencyTypes.ANNUAL
+    fixed_leg_type = swap_types.PAY
+    fixedDCCType = day_count_types.THIRTY_360_BOND
+    fixedFreqType = frequency_types.ANNUAL
     
     swap = IborSwapOLD(settlement_date, "2Y", fixed_leg_type, -0.1525/100.0, fixedFreqType, fixedDCCType); swaps.append(swap)
     swap = IborSwapOLD(settlement_date, "3Y", fixed_leg_type, -0.0185/100.0, fixedFreqType, fixedDCCType); swaps.append(swap)
@@ -380,7 +380,7 @@ def test_swapValuationExample():
     
     ###############################################################################
     
-    depoDCCType = DayCountTypes.ACT_360
+    depoDCCType = day_count_types.ACT_360
     depos = []
     
     spot_days = 0
@@ -390,9 +390,9 @@ def test_swapValuationExample():
     fras = []
     
     swaps = []
-    fixed_leg_type = SwapTypes.PAY
-    fixedDCCType = DayCountTypes.ACT_365F
-    fixedFreqType = FrequencyTypes.ANNUAL
+    fixed_leg_type = swap_types.PAY
+    fixedDCCType = day_count_types.ACT_365F
+    fixedFreqType = frequency_types.ANNUAL
     
     # Standard OIS with standard annual terms
     swap = OIS(settlement_date, "2W", fixed_leg_type, -0.3600 / 100.0, fixedFreqType, fixedDCCType); swaps.append(swap)

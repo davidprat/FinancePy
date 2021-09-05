@@ -5,7 +5,7 @@
 import numpy as np
 from numba import njit
 
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 from ..utils.math import N
 from ..market.curves.interpolator import InterpTypes, _uinterpolate
 from ..utils.helpers import label_to_string
@@ -46,7 +46,7 @@ class ModelRatesHoLee:
         fitting is done within functions below. """
 
         if sigma < 0.0:
-            raise FinError("Negative volatility not allowed.")
+            raise finpy_error("Negative volatility not allowed.")
 
         self._sigma = sigma
 
@@ -72,10 +72,10 @@ class ModelRatesHoLee:
         date and maturity date. """
 
         if texp > tmat:
-            raise FinError("Option expiry after bond matures.")
+            raise finpy_error("Option expiry after bond matures.")
 
         if texp < 0.0:
-            raise FinError("Option expiry time negative.")
+            raise finpy_error("Option expiry time negative.")
 
         ptexp = _uinterpolate(texp, df_times, df_values, interp)
         ptmat = _uinterpolate(tmat, df_times, df_values, interp)

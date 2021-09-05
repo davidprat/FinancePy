@@ -3,12 +3,12 @@
 ##############################################################################
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.calendar import Calendar
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.day_count import DayCount
-from ...utils.day_count import DayCountTypes
+from ...utils.error import finpy_error
+from ...utils.calendar import calendar
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.day_count import day_count
+from ...utils.day_count import day_count_types
 from ...utils.helpers import label_to_string, check_argument_types
 
 
@@ -39,10 +39,10 @@ class IborDeposit:
                  start_date: Date,  # When the interest starts to accrue
                  maturity_date_or_tenor: (Date, str),  # Repayment of interest
                  deposit_rate: float,  # MM rate using simple interest
-                 day_count_type: DayCountTypes,  # How year fraction is calculated
+                 day_count_type: day_count_types,  # How year fraction is calculated
                  notional: float = 100.0,  # Amount borrowed
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,  # Holidays for maturity date
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.MODIFIED_FOLLOWING):
+                 calendar_type: calendar_types = calendar_types.WEEKEND,  # Holidays for maturity date
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.MODIFIED_FOLLOWING):
         """ Create a Libor deposit object which takes the start date when
         the amount of notional is borrowed, a maturity date or a tenor and the
         deposit rate. If a tenor is used then this is added to the start
@@ -61,12 +61,12 @@ class IborDeposit:
         else:
             maturity_date = start_date.add_tenor(maturity_date_or_tenor)
 
-        calendar = Calendar(self._calendar_type)
+        calendar = calendar(self._calendar_type)
 
         maturity_date = calendar.adjust(maturity_date,
                                         self._bus_day_adjust_type)
         if start_date > maturity_date:
-            raise FinError("Start date cannot be after maturity date")
+            raise finpy_error("Start date cannot be after maturity date")
 
         self._start_date = start_date
         self._maturity_date = maturity_date
@@ -81,7 +81,7 @@ class IborDeposit:
         Libor curve to reprice the contractual market deposit rate. Note that
         this is a forward discount factor that starts on settlement date."""
 
-        dc = DayCount(self._day_count_type)
+        dc = day_count(self._day_count_type)
         acc_factor = dc.year_frac(self._start_date, self._maturity_date)[0]
         df = 1.0 / (1.0 + acc_factor * self._deposit_rate)
         return df
@@ -96,9 +96,9 @@ class IborDeposit:
         repayment plus interest discounted on the current Libor curve. """
 
         if valuation_date > self._maturity_date:
-            raise FinError("Start date after maturity date")
+            raise finpy_error("Start date after maturity date")
 
-        dc = DayCount(self._day_count_type)
+        dc = day_count(self._day_count_type)
         acc_factor = dc.year_frac(self._start_date, self._maturity_date)[0]
         df_settle = libor_curve.df(self._start_date)
         df_maturity = libor_curve.df(self._maturity_date)
@@ -116,7 +116,7 @@ class IborDeposit:
                     valuation_date: Date):
         """ Print the date and size of the future repayment. """
 
-        dc = DayCount(self._day_count_type)
+        dc = day_count(self._day_count_type)
         acc_factor = dc.year_frac(self._start_date, self._maturity_date)[0]
         flow = (1.0 + acc_factor * self._deposit_rate) * self._notional
         print(self._maturity_date, flow)

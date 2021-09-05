@@ -5,13 +5,13 @@
 from scipy import optimize
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.frequency import annual_frequency, FrequencyTypes
-from ...utils.day_count import DayCount, DayCountTypes
+from ...utils.error import finpy_error
+from ...utils.frequency import annual_frequency, frequency_types
+from ...utils.day_count import day_count, day_count_types
 from ...utils.schedule import Schedule
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.calendar import DateGenRuleTypes
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.calendar import date_gen_rule_types
 from ...utils.helpers import label_to_string, check_argument_types
 
 
@@ -51,8 +51,8 @@ class BondFRN:
                  issue_date: Date,
                  maturity_date: Date,
                  quoted_margin: float,  # Fixed spread paid on top of index
-                 freq_type: FrequencyTypes,
-                 accrual_type: DayCountTypes,
+                 freq_type: frequency_types,
+                 accrual_type: day_count_types,
                  face_amount: float = 100.0):
         """ Create FinFloatingRateNote object given its maturity date, its
         quoted margin, coupon frequency, accrual type. Face is the size of
@@ -87,9 +87,9 @@ class BondFRN:
 
         # This should only be called once from init 
 
-        calendar_type = CalendarTypes.NONE
-        bus_day_rule_type = BusDayAdjustTypes.NONE
-        date_gen_rule_type = DateGenRuleTypes.BACKWARD
+        calendar_type = calendar_types.NONE
+        bus_day_rule_type = bus_day_adjust_types.NONE
+        date_gen_rule_type = date_gen_rule_types.BACKWARD
 
         self._flow_dates = Schedule(self._issue_date,
                                     self._maturity_date,
@@ -115,7 +115,7 @@ class BondFRN:
 
         self.calc_accrued_interest(settlement_date, next_coupon)
 
-        day_counter = DayCount(self._accrual_type)
+        day_counter = day_count(self._accrual_type)
 
         q = self._quoted_margin
         num_flows = len(self._flow_dates)
@@ -205,7 +205,7 @@ class BondFRN:
         """ Calculate the risk or dP/dy of the bond by bumping. """
 
         if dm > 10.0:
-            raise FinError("Discount margin exceeds 100000bp")
+            raise finpy_error("Discount margin exceeds 100000bp")
 
         self.calc_accrued_interest(settlement_date, next_coupon)
         dy = 0.0001
@@ -363,7 +363,7 @@ class BondFRN:
         margin. """
 
         if dm > 10.0:
-            raise FinError("Discount margin exceeds 100000bp")
+            raise finpy_error("Discount margin exceeds 100000bp")
 
         full_price = self.full_price_from_dm(settlement_date,
                                              next_coupon,
@@ -420,9 +420,9 @@ class BondFRN:
         num_flows = len(self._flow_dates)
 
         if num_flows == 0:
-            raise FinError("Accrued interest - not enough flow dates.")
+            raise finpy_error("Accrued interest - not enough flow dates.")
 
-        dc = DayCount(self._accrual_type)
+        dc = day_count(self._accrual_type)
 
         for i in range(1, num_flows):
             if self._flow_dates[i] > settlement_date:

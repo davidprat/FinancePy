@@ -7,12 +7,12 @@
 
 import numpy as np
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 
-from ...utils.day_count import DayCount, DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes, DateGenRuleTypes
+from ...utils.day_count import day_count, day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types, date_gen_rule_types
 
 from ...products.credit.cds import CDS
 
@@ -22,7 +22,7 @@ from ...models.student_t_copula import StudentTCopula
 
 from ...products.credit.cds_curve import CDSCurve
 
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import ONE_MILLION
 from ...market.curves.interpolator import interpolate, InterpTypes
 
@@ -45,11 +45,11 @@ class CDSBasket:
                  notional: float = ONE_MILLION,
                  running_coupon: float = 0.0,
                  long_protection: bool = True,
-                 freq_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 freq_type: frequency_types = frequency_types.QUARTERLY,
+                 day_count_type: day_count_types = day_count_types.ACT_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
 
         check_argument_types(self.__init__, locals())
 
@@ -91,13 +91,13 @@ class CDSBasket:
 
         adjusted_dates = self._cds_contract._adjusted_dates
         num_flows = len(adjusted_dates)
-        day_count = DayCount(self._day_count_type)
+        day_count = day_count(self._day_count_type)
 
         averageAccrualFactor = 0.0
 
         rpv01ToTimes = np.zeros(num_flows)
         for iTime in range(1, num_flows):
-            t = (adjusted_dates[iTime] - valuation_date) / gDaysInYear
+            t = (adjusted_dates[iTime] - valuation_date) / g_days_in_year
             dt0 = adjusted_dates[iTime - 1]
             dt1 = adjusted_dates[iTime]
             accrual_factor = day_count.year_frac(dt0, dt1)[0]
@@ -107,7 +107,7 @@ class CDSBasket:
 
         averageAccrualFactor /= num_flows
 
-        tmat = (self._maturity_date - valuation_date) / gDaysInYear
+        tmat = (self._maturity_date - valuation_date) / g_days_in_year
 
         rpv01 = 0.0
         prot = 0.0
@@ -169,7 +169,7 @@ class CDSBasket:
         num_credits = len(issuer_curves)
 
         if nToDefault > num_credits or nToDefault < 1:
-            raise FinError("nToDefault must be 1 to num_credits")
+            raise finpy_error("nToDefault must be 1 to num_credits")
 
         default_times = default_times_gc(issuer_curves,
                                          correlationMatrix,
@@ -206,7 +206,7 @@ class CDSBasket:
         num_credits = len(issuer_curves)
 
         if nToDefault > num_credits or nToDefault < 1:
-            raise FinError("nToDefault must be 1 to num_credits")
+            raise finpy_error("nToDefault must be 1 to num_credits")
 
         model = StudentTCopula()
 
@@ -245,15 +245,15 @@ class CDSBasket:
         num_credits = len(issuer_curves)
 
         if num_credits == 0:
-            raise FinError("Num Credits is zero")
+            raise finpy_error("Num Credits is zero")
 
         if nToDefault < 1 or nToDefault > num_credits:
-            raise FinError("NToDefault must be 1 to num_credits")
+            raise finpy_error("NToDefault must be 1 to num_credits")
 
-        tmat = (self._maturity_date - valuation_date) / gDaysInYear
+        tmat = (self._maturity_date - valuation_date) / g_days_in_year
 
         if tmat < 0.0:
-            raise FinError("Value date is after maturity date")
+            raise finpy_error("Value date is after maturity date")
 
         payment_dates = self._cds_contract._adjusted_dates
         num_times = len(payment_dates)
@@ -268,7 +268,7 @@ class CDSBasket:
 
         for iTime in range(1, num_times):
 
-            t = (payment_dates[iTime] - valuation_date) / gDaysInYear
+            t = (payment_dates[iTime] - valuation_date) / g_days_in_year
 
             for iCredit in range(0, num_credits):
                 issuer_curve = issuer_curves[iCredit]

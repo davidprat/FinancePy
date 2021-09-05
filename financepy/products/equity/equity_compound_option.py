@@ -10,10 +10,10 @@ from scipy import optimize
 from numba import njit
 
 
-from ...utils.math import N, phi2
-from ...utils.global_vars import gDaysInYear, gSmall
-from ...utils.error import FinError
-from ...utils.global_types import FinOptionTypes
+from ...utils.math import N, phi_2
+from ...utils.global_vars import g_days_in_year, g_small
+from ...utils.error import finpy_error
+from ...utils.global_types import option_types
 
 from ...products.equity.equity_option import EquityOption
 from ...products.equity.equity_vanilla_option import EquityVanillaOption
@@ -38,7 +38,7 @@ def _f(s0, *args):
     value = args[5]
 
     if s0 <= 0.0:
-        raise FinError("Unable to solve for stock price that fits K1")
+        raise finpy_error("Unable to solve for stock price that fits K1")
 
     obj_fn = self.value(valuation_date,
                         s0,
@@ -124,11 +124,11 @@ def _value_once(stock_price,
 
     for iNode in range(0, iTime + 1):
         s = stock_values[index + iNode]
-        if option_type2 == FinOptionTypes.EUROPEAN_CALL\
-           or option_type2 == FinOptionTypes.AMERICAN_CALL:
+        if option_type2 == option_types.EUROPEAN_CALL\
+           or option_type2 == option_types.AMERICAN_CALL:
             option_values[index + iNode] = max(s - k2, 0.0)
-        elif option_type2 == FinOptionTypes.EUROPEAN_PUT\
-                or option_type2 == FinOptionTypes.AMERICAN_PUT:
+        elif option_type2 == option_types.EUROPEAN_PUT\
+                or option_type2 == option_types.AMERICAN_PUT:
             option_values[index + iNode] = max(k2 - s, 0.0)
 
     # begin backward steps from expiry at t2 to first expiry at time t1
@@ -147,9 +147,9 @@ def _value_once(stock_price,
 
             exerciseValue = 0.0  # NUMBA NEEDS HELP TO DETERMINE THE TYPE
 
-            if option_type1 == FinOptionTypes.AMERICAN_CALL:
+            if option_type1 == option_types.AMERICAN_CALL:
                 exerciseValue = max(s - k2, 0.0)
-            elif option_type1 == FinOptionTypes.AMERICAN_PUT:
+            elif option_type1 == option_types.AMERICAN_PUT:
                 exerciseValue = max(k2 - s, 0.0)
 
             option_values[index + iNode] = max(exerciseValue, holdValue)
@@ -168,11 +168,11 @@ def _value_once(stock_price,
         futureExpectedValue += (1.0 - probs[iTime]) * vDn
         holdValue = periodDiscountFactors[iTime] * futureExpectedValue
 
-        if option_type1 == FinOptionTypes.EUROPEAN_CALL\
-           or option_type1 == FinOptionTypes.AMERICAN_CALL:
+        if option_type1 == option_types.EUROPEAN_CALL\
+           or option_type1 == option_types.AMERICAN_CALL:
             option_values[index + iNode] = max(holdValue - k1, 0.0)
-        elif option_type1 == FinOptionTypes.EUROPEAN_PUT\
-                or option_type1 == FinOptionTypes.AMERICAN_PUT:
+        elif option_type1 == option_types.EUROPEAN_PUT\
+                or option_type1 == option_types.AMERICAN_PUT:
             option_values[index + iNode] = max(k1 - holdValue, 0.0)
 
     # begin backward steps from t1 expiry to value date
@@ -191,9 +191,9 @@ def _value_once(stock_price,
 
             exerciseValue = 0.0  # NUMBA NEEDS HELP TO DETERMINE THE TYPE
 
-            if option_type1 == FinOptionTypes.AMERICAN_CALL:
+            if option_type1 == option_types.AMERICAN_CALL:
                 exerciseValue = max(holdValue - k1, 0.0)
-            elif option_type1 == FinOptionTypes.AMERICAN_PUT:
+            elif option_type1 == option_types.AMERICAN_PUT:
                 exerciseValue = max(k1 - holdValue, 0.0)
 
             option_values[index + iNode] = max(exerciseValue, holdValue)
@@ -232,10 +232,10 @@ class EquityCompoundOption(EquityOption):
 
     def __init__(self,
                  cExpiryDate: Date,  # Compound Option expiry date
-                 cOptionType: FinOptionTypes,  # Compound option type
+                 cOptionType: option_types,  # Compound option type
                  cStrikePrice: float,  # Compound option strike
                  uExpiryDate: Date,  # Underlying option expiry date
-                 uOptionType: FinOptionTypes,  # Underlying option type
+                 uOptionType: option_types,  # Underlying option type
                  uStrikePrice: float):  # Underlying option strike price
         """ Create the EquityCompoundOption by passing in the first and
         second expiry dates as well as the corresponding strike prices and
@@ -244,21 +244,21 @@ class EquityCompoundOption(EquityOption):
         check_argument_types(self.__init__, locals())
 
         if cExpiryDate > uExpiryDate:
-            raise FinError(
+            raise finpy_error(
                 "Compound expiry date must precede underlying expiry date")
 
-        if cOptionType != FinOptionTypes.EUROPEAN_CALL and \
-                cOptionType != FinOptionTypes.AMERICAN_CALL and \
-                cOptionType != FinOptionTypes.EUROPEAN_PUT and \
-                cOptionType != FinOptionTypes.AMERICAN_PUT:
-            raise FinError(
+        if cOptionType != option_types.EUROPEAN_CALL and \
+                cOptionType != option_types.AMERICAN_CALL and \
+                cOptionType != option_types.EUROPEAN_PUT and \
+                cOptionType != option_types.AMERICAN_PUT:
+            raise finpy_error(
                 "Compound option must be European or American call or put.")
 
-        if uOptionType != FinOptionTypes.EUROPEAN_CALL and \
-                uOptionType != FinOptionTypes.AMERICAN_CALL and \
-                uOptionType != FinOptionTypes.EUROPEAN_PUT and \
-                uOptionType != FinOptionTypes.AMERICAN_PUT:
-            raise FinError(
+        if uOptionType != option_types.EUROPEAN_CALL and \
+                uOptionType != option_types.AMERICAN_CALL and \
+                uOptionType != option_types.EUROPEAN_PUT and \
+                uOptionType != option_types.AMERICAN_PUT:
+            raise finpy_error(
                 "Underlying Option must be European or American call or put.")
 
         self._cExpiryDate = cExpiryDate
@@ -284,10 +284,10 @@ class EquityCompoundOption(EquityOption):
         Rubinstein (1991). See also Haug page 132. """
 
         # If the option has any American feature then use the tree
-        if self._cOptionType == FinOptionTypes.AMERICAN_CALL or\
-            self._uOptionType == FinOptionTypes.AMERICAN_CALL or\
-            self._cOptionType == FinOptionTypes.AMERICAN_PUT or\
-                self._uOptionType == FinOptionTypes.AMERICAN_PUT:
+        if self._cOptionType == option_types.AMERICAN_CALL or\
+            self._uOptionType == option_types.AMERICAN_CALL or\
+            self._cOptionType == option_types.AMERICAN_PUT or\
+                self._uOptionType == option_types.AMERICAN_PUT:
 
             v = self._value_tree(valuation_date,
                                  stock_price,
@@ -298,8 +298,8 @@ class EquityCompoundOption(EquityOption):
 
             return v[0]
 
-        tc = (self._cExpiryDate - valuation_date) / gDaysInYear
-        tu = (self._uExpiryDate - valuation_date) / gDaysInYear
+        tc = (self._cExpiryDate - valuation_date) / g_days_in_year
+        tu = (self._uExpiryDate - valuation_date) / g_days_in_year
 
         s0 = stock_price
 
@@ -307,13 +307,13 @@ class EquityCompoundOption(EquityOption):
         ru = -np.log(df)/tu
 
         # CHECK INTEREST RATES AND IF THERE SHOULD BE TWO RU AND RC ?????
-        tc = np.maximum(tc, gSmall)
+        tc = np.maximum(tc, g_small)
         tu = np.maximum(tc, tu)
 
         dq = dividend_curve.df(self._uExpiryDate)
         q = -np.log(dq)/tu
 
-        v = np.maximum(model._volatility, gSmall)
+        v = np.maximum(model._volatility, g_small)
 
         kc = self._cStrikePrice
         ku = self._uStrikePrice
@@ -338,23 +338,23 @@ class EquityCompoundOption(EquityOption):
 
         # Taken from Hull Page 532 (6th edition)
 
-        CALL = FinOptionTypes.EUROPEAN_CALL
-        PUT = FinOptionTypes.EUROPEAN_PUT
+        CALL = option_types.EUROPEAN_CALL
+        PUT = option_types.EUROPEAN_PUT
 
         if self._cOptionType == CALL and self._uOptionType == CALL:
-            v = s0 * dqu * phi2(a1, b1, c) - ku * dfu * \
-                phi2(a2, b2, c) - dfc * kc * N(a2)
+            v = s0 * dqu * phi_2(a1, b1, c) - ku * dfu * \
+                phi_2(a2, b2, c) - dfc * kc * N(a2)
         elif self._cOptionType == PUT and self._uOptionType == CALL:
-            v = ku * dfu * phi2(-a2, b2, -c) - s0 * dqu * \
-                phi2(-a1, b1, -c) + dfc * kc * N(-a2)
+            v = ku * dfu * phi_2(-a2, b2, -c) - s0 * dqu * \
+                phi_2(-a1, b1, -c) + dfc * kc * N(-a2)
         elif self._cOptionType == CALL and self._uOptionType == PUT:
-            v = ku * dfu * phi2(-a2, -b2, c) - s0 * dqu * \
-                phi2(-a1, -b1, c) - dfc * kc * N(-a2)
+            v = ku * dfu * phi_2(-a2, -b2, c) - s0 * dqu * \
+                phi_2(-a1, -b1, c) - dfc * kc * N(-a2)
         elif self._cOptionType == PUT and self._uOptionType == PUT:
-            v = s0 * dqu * phi2(a1, -b1, -c) - ku * dfu * \
-                phi2(a2, -b2, -c) + dfc * kc * N(a2)
+            v = s0 * dqu * phi_2(a1, -b1, -c) - ku * dfu * \
+                phi_2(a2, -b2, -c) + dfc * kc * N(a2)
         else:
-            raise FinError("Unknown option type")
+            raise finpy_error("Unknown option type")
 
         return v
 
@@ -370,10 +370,10 @@ class EquityCompoundOption(EquityOption):
         """ This function is called if the option has American features. """
 
         if valuation_date > self._cExpiryDate:
-            raise FinError("Value date is after expiry date.")
+            raise finpy_error("Value date is after expiry date.")
 
-        tc = (self._cExpiryDate - valuation_date) / gDaysInYear
-        tu = (self._uExpiryDate - valuation_date) / gDaysInYear
+        tc = (self._cExpiryDate - valuation_date) / g_days_in_year
+        tu = (self._uExpiryDate - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._uExpiryDate)
         r = -np.log(df)/tu

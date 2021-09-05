@@ -5,16 +5,16 @@
 
 import numpy as np
 
-from ...utils.frequency import FrequencyTypes
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
-from ...utils.global_types import FinOptionTypes
+from ...utils.frequency import frequency_types
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
+from ...utils.global_types import option_types
 
 from ...utils.helpers import label_to_string, check_argument_types
 from ...utils.date import Date
-from ...utils.day_count import DayCountTypes
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.calendar import CalendarTypes,  DateGenRuleTypes
+from ...utils.day_count import day_count_types
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.calendar import calendar_types,  date_gen_rule_types
 from ...utils.schedule import Schedule
 from ...products.equity.equity_option import EquityOption
 from ...market.curves.discount_curve_flat import DiscountCurve
@@ -36,24 +36,24 @@ class EquityCliquetOption(EquityOption):
     def __init__(self,
                  start_date: Date,
                  final_expiry_date: Date,
-                 option_type: FinOptionTypes,
-                 freq_type: FrequencyTypes,
-                 day_count_type: DayCountTypes = DayCountTypes.THIRTY_E_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 option_type: option_types,
+                 freq_type: frequency_types,
+                 day_count_type: day_count_types = day_count_types.THIRTY_E_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Create the EquityCliquetOption by passing in the start date
         and the end date and whether it is a call or a put. Some additional
         data is needed in order to calculate the individual payments. """
 
         check_argument_types(self.__init__, locals())
 
-        if option_type != FinOptionTypes.EUROPEAN_CALL and \
-           option_type != FinOptionTypes.EUROPEAN_PUT:
-            raise FinError("Unknown Option Type" + str(option_type))
+        if option_type != option_types.EUROPEAN_CALL and \
+           option_type != option_types.EUROPEAN_PUT:
+            raise finpy_error("Unknown Option Type" + str(option_type))
 
         if final_expiry_date < start_date:
-            raise FinError("Expiry date precedes start date")
+            raise finpy_error("Expiry date precedes start date")
 
         self._start_date = start_date
         self._final_expiry_date = final_expiry_date
@@ -83,7 +83,7 @@ class EquityCliquetOption(EquityOption):
         Scholes model. """
 
         if valuation_date > self._final_expiry_date:
-            raise FinError("Value date after final expiry date.")
+            raise finpy_error("Value date after final expiry date.")
 
         s = stock_price
         v_cliquet = 0.0
@@ -92,8 +92,8 @@ class EquityCliquetOption(EquityOption):
         self._dfs = []
         self._actualDates = []
 
-        CALL = FinOptionTypes.EUROPEAN_CALL
-        PUT = FinOptionTypes.EUROPEAN_PUT
+        CALL = option_types.EUROPEAN_CALL
+        PUT = option_types.EUROPEAN_PUT
 
         if isinstance(model, BlackScholes):
 
@@ -106,7 +106,7 @@ class EquityCliquetOption(EquityOption):
                 if dt > valuation_date:
 
                     df = discount_curve.df(dt)
-                    texp = (dt - valuation_date) / gDaysInYear
+                    texp = (dt - valuation_date) / g_days_in_year
                     r = -np.log(df) / texp
 
                     # option life
@@ -129,7 +129,7 @@ class EquityCliquetOption(EquityOption):
                             bs_value(1.0, tau, 1.0, r, q, v, PUT.value)
                         v_cliquet += v_fwd_opt
                     else:
-                        raise FinError("Unknown option type")
+                        raise finpy_error("Unknown option type")
 
 #                    print(dt, r, df, q, v_fwd_opt, v_cliquet)
 
@@ -138,7 +138,7 @@ class EquityCliquetOption(EquityOption):
                     self._actualDates.append(dt)
                     tprev = texp
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return v_cliquet
 

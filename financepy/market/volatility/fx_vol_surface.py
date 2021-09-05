@@ -8,10 +8,10 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from numba import njit, float64, int64
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.global_vars import gDaysInYear
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_vars import g_days_in_year
+from ...utils.global_types import option_types
 from ...products.fx.fx_vanilla_option import FXVanillaOption
 from ...models.option_implied_dbn import option_implied_dbn
 from ...products.fx.fx_mkt_conventions import FinFXATMMethod
@@ -99,12 +99,12 @@ def obj_fast(params, *args):
     sigma_K_25D_C_MS = vol_function(vol_type_value, params, f, K_25D_C_MS, t)
 
     V_25D_C_MS = bs_value(s, t, K_25D_C_MS, rd, rf, sigma_K_25D_C_MS,
-                         FinOptionTypes.EUROPEAN_CALL.value)
+                          option_types.EUROPEAN_CALL.value)
 
     sigma_K_25D_P_MS = vol_function(vol_type_value, params, f, K_25D_P_MS, t)
 
     V_25D_P_MS = bs_value(s, t, K_25D_P_MS, rd, rf, sigma_K_25D_P_MS,
-                         FinOptionTypes.EUROPEAN_PUT.value)
+                          option_types.EUROPEAN_PUT.value)
 
     V_25D_MS = V_25D_C_MS + V_25D_P_MS
     term2 = (V_25D_MS - V_25D_MS_target)**2
@@ -114,7 +114,7 @@ def obj_fast(params, *args):
     ###########################################################################
 
     K_25D_C = solver_for_smile_strike_fast(s, t, rd, rf,
-                                           FinOptionTypes.EUROPEAN_CALL.value,
+                                           option_types.EUROPEAN_CALL.value,
                                            vol_type_value, +0.2500,
                                            delta_method_value, K_25D_C_MS,
                                            params)
@@ -122,7 +122,7 @@ def obj_fast(params, *args):
     sigma_K_25D_C = vol_function(vol_type_value, params, f, K_25D_C, t)
 
     K_25D_P = solver_for_smile_strike_fast(s, t, rd, rf,
-                                           FinOptionTypes.EUROPEAN_PUT.value,
+                                           option_types.EUROPEAN_PUT.value,
                                            vol_type_value, -0.2500,
                                            delta_method_value, K_25D_P_MS,
                                            params)
@@ -156,23 +156,23 @@ def solve_to_horizon_fast(s, t,
     vol_25D_MS = atm_vol + ms25DVol
 
     K_25D_C_MS = solve_for_strike(s, t, rd, rf,
-                                FinOptionTypes.EUROPEAN_CALL.value,
-                                +0.2500,
-                                delta_method_value,
-                                vol_25D_MS)
+                                  option_types.EUROPEAN_CALL.value,
+                                  +0.2500,
+                                  delta_method_value,
+                                  vol_25D_MS)
 
     K_25D_P_MS = solve_for_strike(s, t, rd, rf,
-                                FinOptionTypes.EUROPEAN_PUT.value,
-                                -0.2500,
-                                delta_method_value,
-                                vol_25D_MS)
+                                  option_types.EUROPEAN_PUT.value,
+                                  -0.2500,
+                                  delta_method_value,
+                                  vol_25D_MS)
 
     # USE MARKET STRANGLE VOL TO DETERMINE PRICE OF A MARKET STRANGLE
     V_25D_C_MS = bs_value(s, t, K_25D_C_MS, rd, rf, vol_25D_MS,
-                         FinOptionTypes.EUROPEAN_CALL.value)
+                          option_types.EUROPEAN_CALL.value)
 
     V_25D_P_MS = bs_value(s, t, K_25D_P_MS, rd, rf, vol_25D_MS,
-                         FinOptionTypes.EUROPEAN_PUT.value)
+                          option_types.EUROPEAN_PUT.value)
 
     # Market price of strangle in the domestic currency
     V_25D_MS = V_25D_C_MS + V_25D_P_MS
@@ -192,13 +192,13 @@ def solve_to_horizon_fast(s, t,
     params = np.array(xopt)
 
     K_25D_C = solver_for_smile_strike_fast(s, t, rd, rf,
-                                           FinOptionTypes.EUROPEAN_CALL.value,
+                                           option_types.EUROPEAN_CALL.value,
                                            vol_type_value, +0.2500,
                                            delta_method_value, K_25D_C_MS,
                                            params)
  
     K_25D_P = solver_for_smile_strike_fast(s, t, rd, rf,
-                                           FinOptionTypes.EUROPEAN_PUT.value,
+                                           option_types.EUROPEAN_PUT.value,
                                            vol_type_value, -0.2500,
                                            delta_method_value, K_25D_P_MS,
                                            params)
@@ -233,7 +233,7 @@ def vol_function(vol_function_type_value, params, f, k, t):
         vol = vol_function_clark(params, f, k, t)
         return vol
     else:
-        raise FinError("Unknown Model Type")
+        raise finpy_error("Unknown Model Type")
 
 ###############################################################################
 
@@ -283,7 +283,7 @@ def solver_for_smile_strike_fast(s, t, rd, rf,
     argtuple = (volatilityTypeValue, s, t, rd, rf, option_type_value,
                 delta_method_value, inverseDeltaTarget, parameters)
 
-    K = newton_secant(delta_fit, x0=initialGuess, args=argtuple,
+    K = newton_secant(delta_fit, x_0=initialGuess, args=argtuple,
                       tol=1e-8, maxiter=50)
 
     return K
@@ -318,7 +318,7 @@ def solve_for_strike(spot_fx_rate,
         domDF = np.exp(-rd*tdel) 
         forDF = np.exp(-rf*tdel) 
 
-        if option_type_value == FinOptionTypes.EUROPEAN_CALL.value:
+        if option_type_value == option_types.EUROPEAN_CALL.value:
             phi = +1.0
         else:
             phi = -1.0
@@ -335,7 +335,7 @@ def solve_for_strike(spot_fx_rate,
         domDF = np.exp(-rd*tdel) 
         forDF = np.exp(-rf*tdel) 
 
-        if option_type_value == FinOptionTypes.EUROPEAN_CALL.value:
+        if option_type_value == option_types.EUROPEAN_CALL.value:
             phi = +1.0
         else:
             phi = -1.0
@@ -352,7 +352,7 @@ def solve_for_strike(spot_fx_rate,
         argtuple = (spot_fx_rate, tdel, rd, rf, volatility,
                     delta_method_value, option_type_value, delta_target)
     
-        K = newton_secant(g, x0=spot_fx_rate, args=argtuple,
+        K = newton_secant(g, x_0=spot_fx_rate, args=argtuple,
                           tol=1e-7, maxiter=50)
 
         return K
@@ -362,14 +362,14 @@ def solve_for_strike(spot_fx_rate,
         argtuple = (spot_fx_rate, tdel, rd, rf, volatility,
                     delta_method_value, option_type_value, delta_target)
     
-        K = newton_secant(g, x0=spot_fx_rate, args=argtuple,
-                   tol=1e-7, maxiter=50)
+        K = newton_secant(g, x_0=spot_fx_rate, args=argtuple,
+                          tol=1e-7, maxiter=50)
 
         return K
 
     else:
 
-        raise FinError("Unknown FinFXDeltaMethod")
+        raise finpy_error("Unknown FinFXDeltaMethod")
 
 ###############################################################################
 
@@ -405,7 +405,7 @@ class FXVolSurface():
         self._currency_pair = currency_pair
 
         if len(currency_pair) != 6:
-            raise FinError("Currency pair must be 6 characters.")
+            raise finpy_error("Currency pair must be 6 characters.")
 
         self._forName = self._currency_pair[0:3]
         self._domName = self._currency_pair[3:6]
@@ -416,16 +416,16 @@ class FXVolSurface():
         self._num_vol_curves = len(tenors)
 
         if len(atm_vols) != self._num_vol_curves:
-            raise FinError("Number ATM vols must equal number of tenors")
+            raise finpy_error("Number ATM vols must equal number of tenors")
 
         if len(atm_vols) != self._num_vol_curves:
-            raise FinError("Number ATM vols must equal number of tenors")
+            raise finpy_error("Number ATM vols must equal number of tenors")
 
         if len(mktStrangle25DeltaVols) != self._num_vol_curves:
-            raise FinError("Number MS25D vols must equal number of tenors")
+            raise finpy_error("Number MS25D vols must equal number of tenors")
 
         if len(riskReversal25DeltaVols) != self._num_vol_curves:
-            raise FinError("Number RR25D vols must equal number of tenors")
+            raise finpy_error("Number RR25D vols must equal number of tenors")
 
         self._tenors = tenors
         self._atm_vols = np.array(atm_vols)/100.0
@@ -444,7 +444,7 @@ class FXVolSurface():
         elif self._deltaMethod == FinFXDeltaMethod.FORWARD_DELTA_PREM_ADJ:
             self._deltaMethodString = "pct_fwd_delta_prem_adj"
         else:
-            raise FinError("Unknown Delta Type")
+            raise finpy_error("Unknown Delta Type")
 
         self._volatility_function_type = volatility_function_type
         self._tenorIndex = 0
@@ -468,7 +468,7 @@ class FXVolSurface():
         index0 = 0
         index1 = 0
 
-        t = (expiry_date - self._valuation_date) / gDaysInYear
+        t = (expiry_date - self._valuation_date) / g_days_in_year
 
         num_curves = self._num_vol_curves
 
@@ -521,7 +521,7 @@ class FXVolSurface():
         vart = ((t-t0) * vart1 + (t1-t) * vart0) / (t1 - t0)
 
         if vart < 0.0:
-            raise FinError("Negative variance.")
+            raise finpy_error("Negative variance.")
 
         volt = np.sqrt(vart/t)
         return volt
@@ -547,7 +547,7 @@ class FXVolSurface():
             num_parameters = 5
         else:
             print(self._volatility_function_type)
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         self._parameters = np.zeros([num_vol_curves, num_parameters])
 
@@ -572,7 +572,7 @@ class FXVolSurface():
         for i in range(0, num_vol_curves):
 
             expiry_date = self._expiry_dates[i]
-            texp = (expiry_date - spot_date) / gDaysInYear
+            texp = (expiry_date - spot_date) / g_days_in_year
 
             domDF = self._dom_discount_curve._df(texp)
             forDF = self._for_discount_curve._df(texp)
@@ -595,7 +595,7 @@ class FXVolSurface():
             elif self._atmMethod == FinFXATMMethod.FWD_DELTA_NEUTRAL_PREM_ADJ:
                 self._K_ATM[i] = f * np.exp(-atm_vol*atm_vol*texp/2.0)
             else:
-                raise FinError("Unknown Delta Type")
+                raise finpy_error("Unknown Delta Type")
 
         #######################################################################
         # THE ACTUAL COMPUTATION LOOP STARTS HERE
@@ -661,7 +661,7 @@ class FXVolSurface():
                 x_init = [c0, c1, c2, 0.0, 0.0]
 
             else:
-                raise FinError("Unknown Model Type")
+                raise finpy_error("Unknown Model Type")
 
 
             x_inits.append(x_init)
@@ -716,8 +716,8 @@ class FXVolSurface():
                     self._deltaMethod.value, 
                     inverseDeltaTarget, self._parameters[tenorIndex])
 
-        K = newton_secant(delta_fit, x0=initialValue, args=argtuple,
-                       tol=1e-5, maxiter=50)
+        K = newton_secant(delta_fit, x_0=initialValue, args=argtuple,
+                          tol=1e-5, maxiter=50)
 
         return K
 
@@ -750,14 +750,14 @@ class FXVolSurface():
             call = FXVanillaOption(expiry_date,
                                    K_dummy,
                                    self._currency_pair,
-                                   FinOptionTypes.EUROPEAN_CALL,
+                                   option_types.EUROPEAN_CALL,
                                    1.0,
                                    self._notional_currency, )
 
             put = FXVanillaOption(expiry_date,
                                   K_dummy,
                                   self._currency_pair,
-                                  FinOptionTypes.EUROPEAN_PUT,
+                                  option_types.EUROPEAN_PUT,
                                   1.0,
                                   self._notional_currency)
 

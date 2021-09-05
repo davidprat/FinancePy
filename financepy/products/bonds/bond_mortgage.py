@@ -3,13 +3,13 @@
 ##############################################################################
 
 
-from ...utils.error import FinError
-from ...utils.frequency import annual_frequency, FrequencyTypes
-from ...utils.calendar import CalendarTypes
+from ...utils.error import finpy_error
+from ...utils.frequency import annual_frequency, frequency_types
+from ...utils.calendar import calendar_types
 from ...utils.schedule import Schedule
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.calendar import DateGenRuleTypes
-from ...utils.day_count import DayCountTypes
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.calendar import date_gen_rule_types
+from ...utils.day_count import day_count_types
 from ...utils.date import Date
 from ...utils.helpers import label_to_string, check_argument_types
 
@@ -35,17 +35,17 @@ class BondMortgage:
                  start_date: Date,
                  end_date: Date,
                  principal: float,
-                 freq_type: FrequencyTypes = FrequencyTypes.MONTHLY,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD,
-                 day_count_convention_type: DayCountTypes = DayCountTypes.ACT_360):
+                 freq_type: frequency_types = frequency_types.MONTHLY,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD,
+                 day_count_convention_type: day_count_types = day_count_types.ACT_360):
         """ Create the mortgage using start and end dates and principal. """
 
         check_argument_types(self.__init__, locals())
 
         if start_date > end_date:
-            raise FinError("Start Date after End Date")
+            raise finpy_error("Start Date after End Date")
 
         self._start_date = start_date
         self._end_date = end_date
@@ -99,7 +99,7 @@ class BondMortgage:
         elif mortgage_type == BondMortgageTypes.INTEREST_ONLY:
             monthly_flow = zero_rate * self._principal / frequency
         else:
-            raise FinError("Unknown Mortgage type.")
+            raise finpy_error("Unknown Mortgage type.")
 
         for i in range(1, num_flows):
             interestFlow = principal * zero_rate / frequency

@@ -6,15 +6,15 @@ import numpy as np
 
 
 from ...utils.math import N
-from ...utils.global_vars import gDaysInYear, gSmall
-from ...utils.error import FinError
+from ...utils.global_vars import g_days_in_year, g_small
+from ...utils.error import finpy_error
 from ...utils.date import Date
 
 from ...models.gbm_process_simulator import FinGBMProcess
 from ...products.equity.equity_option import EquityOption
 from ...utils.helpers import label_to_string, check_argument_types
 from ...market.curves.discount_curve import DiscountCurve
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_types import option_types
 
 ##########################################################################
 # TODO: Attempt control variate adjustment to monte carlo
@@ -37,15 +37,15 @@ class EquityFixedLookbackOption(EquityOption):
 
     def __init__(self,
                  expiry_date: Date,
-                 option_type: FinOptionTypes,
+                 option_type: option_types,
                  strike_price: float):
         """ Create the FixedLookbackOption by specifying the expiry date, the
         option type and the option strike. """
 
         check_argument_types(self.__init__, locals())
 
-        if option_type != FinOptionTypes.EUROPEAN_CALL and option_type != FinOptionTypes.EUROPEAN_PUT:
-            raise FinError("Option type must be EUROPEAN_CALL or EUROPEAN_PUT")
+        if option_type != option_types.EUROPEAN_CALL and option_type != option_types.EUROPEAN_PUT:
+            raise finpy_error("Option type must be EUROPEAN_CALL or EUROPEAN_PUT")
 
         self._expiry_date = expiry_date
         self._option_type = option_type
@@ -65,7 +65,7 @@ class EquityFixedLookbackOption(EquityOption):
         is the minimum of maximum of the stock price since the start of the
         option depending on whether the option is a call or a put. """
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._expiry_date)
         r = -np.log(df)/t
@@ -79,19 +79,19 @@ class EquityFixedLookbackOption(EquityOption):
         smin = 0.0
         smax = 0.0
 
-        if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+        if self._option_type == option_types.EUROPEAN_CALL:
             smax = stock_min_max
             if smax < s0:
-                raise FinError("The Smax value must be >= the stock price.")
-        elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+                raise finpy_error("The Smax value must be >= the stock price.")
+        elif self._option_type == option_types.EUROPEAN_PUT:
             smin = stock_min_max
             if smin > s0:
-                raise FinError("The Smin value must be <= the stock price.")
+                raise finpy_error("The Smin value must be <= the stock price.")
 
         # There is a risk of an overflow in the limit of q=r which
         # we remove by adjusting the value of the dividend
-        if abs(r - q) < gSmall:
-            q = r + gSmall
+        if abs(r - q) < g_small:
+            q = r + g_small
 
         df = np.exp(-r * t)
         dq = np.exp(-q * t)
@@ -102,7 +102,7 @@ class EquityFixedLookbackOption(EquityOption):
         sqrtT = np.sqrt(t)
 
         # Taken from Hull Page 536 (6th edition) and Haug Page 143
-        if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+        if self._option_type == option_types.EUROPEAN_CALL:
 
             if k > smax:
 
@@ -134,7 +134,7 @@ class EquityFixedLookbackOption(EquityOption):
                 v = df * (smax - k) + s0 * dq * N(e1) - \
                     smax * df * N(e2) + s0 * df * u * term
 
-        elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+        elif self._option_type == option_types.EUROPEAN_PUT:
 
             if k >= smin:
                 f1 = (np.log(s0/smin) + (b + v * v / 2.0) * t) / v / sqrtT
@@ -166,8 +166,8 @@ class EquityFixedLookbackOption(EquityOption):
                 v = k * df * N(-d2) - s0 * dq * N(-d1) + s0 * df * u * term
 
         else:
-            raise FinError("Unknown lookback option type:" +
-                           str(self._option_type))
+            raise finpy_error("Unknown lookback option type:" +
+                              str(self._option_type))
 
         return v
 
@@ -186,7 +186,7 @@ class EquityFixedLookbackOption(EquityOption):
         """ Monte Carlo valuation of a fixed strike lookback option using a
         Black-Scholes model that assumes the stock follows a GBM process. """
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._expiry_date)
         r = discount_curve.cc_rate(self._expiry_date)
@@ -201,15 +201,15 @@ class EquityFixedLookbackOption(EquityOption):
         smin = 0.0
         smax = 0.0
 
-        if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+        if self._option_type == option_types.EUROPEAN_CALL:
             smax = stock_min_max
             if smax < stock_price:
-                raise FinError(
+                raise finpy_error(
                     "Smax must be greater than or equal to the stock price.")
-        elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+        elif self._option_type == option_types.EUROPEAN_PUT:
             smin = stock_min_max
             if smin > stock_price:
-                raise FinError(
+                raise finpy_error(
                     "Smin must be less than or equal to the stock price.")
 
         model = FinGBMProcess()
@@ -220,18 +220,18 @@ class EquityFixedLookbackOption(EquityOption):
         num_paths = 2 * num_paths
         payoff = np.zeros(num_paths)
 
-        if option_type == FinOptionTypes.EUROPEAN_CALL:
+        if option_type == option_types.EUROPEAN_CALL:
             SMax = np.max(Sall, axis=1)
             smaxs = np.ones(num_paths) * smax
             payoff = np.maximum(SMax - k, 0.0)
             payoff = np.maximum(payoff, smaxs - k)
-        elif option_type == FinOptionTypes.EUROPEAN_PUT:
+        elif option_type == option_types.EUROPEAN_PUT:
             SMin = np.min(Sall, axis=1)
             smins = np.ones(num_paths) * smin
             payoff = np.maximum(k - SMin, 0.0)
             payoff = np.maximum(payoff, k - smins)
         else:
-            raise FinError("Unknown lookback option type:" + str(option_type))
+            raise finpy_error("Unknown lookback option type:" + str(option_type))
 
         v = payoff.mean() * df
         return v

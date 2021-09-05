@@ -3,10 +3,10 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 from financepy.utils.date import Date
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 from financepy.products.rates.ibor_single_curve import IborSingleCurve
 from financepy.products.credit.cds_curve import CDSCurve
 from financepy.products.rates.ibor_swap import IborSwap
@@ -30,8 +30,8 @@ def test_FinCDSCurve():
     depos = []
     fras = []
 
-    fixedDCC = DayCountTypes.ACT_365F
-    fixedFreq = FrequencyTypes.SEMI_ANNUAL
+    fixedDCC = day_count_types.ACT_365F
+    fixedFreq = frequency_types.SEMI_ANNUAL
     fixed_coupon = 0.05
 
     for i in range(1, 11):
@@ -39,7 +39,7 @@ def test_FinCDSCurve():
         maturity_date = curve_date.add_months(12 * i)
         swap = IborSwap(curve_date,
                         maturity_date,
-                        SwapTypes.PAY,
+                        swap_types.PAY,
                         fixed_coupon,
                         fixedFreq,
                         fixedDCC)

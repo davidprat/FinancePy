@@ -3,13 +3,13 @@
 ##############################################################################
 
 from ...utils.date import Date
-from ...utils.frequency import annual_frequency, FrequencyTypes
-from ...utils.calendar import CalendarTypes
+from ...utils.frequency import annual_frequency, frequency_types
+from ...utils.calendar import calendar_types
 from ...utils.schedule import Schedule
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.calendar import DateGenRuleTypes
-from ...utils.day_count import DayCount, DayCountTypes
-from ...utils.error import FinError
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.calendar import date_gen_rule_types
+from ...utils.day_count import day_count, day_count_types
+from ...utils.error import finpy_error
 from ...utils.helpers import check_argument_types, label_to_string
 from ...market.curves.discount_curve import DiscountCurve
 
@@ -26,11 +26,11 @@ class BondAnnuity:
     def __init__(self,
                  maturity_date: Date,
                  coupon: float,
-                 freq_type: FrequencyTypes,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD,
-                 day_count_convention_type: DayCountTypes = DayCountTypes.ACT_360,
+                 freq_type: frequency_types,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD,
+                 day_count_convention_type: day_count_types = day_count_types.ACT_360,
                  face: float = 100.0):
 
         check_argument_types(self.__init__, locals())
@@ -100,12 +100,12 @@ class BondAnnuity:
             return
 
         if settlement_date == self._maturity_date:
-            raise FinError("Settlement date is maturity date.")
+            raise finpy_error("Settlement date is maturity date.")
 
         self._settlement_date = settlement_date
-        calendar_type = CalendarTypes.NONE
-        bus_day_rule_type = BusDayAdjustTypes.NONE
-        date_gen_rule_type = DateGenRuleTypes.BACKWARD
+        calendar_type = calendar_types.NONE
+        bus_day_rule_type = bus_day_adjust_types.NONE
+        date_gen_rule_type = date_gen_rule_types.BACKWARD
 
         self._flow_dates = Schedule(settlement_date,
                                     self._maturity_date,
@@ -119,7 +119,7 @@ class BondAnnuity:
         self.calc_accrued_interest(settlement_date)
 
         self._flow_amounts = [0.0]
-        basis = DayCount(self._day_count_convention_type)
+        basis = day_count(self._day_count_convention_type)
 
         prev_dt = self._pcd
 
@@ -140,9 +140,9 @@ class BondAnnuity:
             self.calculate_payments(settlement_date)
 
         if len(self._flow_dates) == 0:
-            raise FinError("Accrued interest - not enough flow dates.")
+            raise finpy_error("Accrued interest - not enough flow dates.")
 
-        dc = DayCount(self._day_count_convention_type)
+        dc = day_count(self._day_count_convention_type)
 
         (acc_factor, num, _) = dc.year_frac(self._pcd,
                                             settlement_date,

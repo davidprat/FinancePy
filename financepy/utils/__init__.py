@@ -1,3 +1,5 @@
+"""Copyright (C) Dominic O'Kane."""
+
 from .calendar import *
 from .currency import *
 from .date import *

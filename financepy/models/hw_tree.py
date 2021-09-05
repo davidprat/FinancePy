@@ -8,12 +8,12 @@ from scipy import optimize
 from numba import njit
 from math import ceil
 
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 from ..utils.math import N, accrued_interpolator
 from ..market.curves.interpolator import InterpTypes, _uinterpolate
 from ..utils.helpers import label_to_string
-from ..utils.global_types import FinExerciseTypes
-from ..utils.global_vars import gSmall
+from ..utils.global_types import exercise_types
+from ..utils.global_vars import g_small
 
 interp = InterpTypes.FLAT_FWD_RATES.value
 
@@ -39,14 +39,14 @@ class FinHWEuropeanCalcType(Enum):
 
 def option_exercise_types_to_int(optionExerciseType):
 
-    if optionExerciseType == FinExerciseTypes.EUROPEAN:
+    if optionExerciseType == exercise_types.EUROPEAN:
         return 1
-    if optionExerciseType == FinExerciseTypes.BERMUDAN:
+    if optionExerciseType == exercise_types.BERMUDAN:
         return 2
-    if optionExerciseType == FinExerciseTypes.AMERICAN:
+    if optionExerciseType == exercise_types.AMERICAN:
         return 3
     else:
-        raise FinError("Unknown option exercise type.")
+        raise finpy_error("Unknown option exercise type.")
 
 ###############################################################################
 
@@ -471,7 +471,7 @@ def bermudan_swaption_tree_fast(texp, tmat, strike_price, face_amount,
 
         # This is a bit of a hack for when the interpolation does not put the
         # full accrued on flow date. Another scheme may work but so does this
-        if fixed_legFlows[m] > gSmall:
+        if fixed_legFlows[m] > g_small:
             accrued[m] = fixed_legFlows[m] * face_amount
 
     ###########################################################################
@@ -577,7 +577,7 @@ def bermudan_swaption_tree_fast(texp, tmat, strike_price, face_amount,
                 pay_values[m, kN] = max(payExercise, holdPay)
                 rec_values[m, kN] = max(recExercise, holdRec)
 
-            elif exercise_typeInt == 2 and flow > gSmall and m >= expiryStep:
+            elif exercise_typeInt == 2 and flow > g_small and m >= expiryStep:
 
                 pay_values[m, kN] = max(payExercise, holdPay)
                 rec_values[m, kN] = max(recExercise, holdRec)
@@ -589,7 +589,7 @@ def bermudan_swaption_tree_fast(texp, tmat, strike_price, face_amount,
 
                 # Need to define floating value on all grid dates
 
-                raise FinError("American optionality not tested.")
+                raise finpy_error("American optionality not tested.")
 
     return pay_values[0, jmax], rec_values[0, jmax]
 
@@ -616,7 +616,7 @@ def callable_puttable_bond_tree_fast(coupon_times, coupon_flows,
 #    print("DF Values:", _df_values)
 
     if np.any(coupon_times < 0.0):
-        raise FinError("No coupon times can be before the value date.")
+        raise finpy_error("No coupon times can be before the value date.")
 
     num_time_steps, num_nodes = _Q.shape
     dt = _dt
@@ -701,7 +701,7 @@ def callable_puttable_bond_tree_fast(coupon_times, coupon_flows,
             t = _tree_times[i]
             df = _uinterpolate(t, _df_times, _df_values, interp)
 
-            if flow > gSmall:
+            if flow > g_small:
                 pv = flow * df
                 px += pv
 
@@ -851,10 +851,10 @@ class HWTree():
         set to false in which case it uses the trinomial Tree. """
 
         if sigma < 0.0:
-            raise FinError("Negative volatility not allowed.")
+            raise finpy_error("Negative volatility not allowed.")
 
         if a < 0.0:
-            raise FinError("Mean reversion speed parameter should be >= 0.")
+            raise finpy_error("Mean reversion speed parameter should be >= 0.")
 
         self._sigma = sigma
         self._a = a
@@ -881,10 +881,10 @@ class HWTree():
         date and maturity date. """
 
         if texp > tmat:
-            raise FinError("Option expiry after bond matures.")
+            raise finpy_error("Option expiry after bond matures.")
 
         if texp < 0.0:
-            raise FinError("Option expiry time negative.")
+            raise finpy_error("Option expiry time negative.")
 
         ptexp = _uinterpolate(texp, df_times, df_values, interp)
         ptmat = _uinterpolate(tmat, df_times, df_values, interp)
@@ -1053,16 +1053,16 @@ class HWTree():
         tree. The discount curve was already supplied to the tree build. """
 
         if texp > tmat:
-            raise FinError("Option expiry after bond matures.")
+            raise finpy_error("Option expiry after bond matures.")
 
         if texp < 0.0:
-            raise FinError("Option expiry time negative.")
+            raise finpy_error("Option expiry time negative.")
 
         if self._tree_times is None:
-            raise FinError("Tree has not been constructed.")
+            raise finpy_error("Tree has not been constructed.")
 
         if self._tree_times[-1] < texp:
-            raise FinError("Tree expiry must be >= option expiry date.")
+            raise finpy_error("Tree expiry must be >= option expiry date.")
 
         dt = self._dt
         tdelta = texp + dt
@@ -1106,10 +1106,10 @@ class HWTree():
         tmat = coupon_times[-1]
 
         if texp > tmat:
-            raise FinError("Option expiry after bond matures.")
+            raise finpy_error("Option expiry after bond matures.")
 
         if texp < 0.0:
-            raise FinError("Option expiry time negative.")
+            raise finpy_error("Option expiry time negative.")
 
         #######################################################################
 
@@ -1177,7 +1177,7 @@ class HWTree():
                                                      self._df_times, self._dfs)
 
             else:
-                raise FinError("Unknown HW model implementation choice.")
+                raise finpy_error("Unknown HW model implementation choice.")
 
         else:
 
@@ -1246,7 +1246,7 @@ class HWTree():
         fn1 = tmat/self._dt
         fn2 = float(int(tmat/self._dt))
         if abs(fn1 - fn2) > 1e-6:
-            raise FinError("Time not on tree time grid")
+            raise finpy_error("Time not on tree time grid")
 
         timeStep = int(tmat / self._dt) + 1
 
@@ -1263,10 +1263,10 @@ class HWTree():
         """ Build the trinomial tree. """
 
         if isinstance(df_times, np.ndarray) is False:
-            raise FinError("DF TIMES must be a numpy vector")
+            raise finpy_error("DF TIMES must be a numpy vector")
 
         if isinstance(df_values, np.ndarray) is False:
-            raise FinError("DF VALUES must be a numpy vector")
+            raise finpy_error("DF VALUES must be a numpy vector")
 
         # I wish to add on an additional time to the tree so that the second
         # last time corresponds to a maturity treeMat. For this reason I scale

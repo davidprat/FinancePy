@@ -3,10 +3,10 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 from financepy.utils.date import Date
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 from financepy.products.credit.cds_curve import CDSCurve
 from financepy.products.rates.ibor_single_curve import IborSingleCurve
 from financepy.products.rates.ibor_deposit import IborDeposit
@@ -28,7 +28,7 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 
 def buildFullIssuerCurve(valuation_date):
 
-    dcType = DayCountTypes.ACT_360
+    dcType = day_count_types.ACT_360
     depos = []
     irBump = 0.0
 
@@ -64,14 +64,14 @@ def buildFullIssuerCurve(valuation_date):
     settlement_date = valuation_date.add_days(spot_days)
 
     swaps = []
-    dcType = DayCountTypes.THIRTY_E_360_ISDA
-    fixedFreq = FrequencyTypes.SEMI_ANNUAL
+    dcType = day_count_types.THIRTY_E_360_ISDA
+    fixedFreq = frequency_types.SEMI_ANNUAL
 
     maturity_date = settlement_date.add_months(24)
     swap1 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0044 + irBump,
         fixedFreq,
         dcType)
@@ -81,7 +81,7 @@ def buildFullIssuerCurve(valuation_date):
     swap2 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0078 + irBump,
         fixedFreq,
         dcType)
@@ -91,7 +91,7 @@ def buildFullIssuerCurve(valuation_date):
     swap3 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0119 + irBump,
         fixedFreq,
         dcType)
@@ -101,7 +101,7 @@ def buildFullIssuerCurve(valuation_date):
     swap4 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0158 + irBump,
         fixedFreq,
         dcType)
@@ -111,7 +111,7 @@ def buildFullIssuerCurve(valuation_date):
     swap5 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0192 + irBump,
         fixedFreq,
         dcType)
@@ -121,7 +121,7 @@ def buildFullIssuerCurve(valuation_date):
     swap6 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0219 + irBump,
         fixedFreq,
         dcType)
@@ -131,7 +131,7 @@ def buildFullIssuerCurve(valuation_date):
     swap7 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0242 + irBump,
         fixedFreq,
         dcType)
@@ -141,7 +141,7 @@ def buildFullIssuerCurve(valuation_date):
     swap8 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0261 + irBump,
         fixedFreq,
         dcType)
@@ -151,7 +151,7 @@ def buildFullIssuerCurve(valuation_date):
     swap9 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.0276 + irBump,
         fixedFreq,
         dcType)

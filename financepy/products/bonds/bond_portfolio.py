@@ -7,7 +7,7 @@
 import numpy as np
 
 from ...utils.date import Date
-from ...utils.calendar import CalendarTypes
+from ...utils.calendar import calendar_types
 from ...utils.helpers import label_to_string, check_argument_types
 from ...market.curves.discount_curve import DiscountCurve
 from .bond import YTMCalcType
@@ -156,7 +156,7 @@ class BondPortfolio:
     def calc_accrued_interest(self,
                               settlement_date: Date,
                               num_ex_dividend_days: int = 0,
-                              calendar_type: CalendarTypes = CalendarTypes.WEEKEND):
+                              calendar_type: calendar_types = calendar_types.WEEKEND):
 
         return self._accrued_interest
 

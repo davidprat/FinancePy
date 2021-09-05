@@ -6,9 +6,9 @@ import numpy as np
 
 
 from ...utils.date import Date
-from ...utils.global_vars import gDaysInYear
-from ...utils.global_types import FinLongShort
-from ...utils.error import FinError
+from ...utils.global_vars import g_days_in_year
+from ...utils.global_types import long_short
+from ...utils.error import finpy_error
 from ...utils.helpers import label_to_string, check_argument_types
 
 ###############################################################################
@@ -23,7 +23,7 @@ class EquityForward():
                  expiry_date: Date,
                  forward_price: float,  # PRICE OF 1 UNIT OF FOREIGN IN DOM CCY
                  notional: float,
-                 long_short: FinLongShort = FinLongShort.LONG):
+                 long_short: long_short = long_short.LONG):
         """ Creates a EquityForward which allows the owner to buy the stock
         at a price agreed today. Need to specify if LONG or SHORT."""
 
@@ -45,15 +45,15 @@ class EquityForward():
         price and discount and dividend discount. """
 
         if type(valuation_date) == Date:
-            t = (self._expiry_date - valuation_date) / gDaysInYear
+            t = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             t = valuation_date
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if np.any(t < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         t = np.maximum(t, 1e-10)
 
@@ -67,7 +67,7 @@ class EquityForward():
         v = (fwdStockPrice - self._forward_price)
         v = v * self._notional * discountDF
 
-        if self._long_short == FinLongShort.SHORT:
+        if self._long_short == long_short.SHORT:
             v = v * (-1.0)
 
         return v
@@ -82,15 +82,15 @@ class EquityForward():
         """ Calculate the forward price of the equity forward contract. """
 
         if type(valuation_date) == Date:
-            t = (self._expiry_date - valuation_date) / gDaysInYear
+            t = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             t = valuation_date
 
         if np.any(stock_price <= 0.0):
-            raise FinError("spot_fx_rate must be greater than zero.")
+            raise finpy_error("spot_fx_rate must be greater than zero.")
 
         if np.any(t < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         t = np.maximum(t, 1e-10)
 

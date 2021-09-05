@@ -4,8 +4,8 @@
 
 import numpy as np
 
-from ...utils.error import FinError
-from ...utils.math import test_monotonicity
+from ...utils.error import finpy_error
+from ...utils.math import arr_is_monotonic
 from ...utils.helpers import label_to_string
 
 ###############################################################################
@@ -28,23 +28,23 @@ class EquityVolCurve():
                  polynomial=3):
 
         if expiry_date <= curve_date:
-            raise FinError("Expiry date before curve date.")
+            raise finpy_error("Expiry date before curve date.")
 
         if len(strikes) < 1:
-            raise FinError("Volatility grid has zero length.")
+            raise finpy_error("Volatility grid has zero length.")
 
-        if test_monotonicity(strikes) is False:
-            raise FinError("Strikes must be strictly monotonic.")
+        if arr_is_monotonic(strikes) is False:
+            raise finpy_error("Strikes must be strictly monotonic.")
 
         num_strikes = len(strikes)
         num_vols = len(volatilities)
 
         if num_strikes != num_vols:
-            raise FinError("Strike and volatility vectors not same length.")
+            raise finpy_error("Strike and volatility vectors not same length.")
 
         for i in range(1, num_strikes):
             if strikes[i] <= strikes[i - 1]:
-                raise FinError("Grid Strikes are not in increasing order")
+                raise finpy_error("Grid Strikes are not in increasing order")
 
         self._curve_date = curve_date
         self._strikes = np.array(strikes)
@@ -62,7 +62,7 @@ class EquityVolCurve():
         vol = self._f(strike)
 
         if vol.any() < 0.0:
-            raise FinError("Negative volatility. Not permitted.")
+            raise finpy_error("Negative volatility. Not permitted.")
 
         return vol
 

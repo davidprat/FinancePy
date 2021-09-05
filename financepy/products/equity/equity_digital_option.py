@@ -7,9 +7,9 @@ import numpy as np
 from enum import Enum
 
 
-from ...utils.global_vars import gDaysInYear, gSmall
-from ...utils.error import FinError
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_vars import g_days_in_year, g_small
+from ...utils.error import finpy_error
+from ...utils.global_types import option_types
 from ...products.equity.equity_option import EquityOption
 from ...utils.helpers import label_to_string, check_argument_types
 from ...utils.date import Date
@@ -39,7 +39,7 @@ class EquityDigitalOption(EquityOption):
     def __init__(self,
                  expiry_date: Date,
                  barrier_price: float,
-                 option_type: FinOptionTypes,
+                 option_type: option_types,
                  underlying_type: FinDigitalOptionTypes):
         """ Create the digital option by specifying the expiry date, the
         barrier price and the type of option which is either a EUROPEAN_CALL
@@ -48,8 +48,8 @@ class EquityDigitalOption(EquityOption):
 
         check_argument_types(self.__init__, locals())
 
-        if option_type != FinOptionTypes.EUROPEAN_CALL and option_type != FinOptionTypes.EUROPEAN_PUT:
-            raise FinError("Option type must be EUROPEAN CALL or EUROPEAN PUT")
+        if option_type != option_types.EUROPEAN_CALL and option_type != option_types.EUROPEAN_PUT:
+            raise finpy_error("Option type must be EUROPEAN CALL or EUROPEAN PUT")
 
         self._expiry_date = expiry_date
         self._barrier_price = float(barrier_price)
@@ -69,9 +69,9 @@ class EquityDigitalOption(EquityOption):
         options."""
 
         if valuation_date > self._expiry_date:
-            raise FinError("Value date after expiry date.")
+            raise finpy_error("Value date after expiry date.")
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
         t = max(t, 1e-6)
 
         S0 = stock_price
@@ -88,25 +88,25 @@ class EquityDigitalOption(EquityOption):
 
         volatility = model._volatility
 
-        if abs(volatility) < gSmall:
-            volatility = gSmall
+        if abs(volatility) < g_small:
+            volatility = g_small
 
         d1 = (lnS0k + (r - q + volatility*volatility / 2.0) * t)
         d1 = d1 / volatility / sqrtT
         d2 = d1 - volatility * sqrtT
 
         if self._underlying_type == FinDigitalOptionTypes.CASH_OR_NOTHING:
-            if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+            if self._option_type == option_types.EUROPEAN_CALL:
                 v = np.exp(-r * t) * n_vect(d2)
-            elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+            elif self._option_type == option_types.EUROPEAN_PUT:
                 v = np.exp(-r * t) * n_vect(-d2)
         elif self._underlying_type == FinDigitalOptionTypes.ASSET_OR_NOTHING:
-            if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+            if self._option_type == option_types.EUROPEAN_CALL:
                 v = S0 * np.exp(-q * t) * n_vect(d1)
-            elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+            elif self._option_type == option_types.EUROPEAN_PUT:
                 v = S0 * np.exp(-q * t) * n_vect(-d1)
         else:
-            raise FinError("Unknown underlying type.")
+            raise finpy_error("Unknown underlying type.")
 
         return v
 
@@ -125,7 +125,7 @@ class EquityDigitalOption(EquityOption):
         handles both a cash-or-nothing and an asset-or-nothing option."""
 
         np.random.seed(seed)
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
         df = discount_curve.df(self._expiry_date)
         r = -np.log(df)/t
 
@@ -145,17 +145,17 @@ class EquityDigitalOption(EquityOption):
         s_2 = s / m
 
         if self._underlying_type == FinDigitalOptionTypes.CASH_OR_NOTHING:
-            if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+            if self._option_type == option_types.EUROPEAN_CALL:
                 payoff_a_1 = np.heaviside(s_1 - K, 0.0)
                 payoff_a_2 = np.heaviside(s_2 - K, 0.0)
-            elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+            elif self._option_type == option_types.EUROPEAN_PUT:
                 payoff_a_1 = np.heaviside(K - s_1, 0.0)
                 payoff_a_2 = np.heaviside(K - s_2, 0.0)
         elif self._underlying_type == FinDigitalOptionTypes.ASSET_OR_NOTHING:
-            if self._option_type == FinOptionTypes.EUROPEAN_CALL:
+            if self._option_type == option_types.EUROPEAN_CALL:
                 payoff_a_1 = s_1 * np.heaviside(s_1 - K, 0.0)
                 payoff_a_2 = s_2 * np.heaviside(s_2 - K, 0.0)
-            elif self._option_type == FinOptionTypes.EUROPEAN_PUT:
+            elif self._option_type == option_types.EUROPEAN_PUT:
                 payoff_a_1 = s_1 * np.heaviside(K - s_1, 0.0)
                 payoff_a_2 = s_2 * np.heaviside(K - s_2, 0.0)
 

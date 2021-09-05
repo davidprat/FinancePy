@@ -8,7 +8,7 @@ import numpy as np
 ##########################################################################
 
 from ..utils.math import norminvcdf, N, INVROOT2PI
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 from .loss_dbn_builder import indep_loss_dbn_recursion_gcd
 from .loss_dbn_builder import indep_loss_dbn_heterogeneous_adj_binomial
 from .loss_dbn_builder import portfolio_gcd
@@ -33,13 +33,13 @@ def loss_dbn_recursion_gcd(num_credits,
     where losses have been calculate as number of units based on the GCD. """
 
     if len(default_probs) != num_credits:
-        raise FinError("Default probability length must equal num credits.")
+        raise finpy_error("Default probability length must equal num credits.")
 
     if len(lossUnits) != num_credits:
-        raise FinError("Loss units length must equal num credits.")
+        raise finpy_error("Loss units length must equal num credits.")
 
     if len(beta_vector) != num_credits:
-        raise FinError("Beta vector length must equal num credits.")
+        raise finpy_error("Beta vector length must equal num credits.")
 
     numLossUnits = 1
     for i in range(0, len(lossUnits)):
@@ -94,11 +94,11 @@ def homog_basket_loss_dbn(survival_probabilities,
     num_credits = len(survival_probabilities)
 
     if num_credits == 0:
-        raise FinError("Number of credits equals zero")
+        raise finpy_error("Number of credits equals zero")
 
     for iCredit in range(1, num_credits):
         if recovery_rates[iCredit] != recovery_rates[0]:
-            raise FinError("Losses are not homogeneous")
+            raise finpy_error("Losses are not homogeneous")
 
     m = 0.0
     for i in range(0, len(beta_vector)):
@@ -146,7 +146,7 @@ def tranche_surv_prob_recursion(k1,
         return 0.0
 
     if k1 >= k2:
-        raise FinError("K1 >= K2")
+        raise finpy_error("K1 >= K2")
 
     commonRecoveryFlag = 1
 
@@ -242,7 +242,7 @@ def tranch_surv_prob_gaussian(k1,
         return 0.0
 
     if k1 >= k2:
-        raise FinError("K1 >= K2")
+        raise finpy_error("K1 >= K2")
 
     default_probs = [0.0] * num_credits
     for iCredit in range(0, num_credits):
@@ -354,7 +354,7 @@ def tranche_surv_prob_adj_binomial(k1,
         return 0.0
 
     if k1 >= k2:
-        raise FinError("K1 >= K2")
+        raise finpy_error("K1 >= K2")
 
     default_probs = np.zeros(num_credits)
     for iCredit in range(0, num_credits):

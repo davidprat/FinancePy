@@ -4,9 +4,9 @@
 
 from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
-from financepy.utils.calendar import CalendarTypes
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.calendar import calendar_types
+from financepy.utils.frequency import frequency_types
+from financepy.utils.day_count import day_count_types
 from financepy.utils.date import Date, from_datetime
 from financepy.utils.math import ONE_MILLION
 from financepy.products.rates.ibor_swap import IborSwap
@@ -14,7 +14,7 @@ from financepy.products.rates.ibor_deposit import IborDeposit
 from financepy.products.rates.ibor_single_curve import IborSingleCurve
 from financepy.products.bonds.bond import Bond
 from financepy.products.bonds.bond import YTMCalcType
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 import os
 import datetime as dt
 
@@ -29,7 +29,7 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 ##########################################################################
 
 def build_Ibor_Curve(valuation_date):
-    depoDCCType = DayCountTypes.THIRTY_E_360_ISDA
+    depoDCCType = day_count_types.THIRTY_E_360_ISDA
     depos = []
     deposit_rate = 0.050
 
@@ -84,8 +84,8 @@ def build_Ibor_Curve(valuation_date):
     depos.append(depo5)
 
     fras = []
-    fixedDCCType = DayCountTypes.ACT_365F
-    fixedFreqType = FrequencyTypes.SEMI_ANNUAL
+    fixedDCCType = day_count_types.ACT_365F
+    fixedFreqType = frequency_types.SEMI_ANNUAL
 
     swaps = []
 
@@ -94,7 +94,7 @@ def build_Ibor_Curve(valuation_date):
     swap1 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -107,7 +107,7 @@ def build_Ibor_Curve(valuation_date):
     swap2 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -119,7 +119,7 @@ def build_Ibor_Curve(valuation_date):
     swap3 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -131,7 +131,7 @@ def build_Ibor_Curve(valuation_date):
     swap4 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -143,7 +143,7 @@ def build_Ibor_Curve(valuation_date):
     swap5 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -155,7 +155,7 @@ def build_Ibor_Curve(valuation_date):
     swap6 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -167,7 +167,7 @@ def build_Ibor_Curve(valuation_date):
     swap7 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -179,7 +179,7 @@ def build_Ibor_Curve(valuation_date):
     swap8 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -191,7 +191,7 @@ def build_Ibor_Curve(valuation_date):
     swap9 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         swap_rate,
         fixedFreqType,
         fixedDCCType)
@@ -229,11 +229,11 @@ def test_Bond():
     bondDataFrame = pd.read_csv(path, sep='\t')
     bondDataFrame['mid'] = 0.5 * (bondDataFrame['bid'] + bondDataFrame['ask'])
 
-    freq_type = FrequencyTypes.SEMI_ANNUAL
+    freq_type = frequency_types.SEMI_ANNUAL
     settlement_date = Date(19, 9, 2012)
     face = ONE_MILLION
 
-    for accrual_type in DayCountTypes:
+    for accrual_type in day_count_types:
 
         testCases.header("MATURITY", "COUPON", "CLEAN_PRICE", "ACCD_DAYS",
                          "ACCRUED", "YTM")
@@ -260,14 +260,14 @@ def test_Bond():
     ###########################################################################
     #  EXAMPLE FROM http://bondtutor.com/btchp4/topic6/topic6.htm
 
-    accrualConvention = DayCountTypes.ACT_ACT_ICMA
+    accrualConvention = day_count_types.ACT_ACT_ICMA
     y = 0.062267
     settlement_date = Date(19, 4, 1994)
     issue_date = Date(15, 7, 1990)
     maturity_date = Date(15, 7, 1997)
     coupon = 0.085
     face = ONE_MILLION
-    freq_type = FrequencyTypes.SEMI_ANNUAL
+    freq_type = frequency_types.SEMI_ANNUAL
     bond = Bond(issue_date, maturity_date,
                 coupon, freq_type, accrualConvention, face)
 
@@ -310,7 +310,7 @@ def test_Bond():
     # definition
     flat_curve = DiscountCurveFlat(settlement_date,
                                    ytm,
-                                   FrequencyTypes.SEMI_ANNUAL)
+                                   frequency_types.SEMI_ANNUAL)
 
     testCases.header("FIELD", "VALUE")
 
@@ -354,8 +354,8 @@ def test_Bond():
     issue_date = Date(15, 5, 2010)
     maturity_date = Date(15, 5, 2027)
     coupon = 0.02375
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     face = 100.0
 
     bond = Bond(issue_date,
@@ -416,8 +416,8 @@ def test_Bond():
     issue_date = Date(13, 5, 2012)
     maturity_date = Date(13, 5, 2022)
     coupon = 0.027
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.THIRTY_E_360_ISDA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.THIRTY_E_360_ISDA
     face = 100.0
 
     bond = Bond(issue_date, maturity_date,
@@ -473,13 +473,13 @@ def test_BondExDividend():
     issue_date = Date(7, 9, 2000)
     maturity_date = Date(7, 9, 2020)
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     face = 100.0
     exDivDays = 7
     testCases.header("LABEL", "VALUE")
 
-    calendar_type = CalendarTypes.UNITED_KINGDOM
+    calendar_type = calendar_types.UNITED_KINGDOM
     bond = Bond(issue_date, maturity_date, coupon,
                 freq_type, accrual_type, face)
     settlement_date = Date(7, 9, 2003)
@@ -495,12 +495,12 @@ def test_BondExDividend():
     issue_date = Date(7, 9, 2000)
     maturity_date = Date(7, 9, 2020)
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     face = 100.0
     exDivDays = 7
 
-    calendar_type = CalendarTypes.UNITED_KINGDOM
+    calendar_type = calendar_types.UNITED_KINGDOM
     bond = Bond(issue_date, maturity_date, coupon,
                 freq_type, accrual_type, face)
 

@@ -5,8 +5,8 @@
 import numpy as np
 from enum import Enum
 
-from ...utils.error import FinError
-from ...utils.global_vars import gDaysInYear
+from ...utils.error import finpy_error
+from ...utils.global_vars import g_days_in_year
 from ...products.equity.equity_option import EquityOption
 from ...models.process_simulator import FinProcessSimulator
 from ...market.curves.discount_curve import DiscountCurve
@@ -58,7 +58,7 @@ class EquityBarrierOption(EquityOption):
         self._num_observations_per_year = int(num_observations_per_year)
 
         if option_type not in EquityBarrierTypes:
-            raise FinError("Option Type " + str(option_type) + " unknown.")
+            raise finpy_error("Option Type " + str(option_type) + " unknown.")
 
         self._option_type = option_type
         self._notional = notional
@@ -108,10 +108,10 @@ class EquityBarrierOption(EquityOption):
         """ This values a single option. Because of its structure it cannot
         easily be vectorised which is why it has been wrapped. """
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         if texp < 0:
-            raise FinError("Option expires before value date.")
+            raise finpy_error("Option expires before value date.")
 
         texp = max(texp, 1e-6)
 
@@ -179,8 +179,8 @@ class EquityBarrierOption(EquityOption):
         elif self._option_type == EquityBarrierTypes.DOWN_AND_IN_PUT:
             h_adj = h * np.exp(-0.5826 * volatility * np.sqrt(t))
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._option_type))
+            raise finpy_error("Unknown barrier option type." +
+                              str(self._option_type))
 
         h = h_adj
 
@@ -275,8 +275,8 @@ class EquityBarrierOption(EquityOption):
                        (N(y - sigmaRootT) - N(y1 - sigmaRootT))
                 price = p_di
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._option_type))
+            raise finpy_error("Unknown barrier option type." +
+                              str(self._option_type))
 
         v = price * self._notional
         return v
@@ -299,7 +299,7 @@ class EquityBarrierOption(EquityOption):
         crossed and the corresponding value of the final payoff, if any. It
         assumes a GBM model for the stock price. """
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
         num_time_steps = int(texp * numAnnObs)
         K = self._strike_price
         B = self._barrier_level
@@ -402,8 +402,8 @@ class EquityBarrierOption(EquityOption):
         elif option_type == EquityBarrierTypes.DOWN_AND_IN_PUT:
             payoff = np.maximum(K - Sall[:, -1], 0.0) * barrierCrossedFromAbove
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._option_type))
+            raise finpy_error("Unknown barrier option type." +
+                              str(self._option_type))
 
         v = payoff.mean() * np.exp(- r * texp)
 

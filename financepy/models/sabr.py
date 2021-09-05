@@ -7,9 +7,9 @@ import numpy as np
 from numba import njit, float64
 from scipy.optimize import minimize
 
-from ..utils.global_types import FinOptionTypes
+from ..utils.global_types import option_types
 from ..utils.math import N
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 from ..utils.helpers import label_to_string
 
 ###############################################################################
@@ -39,10 +39,10 @@ def vol_function_sabr(params, f, k, t):
 
     # Negative strikes or forwards
     if k <= 0:
-        raise FinError("Strike must be positive")
+        raise finpy_error("Strike must be positive")
 
     if f <= 0:
-        raise FinError("Forward must be positive")
+        raise finpy_error("Forward must be positive")
 
     logfk = np.log(f / k)
     b = 1.0 - beta
@@ -130,10 +130,10 @@ def vol_function_sabr_beta_half(params, f, k, t):
 
     # Negative strikes or forwards
     if k <= 0:
-        raise FinError("Strike must be positive")
+        raise finpy_error("Strike must be positive")
 
     if f <= 0:
-        raise FinError("Forward must be positive")
+        raise finpy_error("Forward must be positive")
 
     logfk = np.log(f / k)
     b = 1.0 - beta
@@ -237,9 +237,9 @@ class SABR():
         d1 = d1 / (vol * sqrtT)
         d2 = d1 - vol * sqrtT
 
-        if call_or_put == FinOptionTypes.EUROPEAN_CALL:
+        if call_or_put == option_types.EUROPEAN_CALL:
             return df * (f * N(d1) - k * N(d2))
-        elif call_or_put == FinOptionTypes.EUROPEAN_PUT:
+        elif call_or_put == option_types.EUROPEAN_PUT:
             return df * (k * N(-d2) - f * N(-d1))
         else:
             raise Exception("Option type must be a European Call(C) or Put(P)")

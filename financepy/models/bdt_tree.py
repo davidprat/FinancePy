@@ -5,12 +5,12 @@
 import numpy as np
 from numba import njit, float64, int64
 
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 from ..utils.math import accrued_interpolator
 from ..market.curves.interpolator import InterpTypes, _uinterpolate
 from ..utils.helpers import label_to_string
-from ..utils.global_types import FinExerciseTypes
-from ..utils.global_vars import gSmall
+from ..utils.global_types import exercise_types
+from ..utils.global_vars import g_small
 
 interp = InterpTypes.FLAT_FWD_RATES.value
 
@@ -22,14 +22,14 @@ interp = InterpTypes.FLAT_FWD_RATES.value
 
 def option_exercise_types_to_int(optionExerciseType):
 
-    if optionExerciseType == FinExerciseTypes.EUROPEAN:
+    if optionExerciseType == exercise_types.EUROPEAN:
         return 1
-    if optionExerciseType == FinExerciseTypes.BERMUDAN:
+    if optionExerciseType == exercise_types.BERMUDAN:
         return 2
-    if optionExerciseType == FinExerciseTypes.AMERICAN:
+    if optionExerciseType == exercise_types.AMERICAN:
         return 3
     else:
-        raise FinError("Unknown option exercise type.")
+        raise finpy_error("Unknown option exercise type.")
 
 ###############################################################################
 
@@ -79,7 +79,7 @@ def search_root(x0, m, Q, rt, dfEnd, dt, sigma):
         df = f1 - f0
 
         if df == 0.0:
-            raise FinError("Search for alpha fails due to zero derivative")
+            raise finpy_error("Search for alpha fails due to zero derivative")
 
         x = x1 - f1 * (x1-x0)/df
         x0, f0 = x1, f1
@@ -89,7 +89,7 @@ def search_root(x0, m, Q, rt, dfEnd, dt, sigma):
         if (abs(f1) <= max_error):
             return x1
 
-    raise FinError("Search root deriv FAILED to find alpha.")
+    raise finpy_error("Search root deriv FAILED to find alpha.")
 
 ###############################################################################
 
@@ -161,7 +161,7 @@ def bermudan_swaption_tree_fast(texp, tmat,
 
         # This is a bit of a hack for when the interpolation does not put the
         # full accrued on flow date. Another scheme may work but so does this
-        if fixed_legFlows[m] > gSmall:
+        if fixed_legFlows[m] > g_small:
             accrued[m] = fixed_legFlows[m] * face_amount
 
     #######################################################################
@@ -222,14 +222,14 @@ def bermudan_swaption_tree_fast(texp, tmat,
                 pay_values[m, k] = max(payExercise, holdPay)
                 rec_values[m, k] = max(recExercise, holdRec)
 
-            elif exercise_typeInt == 2 and flow > gSmall and m > expiryStep:
+            elif exercise_typeInt == 2 and flow > g_small and m > expiryStep:
 
                 pay_values[m, k] = max(payExercise, holdPay)
                 rec_values[m, k] = max(recExercise, holdRec)
 
             elif exercise_typeInt == 3 and m > expiryStep:
 
-                raise FinError("American optionality not completed.")
+                raise finpy_error("American optionality not completed.")
 
                 # Need to define floating value on all grid dates
 
@@ -283,7 +283,7 @@ def american_bond_option_tree_fast(texp, tmat,
 
         if tcpn < 0.0:
             print(coupon_times)
-            raise FinError("Coupon times must be positive.")
+            raise finpy_error("Coupon times must be positive.")
 
         n = int(tcpn/_dt + 0.50)
         ttree = _tree_times[n]
@@ -319,7 +319,7 @@ def american_bond_option_tree_fast(texp, tmat,
 
         # This is a bit of a hack for when the interpolation does not put the
         # full accrued on flow date. Another scheme may work but so does this
-        if treeFlows[m] > gSmall:
+        if treeFlows[m] > g_small:
             accrued[m] = treeFlows[m] * face_amount
 
     if DEBUG:
@@ -651,12 +651,12 @@ class BDTTree():
         and is given by d(log(r)) = theta(t) * dt + sigma * dW. Althopugh """
 
         if sigma < 0.0:
-            raise FinError("Negative volatility not allowed.")
+            raise finpy_error("Negative volatility not allowed.")
 
         self._sigma = sigma
 
         if num_time_steps < 3:
-            raise FinError("Drift fitting requires at least 3 time steps.")
+            raise finpy_error("Drift fitting requires at least 3 time steps.")
 
         self._num_time_steps = num_time_steps
 
@@ -672,10 +672,10 @@ class BDTTree():
     def build_tree(self, treeMat, df_times, df_values):
 
         if isinstance(df_times, np.ndarray) is False:
-            raise FinError("DF TIMES must be a numpy vector")
+            raise finpy_error("DF TIMES must be a numpy vector")
 
         if isinstance(df_values, np.ndarray) is False:
-            raise FinError("DF VALUES must be a numpy vector")
+            raise finpy_error("DF VALUES must be a numpy vector")
 
         interp = InterpTypes.FLAT_FWD_RATES.value
 
@@ -711,10 +711,10 @@ class BDTTree():
         tmat = coupon_times[-1]
 
         if texp > tmat:
-            raise FinError("Option expiry after bond matures.")
+            raise finpy_error("Option expiry after bond matures.")
 
         if texp < 0.0:
-            raise FinError("Option expiry time negative.")
+            raise finpy_error("Option expiry time negative.")
 
         #######################################################################
 
@@ -743,10 +743,10 @@ class BDTTree():
         tmat = coupon_times[-1]
 
         if texp > tmat:
-            raise FinError("Option expiry after bond matures.")
+            raise finpy_error("Option expiry after bond matures.")
 
         if texp < 0.0:
-            raise FinError("Option expiry time negative.")
+            raise finpy_error("Option expiry time negative.")
 
         #######################################################################
 

@@ -3,7 +3,7 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_vars import gDaysInYear
+from financepy.utils.global_vars import g_days_in_year
 from financepy.market.curves.discount_curve_poly import DiscountCurvePoly
 from financepy.market.curves.discount_curve_zeros import DiscountCurveZeros
 from financepy.market.curves.discount_curve_pwl import DiscountCurvePWL
@@ -13,7 +13,7 @@ from financepy.market.curves.discount_curve_ns import DiscountCurveNS
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 from financepy.market.curves.discount_curve import DiscountCurve
 from financepy.market.curves.interpolator import InterpTypes
-from financepy.utils.date import Date, set_date_format, DateFormatTypes
+from financepy.utils.date import Date, set_date_format, date_format_types
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -23,7 +23,7 @@ sys.path.append("..")
 
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
-set_date_format(DateFormatTypes.UK_LONG)
+set_date_format(date_format_types.UK_LONG)
 
 PLOT_GRAPHS = False
 
@@ -41,7 +41,7 @@ def test_FinDiscountCurves():
     years2 = []
 
     for dt in dates:
-        y = (dt - valuation_date) / gDaysInYear
+        y = (dt - valuation_date) / g_days_in_year
         years2.append(y)
 
     rates = np.array([0.05, 0.06, 0.065, 0.07, 0.075])

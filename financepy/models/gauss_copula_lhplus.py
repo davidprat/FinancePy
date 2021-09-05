@@ -6,7 +6,7 @@ import numpy as np
 
 from ..utils.math import N, M, phi3
 from ..utils.math import norminvcdf as NormSInv
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 
 ###############################################################################
 
@@ -30,7 +30,7 @@ class LHPlusModel():
     def prob_loss_gt_k(self, K):
         """ Returns P(L>K) where L is the portfolio loss given by model. """
         if K < (1.0 - self._R0) * self._H0:
-            raise FinError("Function does not work when K<(1-R0)H0")
+            raise finpy_error("Function does not work when K<(1-R0)H0")
 
         c = NormSInv(self._P)
         c0 = NormSInv(self._P0)
@@ -101,7 +101,7 @@ class LHPlusModel():
         argb = (K - (1.0 - self._R0) * self._H0) / (1.0 - self._R) / self._H
 
         if argb < 0:
-            raise FinError("Tranche too thin for LHPlus")
+            raise finpy_error("Tranche too thin for LHPlus")
 
         inva = NormSInv(arga)
         invb = NormSInv(argb)
@@ -140,7 +140,7 @@ class LHPlusModel():
         argb = (K - (1.0 - self._R0) * self._H0) / (1.0 - self._R) / self._H
 
         if argb < 0.0:
-            raise FinError("Tranche too thin for LHPlus")
+            raise finpy_error("Tranche too thin for LHPlus")
 
         inva = NormSInv(arga)
         invb = NormSInv(argb)
@@ -170,7 +170,7 @@ class LHPlusModel():
     def tranche_survival_prob(self, k1, k2):
 
         if k2 == k1:
-            raise FinError("tranche_survival_prob: Same strikes")
+            raise finpy_error("tranche_survival_prob: Same strikes")
 
         dk = 0.00001
         elK2 = self.exp_min_lk_integral(k2, dk)

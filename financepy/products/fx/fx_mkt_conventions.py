@@ -2,7 +2,7 @@
 # Copyright (C) 2018, 2019, 2020 Dominic O'Kane
 ##############################################################################
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from enum import Enum
 from ...utils.helpers import label_to_string
 
@@ -122,12 +122,12 @@ class FinFXRate():
         if ccy1 in ccyNames:
             self._ccy1 = ccy1
         else:
-            raise FinError("Unknown currency code ", ccy1)
+            raise finpy_error("Unknown currency code ", ccy1)
 
         if ccy2 in ccyNames:
             self._ccy2 = ccy2
         else:
-            raise FinError("Unknown currency code ", ccy2)
+            raise finpy_error("Unknown currency code ", ccy2)
 
         self._ccy2 = ccy2
         self._rate

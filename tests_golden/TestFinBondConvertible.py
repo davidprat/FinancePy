@@ -11,8 +11,8 @@ sys.path.append("..")
 
 from financepy.products.bonds.bond_convertible import BondConvertible
 from financepy.utils.date import Date
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.frequency import frequency_types
+from financepy.utils.day_count import day_count_types
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 
 from FinTestCases import FinTestCases, globalTestCaseMode
@@ -28,8 +28,8 @@ def test_BondConvertible():
     maturity_date = Date(15, 3, 2022)
     conversion_ratio = 38.4615  # adjust for face
     coupon = 0.0575
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrualBasis = DayCountTypes.ACT_365F
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrualBasis = day_count_types.ACT_365F
     face = 1000.0
 
     call_price = 1100
@@ -80,7 +80,7 @@ def test_BondConvertible():
     rate = 0.04
     discount_curve = DiscountCurveFlat(settlement_date,
                                        rate,
-                                       FrequencyTypes.CONTINUOUS)
+                                       frequency_types.CONTINUOUS)
     credit_spread = 0.00
     recovery_rate = 0.40
     num_steps_per_year = 20

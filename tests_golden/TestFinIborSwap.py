@@ -5,13 +5,13 @@
 from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.market.curves.interpolator import InterpTypes
 from financepy.market.curves.discount_curve import DiscountCurve
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 from financepy.utils.date import Date
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.calendar import CalendarTypes
-from financepy.utils.calendar import DateGenRuleTypes
-from financepy.utils.calendar import BusDayAdjustTypes
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
+from financepy.utils.calendar import calendar_types
+from financepy.utils.calendar import date_gen_rule_types
+from financepy.utils.calendar import bus_day_adjust_types
 from financepy.products.rates.ibor_deposit import IborDeposit
 from financepy.products.rates.ibor_fra import IborFRA
 from financepy.products.rates.ibor_swap import IborSwap
@@ -30,7 +30,7 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 def buildIborSingleCurve(valuation_date):
 
     settlement_date = valuation_date.add_days(2)
-    dcType = DayCountTypes.ACT_360
+    dcType = day_count_types.ACT_360
 
     depos = []
     fras = []
@@ -106,9 +106,9 @@ def buildIborSingleCurve(valuation_date):
     ###########################################################################
     ###########################################################################
 
-    fixedFreq = FrequencyTypes.ANNUAL
-    dcType = DayCountTypes.THIRTY_E_360
-    fixed_leg_type = SwapTypes.PAY
+    fixedFreq = frequency_types.ANNUAL
+    dcType = day_count_types.THIRTY_E_360
+    fixed_leg_type = swap_types.PAY
 
     #######################################
     maturity_date = settlement_date.add_months(24)
@@ -275,18 +275,18 @@ def test_LiborSwap():
     end_date = Date(27, 12, 2067)
 
     fixed_coupon = 0.015
-    fixedFreqType = FrequencyTypes.ANNUAL
-    fixed_day_count_type = DayCountTypes.THIRTY_E_360
+    fixedFreqType = frequency_types.ANNUAL
+    fixed_day_count_type = day_count_types.THIRTY_E_360
 
     float_spread = 0.0
-    floatFreqType = FrequencyTypes.SEMI_ANNUAL
-    float_day_count_type = DayCountTypes.ACT_360
+    floatFreqType = frequency_types.SEMI_ANNUAL
+    float_day_count_type = day_count_types.ACT_360
     firstFixing = -0.00268
 
-    swapCalendarType = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    fixed_leg_type = SwapTypes.RECEIVE
+    swapCalendarType = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    fixed_leg_type = swap_types.RECEIVE
 
     notional = 10.0 * ONE_MILLION
 
@@ -328,12 +328,12 @@ def test_dp_example():
 
     start_date = Date(14, 11, 2011)
     end_date = Date(14, 11, 2016)
-    fixedFreqType = FrequencyTypes.SEMI_ANNUAL
-    swapCalendarType = CalendarTypes.TARGET
-    bus_day_adjust_type = BusDayAdjustTypes.MODIFIED_FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    fixed_day_count_type = DayCountTypes.THIRTY_E_360_ISDA
-    fixed_leg_type = SwapTypes.PAY
+    fixedFreqType = frequency_types.SEMI_ANNUAL
+    swapCalendarType = calendar_types.TARGET
+    bus_day_adjust_type = bus_day_adjust_types.MODIFIED_FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    fixed_day_count_type = day_count_types.THIRTY_E_360_ISDA
+    fixed_leg_type = swap_types.PAY
     fixed_coupon = 0.0124
     notional = ONE_MILLION
 
@@ -343,8 +343,8 @@ def test_dp_example():
                     fixed_coupon=fixed_coupon,
                     fixed_freq_type=fixedFreqType,
                     fixed_day_count_type=fixed_day_count_type,
-                    float_freq_type=FrequencyTypes.SEMI_ANNUAL,
-                    float_day_count_type=DayCountTypes.ACT_360,
+                    float_freq_type=frequency_types.SEMI_ANNUAL,
+                    float_day_count_type=day_count_types.ACT_360,
                     notional=notional,
                     calendar_type=swapCalendarType,
                     bus_day_adjust_type=bus_day_adjust_type,

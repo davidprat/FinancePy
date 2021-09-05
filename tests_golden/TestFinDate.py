@@ -4,7 +4,7 @@
 
 from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.utils.date import set_date_format
-from financepy.utils.date import DateFormatTypes
+from financepy.utils.date import date_format_types
 from financepy.utils.date import Date, date_range
 import numpy as np
 import time
@@ -17,7 +17,7 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
 
-set_date_format(DateFormatTypes.UK_LONGEST)
+set_date_format(date_format_types.UK_LONGEST)
 
 
 def test_Date():
@@ -185,7 +185,7 @@ def test_DateFormat():
     dt = Date(20, 10, 2019)
     testCases.header("FORMAT", "DATE")
 
-    for format_type in DateFormatTypes:
+    for format_type in date_format_types:
         set_date_format(format_type)
         testCases.print(format_type.name, dt)
 
@@ -299,4 +299,4 @@ elapsed = end - start
 
 testCases.compareTestCases()
 
-set_date_format(DateFormatTypes.UK_LONG)
+set_date_format(date_format_types.UK_LONG)

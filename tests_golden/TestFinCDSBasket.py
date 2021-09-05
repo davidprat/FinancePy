@@ -3,12 +3,12 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 from financepy.models.gbm_process_simulator import get_paths_assets
 from financepy.utils.date import Date
 from financepy.utils.math import corr_matrix_generator
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 from financepy.products.credit.cds_curve import CDSCurve
 from financepy.products.rates.ibor_single_curve import IborSingleCurve
 from financepy.products.rates.ibor_swap import IborSwap
@@ -33,21 +33,21 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 def build_Ibor_Curve(tradeDate):
 
     valuation_date = tradeDate.add_days(1)
-    dcType = DayCountTypes.ACT_360
+    dcType = day_count_types.ACT_360
 
     depos = []
     fras = []
     swaps = []
 
-    dcType = DayCountTypes.THIRTY_E_360_ISDA
-    fixedFreq = FrequencyTypes.SEMI_ANNUAL
+    dcType = day_count_types.THIRTY_E_360_ISDA
+    fixedFreq = frequency_types.SEMI_ANNUAL
     settlement_date = valuation_date
 
     maturity_date = settlement_date.add_months(12)
     swap1 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         0.0502,
         fixedFreq,
         dcType)
@@ -57,7 +57,7 @@ def build_Ibor_Curve(tradeDate):
     swap2 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         0.0502,
         fixedFreq,
         dcType)
@@ -67,7 +67,7 @@ def build_Ibor_Curve(tradeDate):
     swap3 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         0.0501,
         fixedFreq,
         dcType)
@@ -77,7 +77,7 @@ def build_Ibor_Curve(tradeDate):
     swap4 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         0.0502,
         fixedFreq,
         dcType)
@@ -87,7 +87,7 @@ def build_Ibor_Curve(tradeDate):
     swap5 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         0.0501,
         fixedFreq,
         dcType)

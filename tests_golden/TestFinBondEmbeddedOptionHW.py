@@ -8,10 +8,10 @@ import time
 import sys
 sys.path.append("..")
 
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 from financepy.utils.date import Date
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.frequency import frequency_types
+from financepy.utils.day_count import day_count_types
 from financepy.models.hw_tree import HWTree
 
 from financepy.products.rates.ibor_swap import IborSwap
@@ -40,9 +40,9 @@ def test_BondEmbeddedOptionMATLAB():
     
     ###########################################################################
 
-    dcType = DayCountTypes.THIRTY_E_360
-    fixedFreq = FrequencyTypes.ANNUAL
-    fixed_leg_type = SwapTypes.PAY
+    dcType = day_count_types.THIRTY_E_360
+    fixedFreq = frequency_types.ANNUAL
+    fixed_leg_type = swap_types.PAY
     swap1 = IborSwap(settlement_date, "1Y", fixed_leg_type, 0.0350, fixedFreq, dcType)
     swap2 = IborSwap(settlement_date, "2Y", fixed_leg_type, 0.0400, fixedFreq, dcType)
     swap3 = IborSwap(settlement_date, "3Y", fixed_leg_type, 0.0450, fixedFreq, dcType)
@@ -55,8 +55,8 @@ def test_BondEmbeddedOptionMATLAB():
     maturity_date = Date(1, 1, 2010)
     
     coupon = 0.0525
-    freq_type = FrequencyTypes.ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     bond = Bond(issue_date, maturity_date, coupon, freq_type, accrual_type)
 
     call_dates = []
@@ -118,15 +118,15 @@ def test_BondEmbeddedOptionQUANTLIB():
     ###########################################################################
 
     discount_curve = DiscountCurveFlat(valuation_date, 0.035,
-                                       FrequencyTypes.SEMI_ANNUAL)
+                                       frequency_types.SEMI_ANNUAL)
 
     ###########################################################################
 
     issue_date = Date(15, 9, 2010)
     maturity_date = Date(15, 9, 2022)
     coupon = 0.025
-    freq_type = FrequencyTypes.QUARTERLY
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.QUARTERLY
+    accrual_type = day_count_types.ACT_ACT_ICMA
     bond = Bond(issue_date, maturity_date, coupon, freq_type, accrual_type)
 
     ###########################################################################

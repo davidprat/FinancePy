@@ -3,7 +3,7 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.date import Date, set_date_format, DateFormatTypes
+from financepy.utils.date import Date, set_date_format, date_format_types
 from financepy.products.rates.ibor_future import IborFuture
 import sys
 sys.path.append("..")
@@ -11,7 +11,7 @@ sys.path.append("..")
 
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
-set_date_format(DateFormatTypes.UK_LONG)
+set_date_format(date_format_types.UK_LONG)
 
 ###############################################################################
 

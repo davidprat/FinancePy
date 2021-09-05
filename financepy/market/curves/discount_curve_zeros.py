@@ -4,11 +4,11 @@
 
 import numpy as np
 
-from ...utils.frequency import FrequencyTypes
-from ...utils.error import FinError
+from ...utils.frequency import frequency_types
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.day_count import DayCountTypes
-from ...utils.math import test_monotonicity
+from ...utils.day_count import day_count_types
+from ...utils.math import arr_is_monotonic
 from ...utils.helpers import label_to_string
 from ...utils.helpers import times_from_dates
 from ...market.curves.discount_curve import DiscountCurve
@@ -35,8 +35,8 @@ class DiscountCurveZeros(DiscountCurve):
                  valuation_date: Date,
                  zero_dates: list,
                  zero_rates: (list, np.ndarray),
-                 freq_type: FrequencyTypes = FrequencyTypes.ANNUAL,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_ACT_ISDA,
+                 freq_type: frequency_types = frequency_types.ANNUAL,
+                 day_count_type: day_count_types = day_count_types.ACT_ACT_ISDA,
                  interp_type: InterpTypes = InterpTypes.FLAT_FWD_RATES):
         """ Create the discount curve from a vector of dates and zero rates
         factors. The first date is the curve anchor. Then a vector of zero
@@ -50,17 +50,17 @@ class DiscountCurveZeros(DiscountCurve):
 
         # Validate curve
         if len(zero_dates) == 0:
-            raise FinError("Dates has zero length")
+            raise finpy_error("Dates has zero length")
 
         if len(zero_dates) != len(zero_rates):
-            raise FinError("Dates and Rates are not the same length")
+            raise finpy_error("Dates and Rates are not the same length")
 
-        if freq_type not in FrequencyTypes:
-            raise FinError("Unknown Frequency type " + str(freq_type))
+        if freq_type not in frequency_types:
+            raise finpy_error("Unknown Frequency type " + str(freq_type))
 
-        if day_count_type not in DayCountTypes:
-            raise FinError("Unknown Cap Floor DayCountRule type " +
-                           str(day_count_type))
+        if day_count_type not in day_count_types:
+            raise finpy_error("Unknown Cap Floor DayCountRule type " +
+                              str(day_count_type))
 
         self._valuation_date = valuation_date
         self._freq_type = freq_type
@@ -72,8 +72,8 @@ class DiscountCurveZeros(DiscountCurve):
 
         self._times = times_from_dates(zero_dates, valuation_date, day_count_type)
 
-        if test_monotonicity(self._times) is False:
-            raise FinError("Times or dates are not sorted in increasing order")
+        if arr_is_monotonic(self._times) is False:
+            raise finpy_error("Times or dates are not sorted in increasing order")
 
         dfs = self._zero_to_df(self._valuation_date,
                              self._zero_rates,

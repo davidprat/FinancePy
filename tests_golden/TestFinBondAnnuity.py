@@ -7,11 +7,11 @@
 import sys
 sys.path.append("..")
 
-from financepy.utils.calendar import DateGenRuleTypes
-from financepy.utils.calendar import BusDayAdjustTypes
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.calendar import CalendarTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.calendar import date_gen_rule_types
+from financepy.utils.calendar import bus_day_adjust_types
+from financepy.utils.day_count import day_count_types
+from financepy.utils.calendar import calendar_types
+from financepy.utils.frequency import frequency_types
 from financepy.utils.date import Date
 from financepy.products.bonds.bond_annuity import BondAnnuity
 
@@ -31,11 +31,11 @@ def test_BondAnnuity():
 
     maturity_date = Date(20, 6, 2019)
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    basis_type = DayCountTypes.ACT_360
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    basis_type = day_count_types.ACT_360
     face = 1000000
 
     annuity = BondAnnuity(maturity_date,
@@ -62,11 +62,11 @@ def test_BondAnnuity():
 
     maturity_date = Date(20, 6, 2028)
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    basis_type = DayCountTypes.ACT_360
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    basis_type = day_count_types.ACT_360
 
     annuity = BondAnnuity(
         maturity_date,
@@ -93,11 +93,11 @@ def test_BondAnnuity():
 
     maturity_date = Date(20, 6, 2028)
     coupon = 0.05
-    freq_type = FrequencyTypes.MONTHLY
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    basis_type = DayCountTypes.ACT_360
+    freq_type = frequency_types.MONTHLY
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    basis_type = day_count_types.ACT_360
 
     annuity = BondAnnuity(maturity_date,
                           coupon,
@@ -123,11 +123,11 @@ def test_BondAnnuity():
 
     maturity_date = Date(20, 6, 2028)
     coupon = 0.05
-    freq_type = FrequencyTypes.ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.FORWARD
-    basis_type = DayCountTypes.ACT_360
+    freq_type = frequency_types.ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.FORWARD
+    basis_type = day_count_types.ACT_360
 
     annuity = BondAnnuity(maturity_date,
                           coupon,
@@ -153,11 +153,11 @@ def test_BondAnnuity():
 
     maturity_date = Date(20, 6, 2028)
     coupon = 0.05
-    freq_type = FrequencyTypes.ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.FORWARD
-    basis_type = DayCountTypes.ACT_360
+    freq_type = frequency_types.ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.FORWARD
+    basis_type = day_count_types.ACT_360
 
     annuity = BondAnnuity(maturity_date,
                           coupon, 
@@ -183,11 +183,11 @@ def test_BondAnnuity():
 
     maturity_date = Date(20, 6, 2028)
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.FORWARD
-    basis_type = DayCountTypes.ACT_360
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.FORWARD
+    basis_type = day_count_types.ACT_360
 
     annuity = BondAnnuity(maturity_date,
                           coupon,

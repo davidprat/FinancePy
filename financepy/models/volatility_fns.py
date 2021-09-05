@@ -6,7 +6,7 @@ import numpy as np
 from numba import njit, float64
 
 from ..utils.math import N
-from ..utils.error import FinError
+from ..utils.error import finpy_error
 
 ###############################################################################
 # Parametric functions for option volatility to use in a Black-Scholes model
@@ -37,11 +37,11 @@ def vol_function_clark(params, f, k, t):
 
     if f < 0.0:
         print("f:", f)
-        raise FinError("Forward is negative")
+        raise finpy_error("Forward is negative")
 
     if k < 0.0:
         print("k:", k)
-        raise FinError("Strike is negative")
+        raise finpy_error("Strike is negative")
 
     x = np.log(f/k)
     sigma0 = np.exp(params[0])

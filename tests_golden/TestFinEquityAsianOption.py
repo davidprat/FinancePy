@@ -8,7 +8,7 @@ from financepy.models.black_scholes import BlackScholes
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 from financepy.products.equity.equity_asian_option import AsianOptionValuationMethods
 from financepy.products.equity.equity_asian_option import EquityAsianOption
-from financepy.utils.global_types import FinOptionTypes
+from financepy.utils.global_types import option_types
 import time
 
 import sys
@@ -47,7 +47,7 @@ def testConvergence():
     asianOption = EquityAsianOption(startAveragingDate,
                                     expiry_date,
                                     K,
-                                    FinOptionTypes.EUROPEAN_CALL,
+                                    option_types.EUROPEAN_CALL,
                                     num_observations)
 
     testCases.header(
@@ -159,7 +159,7 @@ def testTimeEvolution():
     asianOption = EquityAsianOption(startAveragingDate,
                                     expiry_date,
                                     K,
-                                    FinOptionTypes.EUROPEAN_CALL,
+                                    option_types.EUROPEAN_CALL,
                                     num_observations)
 
     testCases.header(
@@ -287,7 +287,7 @@ def testMCTimings():
     asianOption = EquityAsianOption(startAveragingDate,
                                     expiry_date,
                                     K,
-                                    FinOptionTypes.EUROPEAN_CALL,
+                                    option_types.EUROPEAN_CALL,
                                     num_observations)
 
     testCases.header(

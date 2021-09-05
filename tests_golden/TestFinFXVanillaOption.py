@@ -6,12 +6,12 @@ from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.utils.date import Date
 from financepy.products.rates.ibor_deposit import IborDeposit
 from financepy.products.rates.ibor_single_curve import IborSingleCurve
-from financepy.utils.calendar import CalendarTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.calendar import calendar_types
+from financepy.utils.day_count import day_count_types
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 from financepy.models.black_scholes import BlackScholes
 from financepy.products.fx.fx_vanilla_option import FXVanillaOption
-from financepy.utils.global_types import FinOptionTypes
+from financepy.utils.global_types import option_types
 import time
 import numpy as np
 import sys
@@ -57,10 +57,10 @@ def test_FinFXVanillaOptionWystupExample1():
     # keeps the value unchanged
     notional = 1000000.0
     call_option = FXVanillaOption(expiry_date,
-                                 strike_fx_rate,
-                                 currency_pair,
-                                 FinOptionTypes.EUROPEAN_CALL,
-                                 notional,
+                                  strike_fx_rate,
+                                  currency_pair,
+                                  option_types.EUROPEAN_CALL,
+                                  notional,
                                  "EUR", 2)
 
     value = call_option.value(
@@ -72,10 +72,10 @@ def test_FinFXVanillaOptionWystupExample1():
 
     notional = 1250000.0
     call_option = FXVanillaOption(expiry_date,
-                                 strike_fx_rate,
-                                 currency_pair,
-                                 FinOptionTypes.EUROPEAN_CALL,
-                                 notional,
+                                  strike_fx_rate,
+                                  currency_pair,
+                                  option_types.EUROPEAN_CALL,
+                                  notional,
                                  "USD", 2)
 
     value = call_option.value(
@@ -130,10 +130,10 @@ def test_FinFXVanillaOptionWystupExample2():
     # keeps the value unchanged
     notional = 1000000.0
     call_option = FXVanillaOption(expiry_date,
-                                 strike_fx_rate,
-                                 currency_pair,
-                                 FinOptionTypes.EUROPEAN_PUT,
-                                 notional,
+                                  strike_fx_rate,
+                                  currency_pair,
+                                  option_types.EUROPEAN_PUT,
+                                  notional,
                                  "EUR", 2)
 
     value = call_option.value(
@@ -182,13 +182,13 @@ def test_FinFXVanillaOptionBloombergExample():
     maturity_date = settlement_date.add_months(12)
     notional = 1000000.0
     notional_currency = "EUR"
-    calendar_type = CalendarTypes.TARGET
+    calendar_type = calendar_types.TARGET
 
     depos = []
     fras = []
     swaps = []
     depo = IborDeposit(settlement_date, maturity_date, domDepoRate,
-                       DayCountTypes.ACT_360, notional, calendar_type)
+                       day_count_types.ACT_360, notional, calendar_type)
     depos.append(depo)
     dom_discount_curve = IborSingleCurve(valuation_date, depos, fras, swaps)
 
@@ -196,18 +196,18 @@ def test_FinFXVanillaOptionBloombergExample():
     fras = []
     swaps = []
     depo = IborDeposit(settlement_date, maturity_date, forDepoRate,
-                       DayCountTypes.ACT_360, notional, calendar_type)
+                       day_count_types.ACT_360, notional, calendar_type)
     depos.append(depo)
     for_discount_curve = IborSingleCurve(valuation_date, depos, fras, swaps)
 
     model = BlackScholes(volatility)
 
     call_option = FXVanillaOption(expiry_date,
-                                 strike_fx_rate,
-                                 currency_pair,
-                                 FinOptionTypes.EUROPEAN_CALL,
-                                 notional,
-                                 notional_currency, 2)
+                                  strike_fx_rate,
+                                  currency_pair,
+                                  option_types.EUROPEAN_CALL,
+                                  notional,
+                                  notional_currency, 2)
 
     value = call_option.value(
         valuation_date,
@@ -250,10 +250,10 @@ def test_FinFXVanillaOptionHullExample():
     for num_paths in num_paths_list:
 
         call_option = FXVanillaOption(expiry_date,
-                                     strike_fx_rate,
+                                      strike_fx_rate,
                                      "EURUSD",
-                                     FinOptionTypes.EUROPEAN_CALL,
-                                     1000000,
+                                      option_types.EUROPEAN_CALL,
+                                      1000000,
                                      "USD")
 
         value = call_option.value(
@@ -288,10 +288,10 @@ def test_FinFXVanillaOptionHullExample():
     for spot_fx_rate in spot_fx_rates:
 
         call_option = FXVanillaOption(expiry_date,
-                                     strike_fx_rate,
+                                      strike_fx_rate,
                                      "EURUSD",
-                                     FinOptionTypes.EUROPEAN_CALL,
-                                     1000000,
+                                      option_types.EUROPEAN_CALL,
+                                      1000000,
                                      "USD")
 
         value = call_option.value(
@@ -322,10 +322,10 @@ def test_FinFXVanillaOptionHullExample():
     for spot_fx_rate in spot_fx_rates:
 
         put_option = FXVanillaOption(expiry_date,
-                                    strike_fx_rate,
+                                     strike_fx_rate,
                                     "EURUSD",
-                                    FinOptionTypes.EUROPEAN_PUT,
-                                    1000000,
+                                     option_types.EUROPEAN_PUT,
+                                     1000000,
                                     "USD")
 
         value = put_option.value(
@@ -360,10 +360,10 @@ def test_FinFXVanillaOptionHullExample():
 
     for spot_fx_rate in spot_fx_rates:
         call_option = FXVanillaOption(expiry_date,
-                                     strike_fx_rate,
+                                      strike_fx_rate,
                                      "EURUSD",
-                                     FinOptionTypes.EUROPEAN_CALL,
-                                     1000000,
+                                      option_types.EUROPEAN_CALL,
+                                      1000000,
                                      "USD")
         value = call_option.value(
             valuation_date,
@@ -404,10 +404,10 @@ def test_FinFXVanillaOptionHullExample():
 
     for spot_fx_rate in spot_fx_rates:
         put_option = FXVanillaOption(expiry_date,
-                                    strike_fx_rate,
+                                     strike_fx_rate,
                                     "EURUSD",
-                                    FinOptionTypes.EUROPEAN_PUT,
-                                    1000000,
+                                     option_types.EUROPEAN_PUT,
+                                     1000000,
                                     "USD")
 
         value = put_option.value(
@@ -447,10 +447,10 @@ def test_FinFXVanillaOptionHullExample():
 
     for spot_fx_rate in spot_fx_rates:
         call_option = FXVanillaOption(expiry_date,
-                                     strike_fx_rate,
+                                      strike_fx_rate,
                                      "EURUSD",
-                                     FinOptionTypes.EUROPEAN_CALL,
-                                     1000000,
+                                      option_types.EUROPEAN_CALL,
+                                      1000000,
                                      "USD")
 
         value = call_option.value(valuation_date,

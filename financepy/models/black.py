@@ -9,10 +9,10 @@ import numpy as np
 from numba import njit, float64, float64
 
 from ..utils.math import n_vect, n_prime_vect
-from ..utils.global_vars import gSmall
+from ..utils.global_vars import g_small
 from ..utils.helpers import label_to_string
-from ..utils.global_types import FinOptionTypes
-from ..utils.error import FinError
+from ..utils.global_types import option_types
+from ..utils.error import finpy_error
 
 ###############################################################################
 # TODO: Use Numba ?
@@ -21,16 +21,16 @@ from ..utils.error import FinError
 @njit(float64[:](float64, float64, float64, float64), fastmath=True, cache=True)
 def calculate_d1_d2(f, t, k, v):
 
-    t = np.maximum(t, gSmall)
-    vol = np.maximum(v, gSmall)
-    k = np.maximum(k, gSmall)
+    t = np.maximum(t, g_small)
+    vol = np.maximum(v, g_small)
+    k = np.maximum(k, g_small)
     sqrtT = np.sqrt(t)
 
     if f <= 0.0:
-        raise FinError("Forward is zero.")
+        raise finpy_error("Forward is zero.")
 
     if k <= 0.0:
-        raise FinError("Strike is zero.")
+        raise finpy_error("Strike is zero.")
 
     d1 = (np.log(f/k) + vol * vol * t / 2.0) / (vol * sqrtT)
     d2 = d1 - vol * sqrtT
@@ -71,12 +71,12 @@ class Black():
         
         [d1, d2] = calculate_d1_d2(f, t, k, v)
         
-        if call_or_put == FinOptionTypes.EUROPEAN_CALL:
+        if call_or_put == option_types.EUROPEAN_CALL:
             value = df * (f * n_vect(d1) - k * n_vect(d2))
-        elif call_or_put == FinOptionTypes.EUROPEAN_PUT:
+        elif call_or_put == option_types.EUROPEAN_PUT:
             value = df * (k * n_vect(-d2) - f * n_vect(-d1))
         else:
-            raise FinError("Option type must be a European Call or Put")
+            raise finpy_error("Option type must be a European Call or Put")
 
         return value
 
@@ -99,12 +99,12 @@ class Black():
 
         [d1, d2] = calculate_d1_d2(f, t, k, v)
 
-        if call_or_put == FinOptionTypes.EUROPEAN_CALL:
+        if call_or_put == option_types.EUROPEAN_CALL:
             delta = df * n_vect(d1)
-        elif call_or_put == FinOptionTypes.EUROPEAN_PUT:
+        elif call_or_put == option_types.EUROPEAN_PUT:
             delta = - df * n_vect(-d1)
         else:
-            raise FinError("Option type must be a European Call or Put")
+            raise finpy_error("Option type must be a European Call or Put")
 
         return delta
 
@@ -153,14 +153,14 @@ class Black():
 
         sqrtT = np.sqrt(t)
 
-        if call_or_put == FinOptionTypes.EUROPEAN_CALL:
+        if call_or_put == option_types.EUROPEAN_CALL:
             theta = df * (-(f * v * n_prime_vect(d1)) / (2 * sqrtT) + r * f * n_vect(d1)
                           - r * k * n_vect(d2))
-        elif call_or_put == FinOptionTypes.EUROPEAN_PUT:
+        elif call_or_put == option_types.EUROPEAN_PUT:
             theta = df * (-(f * v * n_prime_vect(d1)) / (2 * sqrtT) - r * f * n_vect(-d1)
                           + r * k * n_vect(-d2))
         else:
-            raise FinError("Option type must be a European Call or Put")
+            raise finpy_error("Option type must be a European Call or Put")
 
         return theta
 
@@ -183,12 +183,12 @@ class Black():
         
         [d1, d2] = calculate_d1_d2(f, t, k, v)
         
-        if call_or_put == FinOptionTypes.EUROPEAN_CALL:
+        if call_or_put == option_types.EUROPEAN_CALL:
             vega = df * f * sqrtT * n_prime_vect(d1)
-        elif call_or_put == FinOptionTypes.EUROPEAN_PUT:
+        elif call_or_put == option_types.EUROPEAN_PUT:
             vega = df * f * sqrtT * n_prime_vect(d1)
         else:
-            raise FinError("Option type must be a European Call or Put")
+            raise finpy_error("Option type must be a European Call or Put")
 
         return vega
 

@@ -2,12 +2,12 @@
 # Copyright (C) 2018, 2019, 2020 Dominic O'Kane
 ##############################################################################
 
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...models.hw_tree import HWTree
 from ...models.bk_tree import BKTree
-from ...utils.error import FinError
-from ...utils.frequency import FrequencyTypes
-from ...utils.day_count import DayCountTypes
+from ...utils.error import finpy_error
+from ...utils.frequency import frequency_types
+from ...utils.day_count import day_count_types
 from ...products.bonds.bond import Bond
 
 from ...utils.date import Date
@@ -50,8 +50,8 @@ class BondEmbeddedOption:
                  issue_date: Date,
                  maturity_date: Date,  # Date
                  coupon: float,  # Annualised coupon - 0.03 = 3.00%
-                 freq_type: FrequencyTypes,
-                 accrual_type: DayCountTypes,
+                 freq_type: frequency_types,
+                 accrual_type: day_count_types,
                  call_dates: List[Date],
                  call_prices: List[float],
                  put_dates: List[Date],
@@ -78,41 +78,41 @@ class BondEmbeddedOption:
         # Validate call and put schedules
         for dt in call_dates:
             if dt > self._maturity_date:
-                raise FinError("Call date after bond maturity date")
+                raise finpy_error("Call date after bond maturity date")
 
         if len(call_dates) > 0:
             dtprev = call_dates[0]
             for dt in call_dates[1:]:
                 if dt <= dtprev:
-                    raise FinError("Call dates not increasing")
+                    raise finpy_error("Call dates not increasing")
                 else:
                     dtprev = dt
 
         for dt in put_dates:
             if dt > self._maturity_date:
-                raise FinError("Put date after bond maturity date")
+                raise finpy_error("Put date after bond maturity date")
 
         if len(put_dates) > 0:
             dtprev = put_dates[0]
             for dt in put_dates[1:]:
                 if dt <= dtprev:
-                    raise FinError("Put dates not increasing")
+                    raise finpy_error("Put dates not increasing")
                 else:
                     dtprev = dt
 
         for px in call_prices:
             if px < 0.0:
-                raise FinError("Call price must be positive.")
+                raise finpy_error("Call price must be positive.")
 
         for px in put_prices:
             if px < 0.0:
-                raise FinError("Put price must be positive.")
+                raise finpy_error("Put price must be positive.")
 
         if len(call_dates) != len(call_prices):
-            raise FinError("Number of call dates and call prices not the same")
+            raise finpy_error("Number of call dates and call prices not the same")
 
         if len(put_dates) != len(put_prices):
-            raise FinError("Number of put dates and put prices not the same")
+            raise finpy_error("Number of put dates and put prices not the same")
 
         self._call_dates = call_dates
         self._call_prices = call_prices
@@ -138,7 +138,7 @@ class BondEmbeddedOption:
 
         for flow_date in self._bond._flow_dates[1:]:
             if flow_date > settlement_date:
-                cpn_time = (flow_date - settlement_date) / gDaysInYear
+                cpn_time = (flow_date - settlement_date) / g_days_in_year
                 cpn_times.append(cpn_time)
                 cpn_amounts.append(cpn)
 
@@ -149,7 +149,7 @@ class BondEmbeddedOption:
         call_times = []
         for dt in self._call_dates:
             if dt > settlement_date:
-                call_time = (dt - settlement_date) / gDaysInYear
+                call_time = (dt - settlement_date) / g_days_in_year
                 call_times.append(call_time)
         call_times = np.array(call_times)
         call_prices = np.array(self._call_prices)
@@ -158,13 +158,13 @@ class BondEmbeddedOption:
         put_times = []
         for dt in self._put_dates:
             if dt > settlement_date:
-                put_time = (dt - settlement_date) / gDaysInYear
+                put_time = (dt - settlement_date) / g_days_in_year
                 put_times.append(put_time)
         put_times = np.array(put_times)
         put_prices = np.array(self._put_prices)
 
         maturity_date = self._bond._maturity_date
-        tmat = (maturity_date - settlement_date) / gDaysInYear
+        tmat = (maturity_date - settlement_date) / g_days_in_year
         df_times = discount_curve._times
         df_values = discount_curve._dfs
 
@@ -217,7 +217,7 @@ class BondEmbeddedOption:
 
             return {'bondwithoption': v_bondwithoption, 'bondpure': v_bondpure}
         else:
-            raise FinError("Unknown model type")
+            raise finpy_error("Unknown model type")
 
 ###############################################################################
 

@@ -5,7 +5,7 @@
 
 from enum import Enum
 
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...models.black_scholes import BlackScholes
 from ...market.curves.discount_curve import DiscountCurve
 from ...utils.date import Date
@@ -124,7 +124,7 @@ class EquityOption:
         # Need to do this carefully.
 
         discount_curve._valuation_date = next_date
-        bump = (next_date - valuation_date) / gDaysInYear
+        bump = (next_date - valuation_date) / g_days_in_year
 
         vBumped = self.value(next_date, stock_price,
                              discount_curve,

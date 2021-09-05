@@ -10,17 +10,17 @@ import numpy as np
 from typing import List
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.frequency import annual_frequency, FrequencyTypes
-from ...utils.math import test_monotonicity
-from ...utils.global_vars import gDaysInYear
-from ...utils.day_count import DayCount, DayCountTypes
+from ...utils.error import finpy_error
+from ...utils.frequency import annual_frequency, frequency_types
+from ...utils.math import arr_is_monotonic
+from ...utils.global_vars import g_days_in_year
+from ...utils.day_count import day_count, day_count_types
 from ...utils.helpers import label_to_string, check_argument_types
 
 from ...utils.schedule import Schedule
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.calendar import DateGenRuleTypes
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.calendar import date_gen_rule_types
 
 from ...market.curves.discount_curve import DiscountCurve
 from ...market.curves.interpolator import InterpTypes, _uinterpolate
@@ -55,48 +55,48 @@ def _value_convertible(tmat,
 
     if len(coupon_times) > 0:
         if coupon_times[-1] > tmat:
-            raise FinError("Coupon after maturity")
+            raise finpy_error("Coupon after maturity")
 
     if len(call_times) > 0:
         if call_times[-1] > tmat:
-            raise FinError("Call times after maturity")
+            raise finpy_error("Call times after maturity")
 
     if len(put_times) > 0:
         if put_times[-1] > tmat:
-            raise FinError("Put times after maturity")
+            raise finpy_error("Put times after maturity")
 
     if len(df_times) > 0:
         if df_times[-1] > tmat:
-            raise FinError("Discount times after maturity")
+            raise finpy_error("Discount times after maturity")
 
     if len(dividend_times) > 0:
         if dividend_times[-1] > tmat:
-            raise FinError("Dividend times after maturity")
+            raise finpy_error("Dividend times after maturity")
 
     if credit_spread < 0.0:
-        raise FinError("Credit spread negative.")
+        raise finpy_error("Credit spread negative.")
 
     if recovery_rate < 0.0 or recovery_rate > 1.0:
-        raise FinError("Recovery rate should be between 0 and 1.")
+        raise finpy_error("Recovery rate should be between 0 and 1.")
 
     if stock_volatility < 0.0:
-        raise FinError("Stock volatility cannot be negative.")
+        raise finpy_error("Stock volatility cannot be negative.")
 
     if num_steps_per_year < 1:
-        raise FinError("Num Steps per year must more than 1.")
+        raise finpy_error("Num Steps per year must more than 1.")
 
     if len(dividend_times) > 0.0:
         if dividend_times[-1] > tmat:
-            raise FinError("Last dividend is after bond maturity.")
+            raise finpy_error("Last dividend is after bond maturity.")
 
     if recovery_rate > 0.999 or recovery_rate < 0.0:
-        raise FinError("Recovery rate must be between 0 and 0.999.")
+        raise finpy_error("Recovery rate must be between 0 and 0.999.")
 
     num_times = int(num_steps_per_year * tmat) + 1  # add one for today time 0
     num_times = num_steps_per_year  # XXXXXXXX!!!!!!!!!!!!!!!!!!!!!
 
     if num_times < 5:
-        raise FinError("Numsteps must be greater than 5.")
+        raise finpy_error("Numsteps must be greater than 5.")
 
     numLevels = num_times
 
@@ -154,7 +154,7 @@ def _value_convertible(tmat,
     treeStockValue = np.zeros(shape=(num_times, numLevels))
     e = stock_volatility ** 2 - h
     if e < 0.0:
-        raise FinError("Volatility squared minus the hazard rate is negative.")
+        raise finpy_error("Volatility squared minus the hazard rate is negative.")
 
     u = exp(sqrt(e * dt))
     d = 1.0 / u
@@ -199,7 +199,7 @@ def _value_convertible(tmat,
     #        n_min = r*r / stock_volatility / stock_volatility
 
     if np.any(treeProbsUp > 1.0):
-        raise FinError("pUp > 1.0. Increase time steps.")
+        raise finpy_error("pUp > 1.0. Increase time steps.")
 
     ###########################################################################
     # work backwards by first setting values at bond maturity date
@@ -262,14 +262,14 @@ class BondConvertible:
     def __init__(self,
                  maturity_date: Date,  # bond maturity date
                  coupon: float,  # annual coupon
-                 freq_type: FrequencyTypes,  # coupon frequency type
+                 freq_type: frequency_types,  # coupon frequency type
                  start_convert_date: Date,  # conversion starts on this date
                  conversion_ratio: float,  # num shares per face of notional
                  call_dates: List[Date],  # list of call dates
                  call_prices: List[float],  # list of call prices
                  put_dates: List[Date],  # list of put dates
                  put_prices: List[float],  # list of put prices
-                 accrual_type: DayCountTypes,  # day count type for accrued
+                 accrual_type: day_count_types,  # day count type for accrued
                  face_amount: float = 100.0):  # face amount
         """ Create BondConvertible object by providing the bond Maturity
         date, coupon, frequency type, accrual convention type and then all of
@@ -280,7 +280,7 @@ class BondConvertible:
         check_argument_types(self.__init__, locals())
 
         if start_convert_date > maturity_date:
-            raise FinError("Start convert date is after bond maturity.")
+            raise finpy_error("Start convert date is after bond maturity.")
 
         self._maturity_date = maturity_date
         self._coupon = coupon
@@ -292,26 +292,26 @@ class BondConvertible:
         self._call_prices = call_prices
 
         if len(self._call_dates) != len(self._call_prices):
-            raise FinError("Call dates and prices not same length.")
+            raise finpy_error("Call dates and prices not same length.")
 
         self._put_dates = put_dates
         self._put_prices = put_prices
 
         if len(self._put_dates) != len(self._put_prices):
-            raise FinError("Put dates and prices not same length.")
+            raise finpy_error("Put dates and prices not same length.")
 
         if len(put_dates) > 0:
             if put_dates[-1] > maturity_date:
-                raise FinError("Last put is after bond maturity.")
+                raise finpy_error("Last put is after bond maturity.")
 
         if len(call_dates) > 0:
             if call_dates[-1] > maturity_date:
-                raise FinError("Last call is after bond maturity.")
+                raise finpy_error("Last call is after bond maturity.")
 
         self._start_convert_date = start_convert_date
 
         if conversion_ratio < 0.0:
-            raise FinError("Conversion ratio is negative.")
+            raise finpy_error("Conversion ratio is negative.")
 
         self._conversion_ratio = conversion_ratio
         self._face_amount = face_amount
@@ -336,9 +336,9 @@ class BondConvertible:
             return
 
         self._settlement_date = settlement_date
-        calendar_type = CalendarTypes.NONE
-        bus_day_rule_type = BusDayAdjustTypes.NONE
-        date_gen_rule_type = DateGenRuleTypes.BACKWARD
+        calendar_type = calendar_types.NONE
+        bus_day_rule_type = bus_day_adjust_types.NONE
+        date_gen_rule_type = date_gen_rule_types.BACKWARD
 
         self._flow_dates = Schedule(settlement_date,
                                     self._maturity_date,
@@ -391,16 +391,16 @@ class BondConvertible:
             stock_volatility = 1e-10  # Avoid overflows in delta calc
 
         self._calculate_flow_dates(settlement_date)
-        tmat = (self._maturity_date - settlement_date) / gDaysInYear
+        tmat = (self._maturity_date - settlement_date) / g_days_in_year
         if tmat <= 0.0:
-            raise FinError("Maturity must not be on or before the value date.")
+            raise finpy_error("Maturity must not be on or before the value date.")
 
         # We include time zero in the coupon times and flows
         coupon_times = [0.0]
         coupon_flows = [0.0]
         cpn = self._coupon / self._frequency
         for dt in self._flow_dates[1:]:
-            flow_time = (dt - settlement_date) / gDaysInYear
+            flow_time = (dt - settlement_date) / g_days_in_year
             coupon_times.append(flow_time)
             coupon_flows.append(cpn)
 
@@ -408,49 +408,49 @@ class BondConvertible:
         coupon_flows = np.array(coupon_flows)
 
         if np.any(coupon_times < 0.0):
-            raise FinError("No coupon times can be before the value date.")
+            raise finpy_error("No coupon times can be before the value date.")
 
         if np.any(coupon_times > tmat):
-            raise FinError("No coupon times can be after the maturity date.")
+            raise finpy_error("No coupon times can be after the maturity date.")
 
         call_times = []
         for dt in self._call_dates:
-            call_time = (dt - settlement_date) / gDaysInYear
+            call_time = (dt - settlement_date) / g_days_in_year
             call_times.append(call_time)
         call_times = np.array(call_times)
         call_prices = np.array(self._call_prices)
 
         if np.any(call_times < 0.0):
-            raise FinError("No call times can be before the value date.")
+            raise finpy_error("No call times can be before the value date.")
 
         if np.any(call_times > tmat):
-            raise FinError("No call times can be after the maturity date.")
+            raise finpy_error("No call times can be after the maturity date.")
 
         put_times = []
         for dt in self._put_dates:
-            put_time = (dt - settlement_date) / gDaysInYear
+            put_time = (dt - settlement_date) / g_days_in_year
             put_times.append(put_time)
         put_times = np.array(put_times)
         put_prices = np.array(self._put_prices)
 
         if np.any(put_times > tmat):
-            raise FinError("No put times can be after the maturity date.")
+            raise finpy_error("No put times can be after the maturity date.")
 
         if np.any(put_times <= 0.0):
-            raise FinError("No put times can be on or before value date.")
+            raise finpy_error("No put times can be on or before value date.")
 
         if len(dividend_yields) != len(dividend_dates):
-            raise FinError("Number of dividend yields and dates not same.")
+            raise finpy_error("Number of dividend yields and dates not same.")
 
         dividend_times = []
         for dt in dividend_dates:
-            dividend_time = (dt - settlement_date) / gDaysInYear
+            dividend_time = (dt - settlement_date) / g_days_in_year
             dividend_times.append(dividend_time)
         dividend_times = np.array(dividend_times)
         dividend_yields = np.array(dividend_yields)
 
         # If it's before today it starts today
-        tconv = (self._start_convert_date - settlement_date) / gDaysInYear
+        tconv = (self._start_convert_date - settlement_date) / g_days_in_year
         tconv = max(tconv, 0.0)
 
         discount_factors = []
@@ -461,20 +461,20 @@ class BondConvertible:
         discount_times = np.array(coupon_times)
         discount_factors = np.array(discount_factors)
 
-        if test_monotonicity(coupon_times) is False:
-            raise FinError("Coupon times not monotonic")
+        if arr_is_monotonic(coupon_times) is False:
+            raise finpy_error("Coupon times not monotonic")
 
-        if test_monotonicity(call_times) is False:
-            raise FinError("Coupon times not monotonic")
+        if arr_is_monotonic(call_times) is False:
+            raise finpy_error("Coupon times not monotonic")
 
-        if test_monotonicity(put_times) is False:
-            raise FinError("Coupon times not monotonic")
+        if arr_is_monotonic(put_times) is False:
+            raise finpy_error("Coupon times not monotonic")
 
-        if test_monotonicity(discount_times) is False:
-            raise FinError("Coupon times not monotonic")
+        if arr_is_monotonic(discount_times) is False:
+            raise finpy_error("Coupon times not monotonic")
 
-        if test_monotonicity(dividend_times) is False:
-            raise FinError("Coupon times not monotonic")
+        if arr_is_monotonic(dividend_times) is False:
+            raise finpy_error("Coupon times not monotonic")
 
         v1 = _value_convertible(tmat,
                                 self._face_amount,
@@ -539,7 +539,7 @@ class BondConvertible:
         self._calculate_flow_dates(settlement_date)
 
         if len(self._flow_dates) <= 2:
-            raise FinError("Accrued interest - not enough flow dates.")
+            raise finpy_error("Accrued interest - not enough flow dates.")
 
         return settlement_date - self._pcd
 
@@ -554,9 +554,9 @@ class BondConvertible:
             self._calculate_flow_dates(settlement_date)
 
         if len(self._flow_dates) == 0:
-            raise FinError("Accrued interest - not enough flow dates.")
+            raise finpy_error("Accrued interest - not enough flow dates.")
 
-        dc = DayCount(self._accrual_type)
+        dc = day_count(self._accrual_type)
 
         (acc_factor, num, _) = dc.year_frac(self._pcd,
                                             settlement_date,

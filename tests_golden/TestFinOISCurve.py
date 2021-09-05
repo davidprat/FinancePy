@@ -3,17 +3,17 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 from financepy.market.curves.interpolator import InterpTypes
-from financepy.utils.calendar import BusDayAdjustTypes
+from financepy.utils.calendar import bus_day_adjust_types
 from financepy.products.rates.ibor_deposit import IborDeposit
 from financepy.products.rates.ois_curve import OISCurve
 from financepy.products.rates.ois import OIS
 from financepy.products.rates.ibor_future import IborFuture
 from financepy.products.rates.ibor_fra import IborFRA
-from financepy.utils.calendar import CalendarTypes
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.calendar import calendar_types
+from financepy.utils.frequency import frequency_types
+from financepy.utils.day_count import day_count_types
 from financepy.utils.date import Date
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,12 +38,12 @@ def test_FinOISFRAsOnly():
     spot_days = 0
     settleDt = valuation_date.add_weekdays(spot_days)
 
-    depoDCCType = DayCountTypes.ACT_360
+    depoDCCType = day_count_types.ACT_360
     notional = 100.0
 
     payFixed = True
 
-    calendar_type = CalendarTypes.TARGET
+    calendar_type = calendar_types.TARGET
     fras = []
 
     # 1 x 4 FRA
@@ -82,15 +82,15 @@ def test_FinOISDepositsFRAsSwaps():
 
     valuation_date = Date(18, 9, 2019)
 
-    dccType = DayCountTypes.THIRTY_E_360_ISDA
+    dccType = day_count_types.THIRTY_E_360_ISDA
     depos = []
 
     spot_days = 0
     settleDt = valuation_date.add_weekdays(spot_days)
 
-    depoDCCType = DayCountTypes.ACT_360
+    depoDCCType = day_count_types.ACT_360
     notional = 100.0
-    calendar_type = CalendarTypes.TARGET
+    calendar_type = calendar_types.TARGET
     depos = []
 
     # 1 month
@@ -123,8 +123,8 @@ def test_FinOISDepositsFRAsSwaps():
     fras.append(fra)
 
     swaps = []
-    fixedDCCType = DayCountTypes.ACT_365F
-    fixedFreqType = FrequencyTypes.SEMI_ANNUAL
+    fixedDCCType = day_count_types.ACT_365F
+    fixedFreqType = frequency_types.SEMI_ANNUAL
 
     swap_rate = 0.05
 #    maturity_date = settleDt.add_months(24)
@@ -262,7 +262,7 @@ def test_FinOISDepositsFuturesSwaps():
     spot_date = Date(6, 6, 2018)
     spot_days = 0
     settleDt = spot_date.add_weekdays(spot_days)
-    depoDCCType = DayCountTypes.THIRTY_E_360_ISDA
+    depoDCCType = day_count_types.THIRTY_E_360_ISDA
 
     depo = IborDeposit(settleDt, "1D", 1.712 / 100.0, depoDCCType)
     depos = [depo]
@@ -311,15 +311,15 @@ def test_FinOISDepositsFuturesSwaps():
     start_date = spot_date.add_weekdays(spot_days)
 
     swaps = []
-    fixed_leg_type = SwapTypes.PAY
-    fixedDCCType = DayCountTypes.THIRTY_E_360
-    fixedFreqType = FrequencyTypes.SEMI_ANNUAL
-    floatFreqType = FrequencyTypes.QUARTERLY
+    fixed_leg_type = swap_types.PAY
+    fixedDCCType = day_count_types.THIRTY_E_360
+    fixedFreqType = frequency_types.SEMI_ANNUAL
+    floatFreqType = frequency_types.QUARTERLY
     notional = 1000000
     float_spread = 0.0
-    floatDCCType = DayCountTypes.ACT_360
-    calendar_type = CalendarTypes.US
-    busDayAdjustRule = BusDayAdjustTypes.PRECEDING
+    floatDCCType = day_count_types.ACT_360
+    calendar_type = calendar_types.US
+    busDayAdjustRule = bus_day_adjust_types.PRECEDING
 
     swap_rate = 0.02776305
     payment_lag = 1
@@ -392,9 +392,9 @@ def test_derivativePricingExample():
     fras = []
 
     swaps = []
-    day_count_type = DayCountTypes.THIRTY_E_360_ISDA
+    day_count_type = day_count_types.THIRTY_E_360_ISDA
 #    day_count_type = DayCountTypes.ACT_360
-    freq_type = FrequencyTypes.SEMI_ANNUAL
+    freq_type = frequency_types.SEMI_ANNUAL
     fixed_leg_type = Finfixed_leg_types.PAY
 
     swap_rate = 0.0058
@@ -473,7 +473,7 @@ def test_bloombergPricingExample():
     # We do the O/N rate which settles on trade date
     spot_days = 0
     settleDt = valuation_date.add_weekdays(spot_days)
-    accrual = DayCountTypes.THIRTY_E_360
+    accrual = day_count_types.THIRTY_E_360
 
     depo = IborDeposit(settleDt, "1D", 1.712 / 100.0, accrual)
     depos = [depo]
@@ -500,11 +500,11 @@ def test_bloombergPricingExample():
     fras[4] = futs[4].to_fra(97.1450, -0.00411)
     fras[5] = futs[5].to_fra(97.0750, -0.00589)
 
-    accrual = DayCountTypes.THIRTY_E_360
-    freq = FrequencyTypes.SEMI_ANNUAL
+    accrual = day_count_types.THIRTY_E_360
+    freq = frequency_types.SEMI_ANNUAL
     spot_days = 2
     settleDt = valuation_date.add_weekdays(spot_days)
-    payRec = SwapTypes.PAY
+    payRec = swap_types.PAY
     lag = 1  # Not used
 
     swaps = []

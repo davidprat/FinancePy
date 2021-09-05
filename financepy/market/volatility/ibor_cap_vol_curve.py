@@ -4,11 +4,11 @@
 
 import numpy as np
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
 from ...utils.helpers import label_to_string
-from ...utils.global_vars import gDaysInYear
-from ...utils.day_count import DayCount, DayCountTypes
+from ...utils.global_vars import g_days_in_year
+from ...utils.day_count import day_count, day_count_types
 
 ##########################################################################
 # TODO: Calibration
@@ -42,18 +42,18 @@ class IborCapVolCurve():
         num_vols = len(capSigmas)
 
         if num_times != num_vols:
-            raise FinError("Date and volatility vectors not same length.")
+            raise finpy_error("Date and volatility vectors not same length.")
 
         if num_times < 2:
-            raise FinError("FinCapVolCurve requires at least two dates/vols")
+            raise finpy_error("FinCapVolCurve requires at least two dates/vols")
 
         if curve_date != capMaturityDates[0]:
-            raise FinError("FinCapFloorDates must start on curve date")
+            raise finpy_error("FinCapFloorDates must start on curve date")
 
         self._curve_date = curve_date
 
         if capSigmas[0] != 0.0:
-            raise FinError("Curve date cap floor volatility must equal zero")
+            raise finpy_error("Curve date cap floor volatility must equal zero")
 
         self._capSigmas = np.array(capSigmas)
         self._capletGammas = []
@@ -62,17 +62,17 @@ class IborCapVolCurve():
         prev_dt = self._curve_date
         for dt in capMaturityDates[1:]:
             if dt < prev_dt:
-                raise FinError("CapFloorLet Dates not in increasing order")
+                raise finpy_error("CapFloorLet Dates not in increasing order")
 
             if dt == prev_dt:
-                raise FinError("Two successive dates are identical")
+                raise finpy_error("Two successive dates are identical")
 
             prev_dt = dt
 
         self._capMaturityDates = capMaturityDates
 
-        if isinstance(day_count_type, DayCountTypes) is False:
-            raise FinError("DayCountType must be of type DayCountTypes.")
+        if isinstance(day_count_type, day_count_types) is False:
+            raise finpy_error("DayCountType must be of type DayCountTypes.")
 
         self._day_count_type = day_count_type
 
@@ -88,12 +88,12 @@ class IborCapVolCurve():
         self._times = []
         self._taus = []
 
-        day_counter = DayCount(self._day_count_type)
+        day_counter = day_count(self._day_count_type)
         prev_dt = self._curve_date
         numCaps = len(self._capMaturityDates)
 
         for dt in self._capMaturityDates:
-            t = (dt - self._curve_date) / gDaysInYear
+            t = (dt - self._curve_date) / g_days_in_year
             self._times.append(t)
             tau = day_counter.year_frac(prev_dt, dt)[0]
             self._taus.append(tau)
@@ -113,7 +113,7 @@ class IborCapVolCurve():
             volIbor2 = ((volCap**2) * sumTau - cumIbor2Tau) / tau
 
             if volIbor2 < 0.0:
-                raise FinError("Error due to negative caplet variance.")
+                raise finpy_error("Error due to negative caplet variance.")
 
             volIbor = np.sqrt(volIbor2)
             self._capletGammas[i] = volIbor
@@ -128,7 +128,7 @@ class IborCapVolCurve():
         The volatility interpolation is piecewise flat. """
 
         if isinstance(dt, Date):
-            t = (dt - self._curve_date) / gDaysInYear
+            t = (dt - self._curve_date) / g_days_in_year
         else:
             t = dt
 
@@ -158,7 +158,7 @@ class IborCapVolCurve():
         is piecewise flat. """
 
         if isinstance(dt, Date):
-            t = (dt - self._curve_date) / gDaysInYear
+            t = (dt - self._curve_date) / g_days_in_year
         else:
             t = dt
 

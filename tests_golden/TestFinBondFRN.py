@@ -8,11 +8,11 @@ sys.path.append("..")
 from financepy.utils.date import Date
 from financepy.products.rates.ibor_single_curve import IborSingleCurve
 from financepy.products.bonds.bond_frn import BondFRN
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.frequency import frequency_types
+from financepy.utils.day_count import day_count_types
 from financepy.products.rates.ibor_swap import IborSwap
 from financepy.products.rates.ibor_deposit import IborDeposit
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 
 from FinTestCases import FinTestCases, globalTestCaseMode
 testCases = FinTestCases(__file__, globalTestCaseMode)
@@ -22,10 +22,10 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 
 def build_Ibor_Curve(valuation_date):
 
-    depoDCCType = DayCountTypes.THIRTY_E_360_ISDA
+    depoDCCType = day_count_types.THIRTY_E_360_ISDA
     depos = []
 
-    payFixed = SwapTypes.PAY
+    payFixed = swap_types.PAY
 
     spot_days = 2
     settlement_date = valuation_date.add_weekdays(spot_days)
@@ -73,8 +73,8 @@ def build_Ibor_Curve(valuation_date):
     depos.append(depo5)
 
     fras = []
-    fixedDCCType = DayCountTypes.ACT_365F
-    fixedFreqType = FrequencyTypes.SEMI_ANNUAL
+    fixedDCCType = day_count_types.ACT_365F
+    fixedFreqType = frequency_types.SEMI_ANNUAL
 
     swaps = []
 
@@ -206,8 +206,8 @@ def test_BondFRN():
     issue_date = Date(10, 11, 2010)
     maturity_date = Date(10, 11, 2021)
     quoted_margin = 0.0025
-    freq_type = FrequencyTypes.QUARTERLY
-    accrual_type = DayCountTypes.THIRTY_E_360
+    freq_type = frequency_types.QUARTERLY
+    accrual_type = day_count_types.THIRTY_E_360
     face = 1000000
 
     bond = BondFRN(issue_date,
@@ -316,8 +316,8 @@ def test_BondFRN():
     settlement_date = Date(28, 3, 2014)
     maturity_date = Date(3, 2, 2021)
     quoted_margin = 0.0020
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.THIRTY_E_360_ISDA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.THIRTY_E_360_ISDA
     face = 1000000.0
 
     bond = BondFRN(issue_date,

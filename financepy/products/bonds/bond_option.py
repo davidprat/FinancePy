@@ -2,12 +2,12 @@
 # Copyright (C) 2018, 2019, 2020 Dominic O'Kane
 ##############################################################################
 
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
 from ...utils.date import Date
 from ...utils.helpers import label_to_string, check_argument_types
 from ...market.curves.discount_curve import DiscountCurve
-from ...utils.global_types import FinOptionTypes, FinExerciseTypes
+from ...utils.global_types import option_types, exercise_types
 from ...products.bonds.bond import Bond
 
 from enum import Enum
@@ -41,7 +41,7 @@ class BondOption():
                  expiry_date: Date,
                  strike_price: float,
                  face_amount: float,
-                 option_type: FinOptionTypes):
+                 option_type: option_types):
 
         check_argument_types(self.__init__, locals())
 
@@ -61,8 +61,8 @@ class BondOption():
         which include the Hull-White, Black-Karasinski and Black-Derman-Toy
         model which are all implemented as short rate tree models. """
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
-        tmat = (self._bond._maturity_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
+        tmat = (self._bond._maturity_date - valuation_date) / g_days_in_year
 
         df_times = discount_curve._times
         df_values = discount_curve._dfs
@@ -83,7 +83,7 @@ class BondOption():
             pcd = flow_dates[i-1]
             ncd = flow_dates[i]
             if pcd < valuation_date and ncd > valuation_date:
-                flow_time = (pcd - valuation_date) / gDaysInYear
+                flow_time = (pcd - valuation_date) / g_days_in_year
                 coupon_times.append(flow_time)
                 coupon_flows.append(flow_amounts[i])
                 break
@@ -97,7 +97,7 @@ class BondOption():
         for i in range(1, num_flows):
             ncd = flow_dates[i]
             if ncd > valuation_date:
-                flow_time = (ncd - valuation_date) / gDaysInYear
+                flow_time = (ncd - valuation_date) / g_days_in_year
                 coupon_times.append(flow_time)
                 coupon_flows.append(flow_amounts[i])
 
@@ -106,11 +106,11 @@ class BondOption():
         coupon_times = np.array(coupon_times)
         coupon_flows = np.array(coupon_flows)
 
-        exercise_type = FinExerciseTypes.AMERICAN
+        exercise_type = exercise_types.AMERICAN
 
-        if self._option_type == FinOptionTypes.EUROPEAN_CALL \
-                or self._option_type == FinOptionTypes.EUROPEAN_PUT:
-            exercise_type = FinExerciseTypes.EUROPEAN
+        if self._option_type == option_types.EUROPEAN_CALL \
+                or self._option_type == option_types.EUROPEAN_PUT:
+            exercise_type = exercise_types.EUROPEAN
 
         # This is wasteful if model is Jamshidian but how to do neat design
         model.build_tree(tmat, df_times, df_values)
@@ -118,15 +118,15 @@ class BondOption():
         v = model.bond_option(texp, self._strike_price, self._face_amount,
                               coupon_times, coupon_flows, exercise_type)
 
-        if self._option_type == FinOptionTypes.EUROPEAN_CALL \
-                or self._option_type == FinOptionTypes.AMERICAN_CALL:
+        if self._option_type == option_types.EUROPEAN_CALL \
+                or self._option_type == option_types.AMERICAN_CALL:
             return v['call']
-        elif self._option_type == FinOptionTypes.EUROPEAN_PUT \
-                or self._option_type == FinOptionTypes.AMERICAN_PUT:
+        elif self._option_type == option_types.EUROPEAN_PUT \
+                or self._option_type == option_types.AMERICAN_PUT:
             return v['put']
         else:
             print(self._option_type)
-            raise FinError("Unknown option type.")
+            raise finpy_error("Unknown option type.")
 
 ###############################################################################
 

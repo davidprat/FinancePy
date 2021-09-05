@@ -8,9 +8,9 @@ from numba import njit
 
 # from scipy import optimize
 from ...utils.date import Date
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
+from ...utils.global_types import option_types
 from ...utils.helpers import check_argument_types, label_to_string
 from ...market.curves.discount_curve import DiscountCurve
 
@@ -78,16 +78,16 @@ class EquityVanillaOption():
     def __init__(self,
                  expiry_date: (Date, list),
                  strike_price: (float, np.ndarray),
-                 option_type: (FinOptionTypes, list),
+                 option_type: (option_types, list),
                  num_options: float = 1.0):
         """ Create the Equity Vanilla option object by specifying the expiry
         date, the option strike, the option type and the number of options. """
 
         check_argument_types(self.__init__, locals())
 
-        if option_type != FinOptionTypes.EUROPEAN_CALL and \
-           option_type != FinOptionTypes.EUROPEAN_PUT:
-            raise FinError("Unknown Option Type" + str(option_type))
+        if option_type != option_types.EUROPEAN_CALL and \
+           option_type != option_types.EUROPEAN_PUT:
+            raise finpy_error("Unknown Option Type" + str(option_type))
 
         self._expiry_date = expiry_date
         self._strike_price = strike_price
@@ -105,7 +105,7 @@ class EquityVanillaOption():
         """ Equity Vanilla Option valuation using Black-Scholes model. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
@@ -139,17 +139,17 @@ class EquityVanillaOption():
         """ Equity Vanilla Option valuation using Black-Scholes model. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
         self._texp = texp
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if np.any(texp < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         s0 = stock_price
 
@@ -169,7 +169,7 @@ class EquityVanillaOption():
             value = bs_value(s0, texp, k, r, q, v, self._option_type.value)
 
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         value = value * self._num_options
         return value
@@ -185,17 +185,17 @@ class EquityVanillaOption():
         """ Calculate the analytical delta of a European vanilla option. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
         self._texp = texp
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if np.any(texp < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         s0 = stock_price
         texp = np.maximum(texp, 1e-10)
@@ -214,7 +214,7 @@ class EquityVanillaOption():
             delta = bs_delta(s0, texp, k, r, q, v, self._option_type.value)
 
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return delta
 
@@ -229,15 +229,15 @@ class EquityVanillaOption():
         """ Calculate the analytical gamma of a European vanilla option. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if np.any(texp < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         s0 = stock_price
 
@@ -257,7 +257,7 @@ class EquityVanillaOption():
             gamma = bs_gamma(s0, texp, k, r, q, v, self._option_type.value)
 
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return gamma
 
@@ -272,15 +272,15 @@ class EquityVanillaOption():
         """ Calculate the analytical vega of a European vanilla option. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if np.any(texp < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         s0 = stock_price
         texp = np.maximum(texp, 1e-10)
@@ -299,7 +299,7 @@ class EquityVanillaOption():
             vega = bs_vega(s0, texp, k, r, q, v, self._option_type.value)
 
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return vega
 
@@ -314,15 +314,15 @@ class EquityVanillaOption():
         """ Calculate the analytical theta of a European vanilla option. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if np.any(texp < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         s0 = stock_price
         texp = np.maximum(texp, 1e-10)
@@ -341,7 +341,7 @@ class EquityVanillaOption():
             theta = bs_theta(s0, texp, k, r, q, v, self._option_type.value)
 
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return theta
 
@@ -356,15 +356,15 @@ class EquityVanillaOption():
         """ Calculate the analytical rho of a European vanilla option. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiry_date - valuation_date) / gDaysInYear
+            texp = (self._expiry_date - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if np.any(texp < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         s0 = stock_price
         texp = np.maximum(texp, 1e-10)
@@ -383,7 +383,7 @@ class EquityVanillaOption():
             rho = bs_rho(s0, texp, k, r, q, v, self._option_type.value)
 
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return rho
 
@@ -398,15 +398,15 @@ class EquityVanillaOption():
         """ Calculate the analytical vanna of a European vanilla option. """
 
         if type(valuation_date) == Date:
-            texp = (self._expiryDate - valuation_date) / gDaysInYear
+            texp = (self._expiryDate - valuation_date) / g_days_in_year
         else:
             texp = valuation_date
 
         if np.any(stock_price <= 0.0):
-            raise FinError("Stock price must be greater than zero.")
+            raise finpy_error("Stock price must be greater than zero.")
 
         if np.any(texp < 0.0):
-            raise FinError("Time to expiry must be positive.")
+            raise finpy_error("Time to expiry must be positive.")
 
         s0 = stock_price
         texp = np.maximum(texp, 1e-10)
@@ -425,7 +425,7 @@ class EquityVanillaOption():
             vanna = bs_vanna(s0, texp, k, r, q, v, self._optionType.value)
 
         else:
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         return vanna
 
@@ -440,7 +440,7 @@ class EquityVanillaOption():
         """ Calculate the Black-Scholes implied volatility of a European 
         vanilla option. """
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         if texp < 1.0 / 365.0:
             print("Expiry time is too close to zero.")
@@ -472,7 +472,7 @@ class EquityVanillaOption():
                             seed: int = 4242,
                             useSobol: int = 0):
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._expiry_date)
         r = -np.log(df)/texp
@@ -507,7 +507,7 @@ class EquityVanillaOption():
                             seed: int = 4242,
                             useSobol: int = 0):
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._expiry_date)
         r = -np.log(df)/texp
@@ -542,7 +542,7 @@ class EquityVanillaOption():
                                 seed: int = 4242,
                                 useSobol: int = 0):
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._expiry_date)
         r = -np.log(df)/texp
@@ -579,7 +579,7 @@ class EquityVanillaOption():
                              seed: int = 4242,
                              useSobol: int = 0):
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._expiry_date)
         r = -np.log(df)/texp
@@ -614,7 +614,7 @@ class EquityVanillaOption():
                                  seed: int = 4242,
                                  useSobol: int = 0):
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._expiry_date)
         r = -np.log(df)/texp
@@ -651,7 +651,7 @@ class EquityVanillaOption():
         """ Value European style call or put option using Monte Carlo. This is
         mainly for educational purposes. Sobol numbers can be used. """
 
-        texp = (self._expiry_date - valuation_date) / gDaysInYear
+        texp = (self._expiry_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(self._expiry_date)
         r = -np.log(df)/texp

@@ -4,8 +4,8 @@
 
 from numba import njit, float64, int64
 import numpy as np
-from ...utils.error import FinError
-from ...utils.global_vars import gSmall
+from ...utils.error import finpy_error
+from ...utils.global_vars import g_small
 
 from scipy.interpolate import PchipInterpolator
 from scipy.interpolate import CubicSpline
@@ -44,7 +44,7 @@ def interpolate(t: (float, np.ndarray),  # time or array of times
 
         if t < 0.0:
             print(t)
-            raise FinError("Interpolate times must all be >= 0")
+            raise finpy_error("Interpolate times must all be >= 0")
 
         u = _uinterpolate(t, times, dfs, method)
         return u
@@ -52,13 +52,13 @@ def interpolate(t: (float, np.ndarray),  # time or array of times
 
         if np.any(t < 0.0):
             print(t)
-            raise FinError("Interpolate times must all be >= 0")
+            raise finpy_error("Interpolate times must all be >= 0")
 
         v = _vinterpolate(t, times, dfs, method)
 
         return v
     else:
-        raise FinError("Unknown input type" + type(t))
+        raise finpy_error("Unknown input type" + type(t))
 
 
 ###############################################################################
@@ -167,7 +167,7 @@ def _uinterpolate(t, times, dfs, method):
 
     else:
         print(method)
-        raise FinError("Invalid interpolation scheme.")
+        raise finpy_error("Invalid interpolation scheme.")
 
 
 ###############################################################################
@@ -224,7 +224,7 @@ class FinInterpolator():
 
         elif self._interp_type == InterpTypes.PCHIP_ZERO_RATES:
 
-            gSmallVector = np.ones(len(self._times)) * gSmall
+            gSmallVector = np.ones(len(self._times)) * g_small
             zero_rates = -np.log(self._dfs) / (self._times + gSmallVector)
 
             if self._times[0] == 0.0:
@@ -244,7 +244,7 @@ class FinInterpolator():
 
             """ Second derivatives at left is zero and first derivative at
             right is clamped to zero. """
-            gSmallVector = np.ones(len(self._times)) * gSmall
+            gSmallVector = np.ones(len(self._times)) * g_small
             zero_rates = -np.log(self._dfs) / (self._times + gSmallVector)
 
             if self._times[0] == 0.0:
@@ -263,7 +263,7 @@ class FinInterpolator():
         elif self._interp_type == InterpTypes.NATCUBIC_ZERO_RATES:
 
             """ Second derivatives are clamped to zero at end points """
-            gSmallVector = np.ones(len(self._times)) * gSmall
+            gSmallVector = np.ones(len(self._times)) * g_small
             zero_rates = -np.log(self._dfs) / (self._times + gSmallVector)
 
             if self._times[0] == 0.0:
@@ -287,15 +287,15 @@ class FinInterpolator():
         The value of x can be an array so that the function is vectorised. """
 
         if self._dfs is None:
-            raise FinError("Dfs have not been set.")
+            raise finpy_error("Dfs have not been set.")
 
         if type(t) is float or type(t) is np.float64:
 
             if t < 0.0:
                 print(t)
-                raise FinError("Interpolate times must all be >= 0")
+                raise finpy_error("Interpolate times must all be >= 0")
 
-            if np.abs(t) < gSmall:
+            if np.abs(t) < g_small:
                 return 1.0
 
             tvec = np.array([t])
@@ -304,12 +304,12 @@ class FinInterpolator():
 
             if np.any(t < 0.0):
                 print(t)
-                raise FinError("Interpolate times must all be >= 0")
+                raise finpy_error("Interpolate times must all be >= 0")
 
             tvec = t
 
         else:
-            raise FinError("t is not a recognized type")
+            raise finpy_error("t is not a recognized type")
 
         if self._interp_type == InterpTypes.PCHIP_LOG_DISCOUNT:
 

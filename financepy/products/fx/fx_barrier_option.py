@@ -6,9 +6,9 @@ from math import exp, log, sqrt
 import numpy as np
 from enum import Enum
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.math import N
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...products.fx.fx_option import FXOption
 from ...models.process_simulator import FinProcessSimulator
 from ...utils.helpers import label_to_string, check_argument_types
@@ -76,7 +76,7 @@ class FXBarrierOption(FXOption):
         S0 = spot_fx_rate
         h = self._barrier_level
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
         lnS0k = log(float(S0) / K)
         sqrtT = sqrt(t)
 
@@ -135,8 +135,8 @@ class FXBarrierOption(FXOption):
         elif self._option_type == FinFXBarrierTypes.DOWN_AND_IN_PUT:
             h_adj = h * exp(-0.5826 * volatility * sqrt(t / num_observations))
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._option_type))
+            raise finpy_error("Unknown barrier option type." +
+                              str(self._option_type))
 
         h = h_adj
 
@@ -233,8 +233,8 @@ class FXBarrierOption(FXOption):
                        (N(y - sigmaRootT) - N(y1 - sigmaRootT))
                 price = p_di
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._option_type))
+            raise finpy_error("Unknown barrier option type." +
+                              str(self._option_type))
 
         return price
 
@@ -251,7 +251,7 @@ class FXBarrierOption(FXOption):
                  seed=4242):
         """ Value the FX Barrier Option using Monte Carlo. """
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
         num_time_steps = int(t * num_ann_steps)
         K = self._strike_fx_rate
         B = self._barrier_level
@@ -356,8 +356,8 @@ class FXBarrierOption(FXOption):
         elif option_type == FinFXBarrierTypes.DOWN_AND_IN_PUT:
             payoff = np.maximum(K - Sall[:, -1], 0.0) * barrierCrossedFromAbove
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._option_type))
+            raise finpy_error("Unknown barrier option type." +
+                              str(self._option_type))
 
         v = payoff.mean() * exp(-rd * t)
 

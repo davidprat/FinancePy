@@ -8,10 +8,10 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from numba import jit, njit, float64, int64
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.global_vars import gDaysInYear
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_vars import g_days_in_year
+from ...utils.global_types import option_types
 from ...products.fx.fx_vanilla_option import FXVanillaOption
 from ...models.option_implied_dbn import option_implied_dbn
 from ...products.fx.fx_mkt_conventions import FinFXATMMethod
@@ -40,7 +40,7 @@ from ...utils.distribution import FinDistribution
 
 from ...utils.solver_1d import newton_secant
 from ...utils.solver_nm import nelder_mead
-from ...utils.global_types import FinSolverTypes
+from ...utils.global_types import solver_types
 
 ###############################################################################
 # ISSUES
@@ -168,20 +168,20 @@ def _solve_to_horizon(t, f,
     # to converge, so for those cases try again with CG
     # Numba version is quicker, but can be slightly away from CG output
     try:
-        if finSolverType == FinSolverTypes.NELDER_MEAD_NUMBA:
+        if finSolverType == solver_types.NELDER_MEAD_NUMBA:
             xopt = nelder_mead(_obj, np.array(x_inits),
                                bounds=np.array([[], []]).T, 
                                args=args, tol_f=tol,
                                tol_x=tol, max_iter=1000)
-        elif finSolverType == FinSolverTypes.NELDER_MEAD:
+        elif finSolverType == solver_types.NELDER_MEAD:
             opt = minimize(_obj, x_inits, args, method="Nelder-Mead", tol=tol)
             xopt = opt.x
-        elif finSolverType == FinSolverTypes.CONJUGATE_GRADIENT:
+        elif finSolverType == solver_types.CONJUGATE_GRADIENT:
             opt = minimize(_obj, x_inits, args, method="CG", tol=tol)
             xopt = opt.x
     except:
         # If convergence fails try again with CG if necessary
-        if finSolverType != FinSolverTypes.CONJUGATE_GRADIENT:
+        if finSolverType != solver_types.CONJUGATE_GRADIENT:
             print('Failed to converge, will try CG')
             opt = minimize(_obj, x_inits, args, method="CG", tol=tol)
             xopt = opt.x
@@ -226,7 +226,7 @@ def vol_function(vol_function_type_value, params, f, k, t):
         vol = vol_function_ssvi(params, f, k, t)
         return vol
     else:
-        raise FinError("Unknown Model Type")
+        raise finpy_error("Unknown Model Type")
 
 ###############################################################################
 
@@ -395,7 +395,7 @@ class SwaptionVolSurface():
                  strike_grid: (np.ndarray),
                  volatility_grid: (np.ndarray),
                  volatility_function_type:FinVolFunctionTypes=FinVolFunctionTypes.SABR,
-                 finSolverType:FinSolverTypes=FinSolverTypes.NELDER_MEAD):
+                 finSolverType:solver_types=solver_types.NELDER_MEAD):
         """ Create the FinSwaptionVolSurface object by passing in market vol 
         data for a list of strikes and expiry dates. """
 
@@ -404,19 +404,19 @@ class SwaptionVolSurface():
         self._valuation_date = valuation_date
 
         if len(strike_grid.shape) != 2:
-            raise FinError("Strike grid must be a 2D grid of values")
+            raise finpy_error("Strike grid must be a 2D grid of values")
 
         if len(volatility_grid.shape) != 2:
-            raise FinError("Volatility grid must be a 2D grid of values")
+            raise finpy_error("Volatility grid must be a 2D grid of values")
             
         if len(strike_grid) != len(volatility_grid):
-            raise FinError("Strike grid and volatility grid must have same size")
+            raise finpy_error("Strike grid and volatility grid must have same size")
 
         if len(strike_grid[0]) != len(volatility_grid[0]):
-            raise FinError("Strike grid and volatility grid must have same size")
+            raise finpy_error("Strike grid and volatility grid must have same size")
 
         if len(expiry_dates) != len(volatility_grid[0]):
-            raise FinError("Expiry dates not same size as volatility grid")
+            raise finpy_error("Expiry dates not same size as volatility grid")
 
         self._numExpiryDates = len(volatility_grid[0])
         self._num_strikes = len(volatility_grid)
@@ -444,7 +444,7 @@ class SwaptionVolSurface():
         interpolation is done in variance space and then converted back to a 
         lognormal volatility."""
 
-        texp = (expiry_date - self._valuation_date) / gDaysInYear
+        texp = (expiry_date - self._valuation_date) / g_days_in_year
 
         vol_type_value = self._volatility_function_type.value
 
@@ -506,7 +506,7 @@ class SwaptionVolSurface():
             vart = ((texp-t0) * vart1 + (t1-texp) * vart0) / (t1 - t0)
 
             if vart < 0.0:
-                raise FinError("Negative variance.")
+                raise finpy_error("Negative variance.")
 
             volt = np.sqrt(vart/texp)
 
@@ -730,7 +730,7 @@ class SwaptionVolSurface():
 
 ###############################################################################
 
-    def _build_vol_surface(self, finSolverType=FinSolverTypes.NELDER_MEAD):
+    def _build_vol_surface(self, finSolverType=solver_types.NELDER_MEAD):
         """ Main function to construct the vol surface. """
 
         if self._volatility_function_type == FinVolFunctionTypes.CLARK:
@@ -751,7 +751,7 @@ class SwaptionVolSurface():
             num_parameters = 5
         else:
             print(self._volatility_function_type)
-            raise FinError("Unknown Model Type")
+            raise finpy_error("Unknown Model Type")
 
         numExpiryDates = self._numExpiryDates
 
@@ -765,7 +765,7 @@ class SwaptionVolSurface():
         for i in range(0, numExpiryDates):
 
             expiry_date = self._expiry_dates[i]
-            texp = (expiry_date - self._valuation_date) / gDaysInYear
+            texp = (expiry_date - self._valuation_date) / g_days_in_year
             self._texp[i] = texp
 
         #######################################################################

@@ -7,8 +7,8 @@ import numpy as np
 from enum import Enum
 
 
-from ...utils.global_vars import gDaysInYear
-from ...utils.error import FinError
+from ...utils.global_vars import g_days_in_year
+from ...utils.error import finpy_error
 from ...products.equity.equity_option import EquityOption
 from ...utils.helpers import label_to_string, check_argument_types
 from ...utils.date import Date
@@ -176,9 +176,9 @@ class FXOneTouchOption(EquityOption):
         print("USE WITH CAUTION. MORE TESTING REQUIRED.")
 
         if valuation_date > self._expiry_date:
-            raise FinError("Value date after expiry date.")
+            raise finpy_error("Value date after expiry date.")
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
         t = max(t, 1e-6)
 
         s0 = spot_fx_rate
@@ -210,7 +210,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 1
 
             if np.any(s0 <= H):
-                raise FinError("FX Rate is currently below barrier.")
+                raise finpy_error("FX Rate is currently below barrier.")
 
             eta = 1.0
             z = np.log(H/s0) / v / sqrtT + lam * v * sqrtT
@@ -223,7 +223,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 2
 
             if np.any(s0 >= H):
-                raise FinError("FX Rate is currently above barrier.")
+                raise finpy_error("FX Rate is currently above barrier.")
 
             eta = -1.0
             z = np.log(H/s0) / v / sqrtT + lam * v * sqrtT
@@ -236,7 +236,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 3
 
             if np.any(s0 <= H):
-                raise FinError("FX Rate is currently below barrier.")
+                raise finpy_error("FX Rate is currently below barrier.")
 
             eta = 1.0
             K = H
@@ -250,7 +250,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 4
 
             if np.any(s0 >= H):
-                raise FinError("FX Rate is currently above barrier.")
+                raise finpy_error("FX Rate is currently above barrier.")
 
             eta = -1.0
             K = H
@@ -264,7 +264,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 5
 
             if np.any(s0 <= H):
-                raise FinError("FX Rate is currently below barrier.")
+                raise finpy_error("FX Rate is currently below barrier.")
 
             eta = +1.0
             phi = -1.0
@@ -279,7 +279,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 6
 
             if np.any(s0 >= H):
-                raise FinError("FX Rate is currently above barrier.")
+                raise finpy_error("FX Rate is currently above barrier.")
 
             eta = -1.0
             phi = +1.0
@@ -295,7 +295,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 7
 
             if np.any(s0 <= H):
-                raise FinError("FX Rate is currently below barrier.")
+                raise finpy_error("FX Rate is currently below barrier.")
 
             eta = +1.0
             phi = -1.0
@@ -311,7 +311,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 8
 
             if np.any(s0 >= H):
-                raise FinError("FX Rate is currently above barrier.")
+                raise finpy_error("FX Rate is currently above barrier.")
 
             eta = -1.0
             phi = +1.0
@@ -327,7 +327,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 9
 
             if np.any(s0 <= H):
-                raise FinError("FX Rate is currently below barrier.")
+                raise finpy_error("FX Rate is currently below barrier.")
 
             eta = +1.0
             phi = +1.0
@@ -343,7 +343,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 10
 
             if np.any(s0 >= H):
-                raise FinError("FX Rate is currently above barrier.")
+                raise finpy_error("FX Rate is currently above barrier.")
 
             eta = -1.0
             phi = -1.0
@@ -359,7 +359,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 11
 
             if np.any(s0 <= H):
-                raise FinError("FX Rate is currently below barrier.")
+                raise finpy_error("FX Rate is currently below barrier.")
 
             eta = +1.0
             phi = +1.0
@@ -376,7 +376,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 12
 
             if np.any(s0 >= H):
-                raise FinError("FX Rate is currently above barrier.")
+                raise finpy_error("FX Rate is currently above barrier.")
 
             eta = -1.0
             phi = -1.0
@@ -390,7 +390,7 @@ class FXOneTouchOption(EquityOption):
             return v
 
         else:
-            raise FinError("Unknown option type.")
+            raise finpy_error("Unknown option type.")
 
         return v
 
@@ -410,7 +410,7 @@ class FXOneTouchOption(EquityOption):
         result as we only observe the barrier a finite number of times. The
         convergence is slow. """
 
-        t = (self._expiry_date - valuation_date) / gDaysInYear
+        t = (self._expiry_date - valuation_date) / g_days_in_year
 
         df_d = domCurve.df(self._expiry_date)
         rd = -np.log(df_d)/t
@@ -436,7 +436,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 1
 
             if s0 <= H:
-                raise FinError("Barrier has ALREADY been crossed.")
+                raise finpy_error("Barrier has ALREADY been crossed.")
 
             v = _barrier_pay_one_at_hit_pv_down(s, H, rd, dt)
             v = v * X
@@ -446,7 +446,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 2
 
             if s0 >= H:
-                raise FinError("Barrier has ALREADY been crossed.")
+                raise finpy_error("Barrier has ALREADY been crossed.")
 
             v = _barrier_pay_one_at_hit_pv_up(s, H, rd, dt)
             v = v * X
@@ -456,7 +456,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 3
 
             if s0 <= H:
-                raise FinError("Stock price is currently below barrier.")
+                raise finpy_error("Stock price is currently below barrier.")
 
             v = _barrier_pay_one_at_hit_pv_down(s, H, rd, dt) * H
             return v
@@ -465,7 +465,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 4
 
             if s0 >= H:
-                raise FinError("Stock price is currently below barrier.")
+                raise finpy_error("Stock price is currently below barrier.")
 
             v = _barrier_pay_one_at_hit_pv_up(s, H, rd, dt) * H
             return v
@@ -474,7 +474,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 5
 
             if s0 <= H:
-                raise FinError("Barrier has  ALREADY been crossed.")
+                raise finpy_error("Barrier has  ALREADY been crossed.")
 
             v = _barrier_pay_one_at_hit_pv_down(s, H, 0.0, dt)
             v = v * X * np.exp(-rd*t)
@@ -484,7 +484,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 6
 
             if s0 >= H:
-                raise FinError("Barrier has ALREADY been crossed.")
+                raise finpy_error("Barrier has ALREADY been crossed.")
 
             v = _barrier_pay_one_at_hit_pv_up(s, H, 0.0, dt)
             v = v * X * np.exp(-rd*t)
@@ -494,7 +494,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 7
 
             if s0 <= H:
-                raise FinError("Stock price is currently below barrier.")
+                raise finpy_error("Stock price is currently below barrier.")
 
             v = _barrier_pay_one_at_hit_pv_down(s, H, 0.0, dt) * H
             return v
@@ -503,7 +503,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 8
 
             if s0 >= H:
-                raise FinError("Stock price is currently below barrier.")
+                raise finpy_error("Stock price is currently below barrier.")
 
             v = _barrier_pay_one_at_hit_pv_up(s, H, 0.0, dt) * H
             return v
@@ -512,7 +512,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 9
 
             if s0 <= H:
-                raise FinError("Barrier has ALREADY been crossed.")
+                raise finpy_error("Barrier has ALREADY been crossed.")
 
             v = 1.0 - _barrier_pay_one_at_hit_pv_down(s, H, 0.0, dt)
             v = v * X * np.exp(-rd*t)
@@ -522,7 +522,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 10
 
             if s0 >= H:
-                raise FinError("Barrier has ALREADY been crossed.")
+                raise finpy_error("Barrier has ALREADY been crossed.")
 
             v = 1.0 - _barrier_pay_one_at_hit_pv_up(s, H, 0.0, dt)
             v = v * X * np.exp(-rd*t)
@@ -532,7 +532,7 @@ class FXOneTouchOption(EquityOption):
             # HAUG 11
 
             if s0 <= H:
-                raise FinError("Stock price is currently below barrier.")
+                raise finpy_error("Stock price is currently below barrier.")
 
             v = _barrier_pay_asset_at_expiry_down_out(s, H)
             v = v * np.exp(-rd*t)
@@ -542,13 +542,13 @@ class FXOneTouchOption(EquityOption):
             # HAUG 12
 
             if s0 >= H:
-                raise FinError("Stock price is currently below barrier.")
+                raise finpy_error("Stock price is currently below barrier.")
 
             v = _barrier_pay_asset_at_expiry_up_out(s, H)
             v = v * np.exp(-rd*t)
             return v
         else:
-            raise FinError("Unknown option type.")
+            raise finpy_error("Unknown option type.")
 
         return v
 

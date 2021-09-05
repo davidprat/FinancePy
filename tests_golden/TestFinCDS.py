@@ -6,14 +6,14 @@ import sys
 sys.path.append("..")
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_types import SwapTypes
+from financepy.utils.global_types import swap_types
 from financepy.utils.date import Date
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.calendar import CalendarTypes
-from financepy.utils.calendar import DateGenRuleTypes
-from financepy.utils.calendar import BusDayAdjustTypes
-from financepy.utils.global_vars import gDaysInYear
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
+from financepy.utils.calendar import calendar_types
+from financepy.utils.calendar import date_gen_rule_types
+from financepy.utils.calendar import bus_day_adjust_types
+from financepy.utils.global_vars import g_days_in_year
 from financepy.products.credit.cds_curve import CDSCurve
 from financepy.products.rates.ibor_single_curve import IborSingleCurve
 from financepy.market.curves.discount_curve import DiscountCurve
@@ -184,7 +184,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
 
     m = 1.0  # 0.00000000000
 
-    dcType = DayCountTypes.ACT_360
+    dcType = day_count_types.ACT_360
     depos = []
     depo1 = IborDeposit(valuation_date, "1D", m * 0.0220, dcType)
     depos.append(depo1)
@@ -216,14 +216,14 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     fras = []
 
     swaps = []
-    dcType = DayCountTypes.THIRTY_E_360_ISDA
-    fixedFreq = FrequencyTypes.SEMI_ANNUAL
+    dcType = day_count_types.THIRTY_E_360_ISDA
+    fixedFreq = frequency_types.SEMI_ANNUAL
 
     maturity_date = settlement_date.add_months(24)
     swap1 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.015910 + irBump,
         fixedFreq,
         dcType)
@@ -233,7 +233,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap2 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.014990 + irBump,
         fixedFreq,
         dcType)
@@ -243,7 +243,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap3 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.014725 + irBump,
         fixedFreq,
         dcType)
@@ -253,7 +253,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap4 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.014640 + irBump,
         fixedFreq,
         dcType)
@@ -263,7 +263,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap5 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.014800 + irBump,
         fixedFreq,
         dcType)
@@ -273,7 +273,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap6 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.014995 + irBump,
         fixedFreq,
         dcType)
@@ -283,7 +283,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap7 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.015180 + irBump,
         fixedFreq,
         dcType)
@@ -293,7 +293,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap8 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.015610 + irBump,
         fixedFreq,
         dcType)
@@ -303,7 +303,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap9 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.015880 + irBump,
         fixedFreq,
         dcType)
@@ -313,7 +313,7 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
     swap10 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.016430 + irBump,
         fixedFreq,
         dcType)
@@ -448,7 +448,7 @@ def test_full_priceCDS1():
     dv = v_bump['full_pv'] - v['full_pv']
     testCases.print("INTEREST_DV01", dv)
 
-    t = (maturity_date - valuation_date) / gDaysInYear
+    t = (maturity_date - valuation_date) / g_days_in_year
     z = libor_curve.df(maturity_date)
     r = -np.log(z) / t
 
@@ -474,7 +474,7 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
 
     valuation_date = Date(24, 8, 2020)
     settlement_date = Date(24, 8, 2020)
-    dcType = DayCountTypes.ACT_360
+    dcType = day_count_types.ACT_360
     depos = []
 
     maturity_date = settlement_date.add_months(1)
@@ -499,14 +499,14 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
     depos.append(depo5)
 
     swaps = []
-    dcType = DayCountTypes.THIRTY_E_360_ISDA
-    fixedFreq = FrequencyTypes.SEMI_ANNUAL
+    dcType = day_count_types.THIRTY_E_360_ISDA
+    fixedFreq = frequency_types.SEMI_ANNUAL
 
     maturity_date = settlement_date.add_months(24)
     swap1 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.002155 + irBump,
         fixedFreq,
         dcType)
@@ -516,7 +516,7 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
     swap2 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.002305 + irBump,
         fixedFreq,
         dcType)
@@ -526,7 +526,7 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
     swap3 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.002665 + irBump,
         fixedFreq,
         dcType)
@@ -536,7 +536,7 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
     swap4 = IborSwap(
         settlement_date,
         maturity_date,
-        SwapTypes.PAY,
+        swap_types.PAY,
         m * 0.003290 + irBump,
         fixedFreq,
         dcType)
@@ -656,7 +656,7 @@ def test_full_priceCDSModelCheck():
     testCases.print("INTEREST DV01", interest_dv01)
 
     # Consider fast approximation
-    t = (maturity_date - valuation_date) / gDaysInYear
+    t = (maturity_date - valuation_date) / g_days_in_year
     z = libor_curve.df(maturity_date)
     r = -np.log(z) / t
 
@@ -719,11 +719,11 @@ def test_CDSDateGeneration():
                        cdsCoupon,
                        ONE_MILLION,
                        True,
-                       FrequencyTypes.QUARTERLY,
-                       DayCountTypes.ACT_360,
-                       CalendarTypes.WEEKEND,
-                       BusDayAdjustTypes.FOLLOWING,
-                       DateGenRuleTypes.BACKWARD)
+                       frequency_types.QUARTERLY,
+                       day_count_types.ACT_360,
+                       calendar_types.WEEKEND,
+                       bus_day_adjust_types.FOLLOWING,
+                       date_gen_rule_types.BACKWARD)
 
     testCases.header("Flow Date", "AccrualFactor", "Flow")
     num_flows = len(cds_contract._adjusted_dates)

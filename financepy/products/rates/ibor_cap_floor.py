@@ -9,15 +9,15 @@
 from typing import Optional
 
 from ...utils.date import Date
-from ...utils.calendar import Calendar
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import DateGenRuleTypes
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.day_count import DayCount, DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.global_vars import gDaysInYear
+from ...utils.calendar import calendar
+from ...utils.calendar import calendar_types
+from ...utils.calendar import date_gen_rule_types
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.day_count import day_count, day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import ONE_MILLION
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.schedule import Schedule
 from ...utils.helpers import label_to_string, check_argument_types
 from ...models.black import Black
@@ -26,7 +26,7 @@ from ...models.bachelier import Bachelier
 from ...models.sabr import SABR
 from ...models.sabr_shifted import SABRShifted
 from ...models.hw_tree import HWTree
-from ...utils.global_types import FinCapFloorTypes, FinOptionTypes
+from ...utils.global_types import cap_floor, option_types
 
 ##########################################################################
 
@@ -52,15 +52,15 @@ class IborCapFloor():
     def __init__(self,
                  start_date: Date,
                  maturity_date_or_tenor: (Date, str),
-                 option_type: FinCapFloorTypes,
+                 option_type: cap_floor,
                  strike_rate: float,
                  lastFixing: Optional[float] = None,
-                 freq_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 day_count_type: DayCountTypes = DayCountTypes.THIRTY_E_360_ISDA,
+                 freq_type: frequency_types = frequency_types.QUARTERLY,
+                 day_count_type: day_count_types = day_count_types.THIRTY_E_360_ISDA,
                  notional: float = ONE_MILLION,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Initialise FinIborCapFloor object. """
 
         check_argument_types(self.__init__, locals())
@@ -72,12 +72,12 @@ class IborCapFloor():
             maturity_date = maturity_date_or_tenor
         else:
             maturity_date = start_date.add_tenor(maturity_date_or_tenor)
-            calendar = Calendar(self._calendar_type)
+            calendar = calendar(self._calendar_type)
             maturity_date = calendar.adjust(maturity_date,
                                             self._bus_day_adjust_type)
 
         if start_date > maturity_date:
-            raise FinError("Start date must be before maturity date")
+            raise finpy_error("Start date must be before maturity date")
 
         self._start_date = start_date
         self._maturity_date = maturity_date
@@ -121,15 +121,15 @@ class IborCapFloor():
         self._valuation_date = valuation_date
         self._generate_dates()
 
-        self._day_counter = DayCount(self._day_count_type)
+        self._day_counter = day_count(self._day_count_type)
         num_options = len(self._capFloorLetDates)
         strike_rate = self._strike_rate
 
         if strike_rate < 0.0:
-            raise FinError("Strike < 0.0")
+            raise finpy_error("Strike < 0.0")
 
         if num_options <= 1:
-            raise FinError("Number of options in capfloor equals 1")
+            raise finpy_error("Number of options in capfloor equals 1")
 
         self._capFloorLetValues = [0]
         self._capFloorLetAlphas = [0]
@@ -154,9 +154,9 @@ class IborCapFloor():
         alpha = self._day_counter.year_frac(start_date, end_date)[0]
         df = libor_curve.df(end_date)
 
-        if self._option_type == FinCapFloorTypes.CAP:
+        if self._option_type == cap_floor.CAP:
             capFloorLetValue = df * alpha * max(fwd_rate - strike_rate, 0.0)
-        elif self._option_type == FinCapFloorTypes.FLOOR:
+        elif self._option_type == cap_floor.FLOOR:
             capFloorLetValue = df * alpha * max(strike_rate - fwd_rate, 0.0)
 
         capFloorLetValue *= self._notional
@@ -179,9 +179,9 @@ class IborCapFloor():
             fwd_rate = libor_curve.fwd_rate(start_date, end_date,
                                             self._day_count_type)
 
-            if self._option_type == FinCapFloorTypes.CAP:
+            if self._option_type == cap_floor.CAP:
                 intrinsic_value = df * alpha * max(fwd_rate - strike_rate, 0.0)
-            elif self._option_type == FinCapFloorTypes.FLOOR:
+            elif self._option_type == cap_floor.FLOOR:
                 intrinsic_value = df * alpha * max(strike_rate - fwd_rate, 0.0)
 
             intrinsic_value *= self._notional
@@ -213,7 +213,7 @@ class IborCapFloor():
                                model):
         """ Value the caplet or floorlet using a specific model. """
 
-        texp = (capletStartDate - self._start_date) / gDaysInYear
+        texp = (capletStartDate - self._start_date) / g_days_in_year
 
         alpha = self._day_counter.year_frac(capletStartDate, capletEndDate)[0]
 
@@ -228,52 +228,52 @@ class IborCapFloor():
 
         if isinstance(model, Black):
 
-            if self._option_type == FinCapFloorTypes.CAP:
+            if self._option_type == cap_floor.CAP:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_CALL)
-            elif self._option_type == FinCapFloorTypes.FLOOR:
+                                               option_types.EUROPEAN_CALL)
+            elif self._option_type == cap_floor.FLOOR:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_PUT)
+                                               option_types.EUROPEAN_PUT)
 
         elif isinstance(model, BlackShifted):
 
-            if self._option_type == FinCapFloorTypes.CAP:
+            if self._option_type == cap_floor.CAP:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_CALL)
-            elif self._option_type == FinCapFloorTypes.FLOOR:
+                                               option_types.EUROPEAN_CALL)
+            elif self._option_type == cap_floor.FLOOR:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_PUT)
+                                               option_types.EUROPEAN_PUT)
 
         elif isinstance(model, Bachelier):
 
-            if self._option_type == FinCapFloorTypes.CAP:
+            if self._option_type == cap_floor.CAP:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_CALL)
-            elif self._option_type == FinCapFloorTypes.FLOOR:
+                                               option_types.EUROPEAN_CALL)
+            elif self._option_type == cap_floor.FLOOR:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_PUT)
+                                               option_types.EUROPEAN_PUT)
 
         elif isinstance(model, SABR):
 
-            if self._option_type == FinCapFloorTypes.CAP:
+            if self._option_type == cap_floor.CAP:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_CALL)
-            elif self._option_type == FinCapFloorTypes.FLOOR:
+                                               option_types.EUROPEAN_CALL)
+            elif self._option_type == cap_floor.FLOOR:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_PUT)
+                                               option_types.EUROPEAN_PUT)
 
         elif isinstance(model, SABRShifted):
 
-            if self._option_type == FinCapFloorTypes.CAP:
+            if self._option_type == cap_floor.CAP:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_CALL)
-            elif self._option_type == FinCapFloorTypes.FLOOR:
+                                               option_types.EUROPEAN_CALL)
+            elif self._option_type == cap_floor.FLOOR:
                 capFloorLetValue = model.value(f, k, texp, df,
-                                               FinOptionTypes.EUROPEAN_PUT)
+                                               option_types.EUROPEAN_PUT)
 
         elif isinstance(model, HWTree):
 
-            tmat = (capletEndDate - valuation_date) / gDaysInYear
+            tmat = (capletEndDate - valuation_date) / g_days_in_year
             alpha = self._day_counter.year_frac(capletStartDate,
                                                 capletEndDate)[0]
             strike_price = 1.0/(1.0 + alpha * self._strike_rate)
@@ -286,13 +286,13 @@ class IborCapFloor():
                                     df_times, df_values)
 
             # we divide by alpha to offset the multiplication above
-            if self._option_type == FinCapFloorTypes.CAP:
+            if self._option_type == cap_floor.CAP:
                 capFloorLetValue = v['put'] * notionalAdj / alpha
-            elif self._option_type == FinCapFloorTypes.FLOOR:
+            elif self._option_type == cap_floor.FLOOR:
                 capFloorLetValue = v['call'] * notionalAdj / alpha
 
         else:
-            raise FinError("Unknown model type " + str(model))
+            raise finpy_error("Unknown model type " + str(model))
 
         capFloorLetValue *= (self._notional * alpha)
 
@@ -315,10 +315,10 @@ class IborCapFloor():
             print("Caplets not calculated.")
             return
 
-        if self._option_type == FinCapFloorTypes.CAP:
+        if self._option_type == cap_floor.CAP:
             header = "PAYMENT_DATE     YEAR_FRAC   FWD_RATE    INTRINSIC      "
             header += "     DF    CAPLET_PV       CUM_PV"
-        elif self._option_type == FinCapFloorTypes.FLOOR:
+        elif self._option_type == cap_floor.FLOOR:
             header = "PAYMENT_DATE     YEAR_FRAC   FWD_RATE    INTRINSIC      "
             header += "     DF    FLRLET_PV       CUM_PV"
 

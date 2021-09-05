@@ -3,12 +3,12 @@
 ##############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.global_types import FinExerciseTypes
+from financepy.utils.global_types import exercise_types
 from financepy.models.bk_tree import BKTree
 from financepy.utils.helpers import print_tree
-from financepy.utils.global_vars import gDaysInYear
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.global_vars import g_days_in_year
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 from financepy.products.bonds.bond import Bond
 from financepy.market.curves.discount_curve import DiscountCurve
 from financepy.utils.date import Date
@@ -39,7 +39,7 @@ def test_BKExampleOne():
     sigma = 0.25
     a = 0.22
     num_time_steps = 3
-    tmat = (end_date - start_date)/gDaysInYear
+    tmat = (end_date - start_date) / g_days_in_year
     model = BKTree(sigma, a, num_time_steps)
     model.build_tree(tmat, times, dfs)
 
@@ -66,8 +66,8 @@ def test_BKExampleTwo():
     expiry_date = settlement_date.add_tenor("18m")
     maturity_date = settlement_date.add_tenor("10Y")
     coupon = 0.05
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    accrual_type = DayCountTypes.ACT_ACT_ICMA
+    freq_type = frequency_types.SEMI_ANNUAL
+    accrual_type = day_count_types.ACT_ACT_ICMA
     bond = Bond(issue_date, maturity_date, coupon, freq_type, accrual_type)
 
     coupon_times = []
@@ -79,13 +79,13 @@ def test_BKExampleTwo():
         pcd = bond._flow_dates[i-1]
         ncd = bond._flow_dates[i]
         if pcd < settlement_date and ncd > settlement_date:
-            flow_time = (pcd - settlement_date) / gDaysInYear
+            flow_time = (pcd - settlement_date) / g_days_in_year
             coupon_times.append(flow_time)
             coupon_flows.append(cpn)
 
     for flow_date in bond._flow_dates:
         if flow_date > settlement_date:
-            flow_time = (flow_date - settlement_date) / gDaysInYear
+            flow_time = (flow_date - settlement_date) / g_days_in_year
             coupon_times.append(flow_time)
             coupon_flows.append(cpn)
 
@@ -95,8 +95,8 @@ def test_BKExampleTwo():
     strike_price = 105.0
     face = 100.0
 
-    tmat = (maturity_date - settlement_date) / gDaysInYear
-    texp = (expiry_date - settlement_date) / gDaysInYear
+    tmat = (maturity_date - settlement_date) / g_days_in_year
+    texp = (expiry_date - settlement_date) / g_days_in_year
     times = np.linspace(0, tmat, 11)
     dates = settlement_date.add_years(times)
     dfs = np.exp(-0.05*times)
@@ -112,13 +112,13 @@ def test_BKExampleTwo():
 
     model = BKTree(sigma, a, num_time_steps)
     model.build_tree(tmat, times, dfs)
-    exercise_type = FinExerciseTypes.AMERICAN
+    exercise_type = exercise_types.AMERICAN
     v = model.bond_option(texp, strike_price, face, coupon_times,
                           coupon_flows, exercise_type)
 
     # Test convergence
     num_steps_list = [100, 200, 300, 500, 1000]
-    exercise_type = FinExerciseTypes.AMERICAN
+    exercise_type = exercise_types.AMERICAN
 
     testCases.header("TIMESTEPS", "TIME", "VALUE")
     treeVector = []

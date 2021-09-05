@@ -5,11 +5,11 @@
 
 from math import pow
 
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes, DateGenRuleTypes
-from ...utils.day_count import DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.error import FinError
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types, date_gen_rule_types
+from ...utils.day_count import day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.error import finpy_error
 from ...products.credit.cds import CDS
 from ...products.credit.cds_curve import CDSCurve
 from ...utils.helpers import check_argument_types
@@ -27,11 +27,11 @@ class CDSIndexPortfolio:
     portfolio of CDS contracts with the same maturity date. """
 
     def __init__(self,
-                 freq_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 freq_type: frequency_types = frequency_types.QUARTERLY,
+                 day_count_type: day_count_types = day_count_types.ACT_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Create FinCDSIndexPortfolio object. Note that all of the inputs
         have a default value which reflects the CDS market standard. """
 
@@ -187,7 +187,7 @@ class CDSIndexPortfolio:
         num_credits = len(issuer_curves)
 
         if num_credits < 1:
-            raise FinError(
+            raise finpy_error(
                 "Number of credits in index must be > 1 and not" + str(num_credits))
 
         cds_contract = CDS(step_in_date,
@@ -216,7 +216,7 @@ class CDSIndexPortfolio:
         num_credits = len(issuer_curves)
 
         if num_credits < 1:
-            raise FinError(
+            raise finpy_error(
                 "Number of credits in index must be > 1 and not " + str(num_credits))
 
         cds_contract = CDS(step_in_date,
@@ -250,7 +250,7 @@ class CDSIndexPortfolio:
         num_credits = len(issuer_curves)
 
         if num_credits < 1:
-            raise FinError(
+            raise finpy_error(
                 "Number of credits in index must be > 1 and not " + str(num_credits))
 
         libor_curve = issuer_curves[0]._libor_curve
@@ -266,7 +266,7 @@ class CDSIndexPortfolio:
         for issuer_curve in issuer_curves:
             n = len(issuer_curve._cds_contracts)
             if n != len(cdsMaturityDates):
-                raise FinError(
+                raise finpy_error(
                     "All issuer discount must be built from same cds maturities")
 
         cdsSpreadMultipliers = [1.0] * numCDSMaturityPoints
@@ -304,7 +304,7 @@ class CDSIndexPortfolio:
                 numIterations += 1
 
                 if numIterations > 20:
-                    raise FinError(
+                    raise finpy_error(
                         "Num iterations > 20. Increase limit or reduce tolerance or check inputs.")
 
                 sumRPV01 = 0.0
@@ -400,7 +400,7 @@ class CDSIndexPortfolio:
         num_credits = len(issuer_curves)
 
         if num_credits < 1:
-            raise FinError("Number of credits must be greater than 1")
+            raise finpy_error("Number of credits must be greater than 1")
 
         libor_curve = issuer_curves[0]._libor_curve
         numIndexMaturityPoints = len(index_coupons)
@@ -429,7 +429,7 @@ class CDSIndexPortfolio:
                 numIterations += 1
 
                 if numIterations == maxIterations:
-                    raise FinError("Max Iterations exceeded")
+                    raise finpy_error("Max Iterations exceeded")
 
                 sumRPV01 = 0.0
                 sumProt = 0.0

@@ -3,7 +3,7 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.frequency import frequency_types
 from financepy.utils.date import Date
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
 import sys
@@ -21,28 +21,28 @@ def test_FinFlatCurve():
     months = range(1, 60, 3)
     dates = curve_date.add_months(months)
     testCases.header("COMPOUNDING", "DFS")
-    compounding = FrequencyTypes.CONTINUOUS
+    compounding = frequency_types.CONTINUOUS
 
     flat_curve = DiscountCurveFlat(curve_date, 0.05, compounding)
     dfs = flat_curve.df(dates)
     testCases.print(compounding, dfs)
 
-    compounding = FrequencyTypes.ANNUAL
+    compounding = frequency_types.ANNUAL
     flat_curve = DiscountCurveFlat(curve_date, 0.05, compounding)
     dfs = flat_curve.df(dates)
     testCases.print(compounding, dfs)
 
-    compounding = FrequencyTypes.SEMI_ANNUAL
+    compounding = frequency_types.SEMI_ANNUAL
     flat_curve = DiscountCurveFlat(curve_date, 0.05, compounding)
     dfs = flat_curve.df(dates)
     testCases.print(compounding, dfs)
 
-    compounding = FrequencyTypes.QUARTERLY
+    compounding = frequency_types.QUARTERLY
     flat_curve = DiscountCurveFlat(curve_date, 0.05, compounding)
     dfs = flat_curve.df(dates)
     testCases.print(compounding, dfs)
 
-    compounding = FrequencyTypes.MONTHLY
+    compounding = frequency_types.MONTHLY
     flat_curve = DiscountCurveFlat(curve_date, 0.05, compounding)
     dfs = flat_curve.df(dates)
     testCases.print(compounding, dfs)

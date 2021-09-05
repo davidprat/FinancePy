@@ -4,11 +4,11 @@
 
 import numpy as np
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
 from ...utils.math import ONE_MILLION
-from ...utils.global_vars import gDaysInYear
-from ...utils.global_types import FinOptionTypes
+from ...utils.global_vars import g_days_in_year
+from ...utils.global_types import option_types
 from .fx_vanilla_option import FXVanillaOption
 from ...models.black_scholes import BlackScholes
 
@@ -36,7 +36,7 @@ class FinFXVarianceSwap:
             maturity_date = effective_date.add_tenor(maturity_date_or_tenor)
 
         if effective_date >= maturity_date:
-            raise FinError("Start date after or same as maturity date")
+            raise finpy_error("Start date after or same as maturity date")
 
         self._effective_date = effective_date
         self._maturity_date = maturity_date
@@ -63,8 +63,8 @@ class FinFXVarianceSwap:
         volatility to the valuation date, the forward looking implied
         volatility to the maturity date using the libor discount curve. """
 
-        t1 = (valuation_date - self._effective_date) / gDaysInYear
-        t2 = (self._maturity_date - self._effective_date) / gDaysInYear
+        t1 = (valuation_date - self._effective_date) / g_days_in_year
+        t2 = (self._maturity_date - self._effective_date) / g_days_in_year
 
         expectedVariance = t1 * realisedVar/t2
         expectedVariance += (t2-t1) * fair_strikeVar / t2
@@ -90,7 +90,7 @@ class FinFXVarianceSwap:
 
         # TODO Linear interpolation - to be revisited
         atm_vol = np.interp(f, strikes, volatilities)
-        tmat = (self._maturity_date - valuation_date)/gDaysInYear
+        tmat = (self._maturity_date - valuation_date) / g_days_in_year
 
         """ Calculate the slope of the volatility curve by taking the end
         points in the volatilities and strikes to calculate the gradient."""
@@ -121,10 +121,10 @@ class FinFXVarianceSwap:
         self._num_put_options = num_put_options
         self._num_call_options = num_call_options
 
-        call_type = FinOptionTypes.EUROPEAN_CALL
-        put_type = FinOptionTypes.EUROPEAN_PUT
+        call_type = option_types.EUROPEAN_CALL
+        put_type = option_types.EUROPEAN_PUT
 
-        tmat = (self._maturity_date - valuation_date)/gDaysInYear
+        tmat = (self._maturity_date - valuation_date) / g_days_in_year
 
         df = discount_curve.df(tmat)
         r = - np.log(df)/tmat
@@ -229,7 +229,7 @@ class FinFXVarianceSwap:
 
         for i in range(0, num_observations):
             if closePrices[i] <= 0.0:
-                raise FinError("Stock prices must be greater than zero")
+                raise finpy_error("Stock prices must be greater than zero")
 
         cumX2 = 0.0
 

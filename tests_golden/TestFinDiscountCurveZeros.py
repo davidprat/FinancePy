@@ -6,8 +6,8 @@ from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.market.curves.discount_curve_zeros import DiscountCurveZeros
 from financepy.market.curves.interpolator import InterpTypes
 from financepy.utils.date import Date
-from financepy.utils.frequency import FrequencyTypes
-from financepy.utils.day_count import DayCountTypes
+from financepy.utils.frequency import frequency_types
+from financepy.utils.day_count import day_count_types
 import time
 import numpy as np
 
@@ -26,8 +26,8 @@ def test_FinDiscountCurveZeros():
     times = np.linspace(1.0, 10.0, 10)
     dates = start_date.add_years(times)
     zero_rates = np.linspace(5.0, 6.0, 10)/100
-    freq_type = FrequencyTypes.ANNUAL
-    day_count_type = DayCountTypes.ACT_ACT_ISDA
+    freq_type = frequency_types.ANNUAL
+    day_count_type = day_count_types.ACT_ACT_ISDA
 
     curve = DiscountCurveZeros(start_date,
                                dates,
@@ -53,8 +53,8 @@ def test_FinDiscountCurveZeros():
     start = time.time()
 
     for i in range(0, numRepeats):
-        freq_type = FrequencyTypes.ANNUAL
-        day_count_type = DayCountTypes.ACT_ACT_ISDA
+        freq_type = frequency_types.ANNUAL
+        day_count_type = day_count_types.ACT_ACT_ISDA
 
         dates = [Date(14, 6, 2016), Date(14, 9, 2016),
                  Date(14, 12, 2016), Date(14, 6, 2017),

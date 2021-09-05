@@ -2,8 +2,8 @@
 # Copyright (C) 2018, 2019, 2020 Dominic O'Kane
 ###############################################################################
 
-from financepy.utils.date import set_date_format, DateFormatTypes
-from financepy.utils.error import FinError
+from financepy.utils.date import set_date_format, date_format_types
+from financepy.utils.error import finpy_error
 import glob
 import sys
 from os.path import dirname, basename, join
@@ -12,7 +12,7 @@ sys.path.append("..")
 # This only works if I have an init.py in the parent folder
 
 
-set_date_format(DateFormatTypes.UK_LONG)
+set_date_format(date_format_types.UK_LONG)
 
 # I put this here to get the library loaded and header printed before loop
 
@@ -47,7 +47,7 @@ for moduleFileName in modules[n:m+1]:
         n = n + 1
 
     # Want testing to continue even if a module has an exception
-    except FinError as err:
+    except finpy_error as err:
         print("FinError:", err._message, "************")
         n = n + 1
         pass

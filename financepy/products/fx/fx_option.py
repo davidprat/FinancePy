@@ -4,7 +4,7 @@
 
 
 from ...models.black_scholes import BlackScholes
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...utils.helpers import label_to_string
 
 ##########################################################################
@@ -90,7 +90,7 @@ class FXOption:
                        dividend_curve, model)
 
         next_date = valuation_date.add_days(1)
-        bump = 1.0 / gDaysInYear
+        bump = 1.0 / g_days_in_year
 
         vBumped = self.value(next_date, stock_price, discount_curve,
                              dividend_curve, model)

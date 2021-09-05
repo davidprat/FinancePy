@@ -14,14 +14,14 @@ THIS IS STILL IN PROTOPTYPE MODE. DO NOT USE. """
 
 import numpy as np
 
-from ...utils.calendar import CalendarTypes
-from ...utils.calendar import BusDayAdjustTypes
-from ...utils.calendar import DateGenRuleTypes
-from ...utils.day_count import DayCountTypes
-from ...utils.frequency import FrequencyTypes
-from ...utils.day_count import DayCount
+from ...utils.calendar import calendar_types
+from ...utils.calendar import bus_day_adjust_types
+from ...utils.calendar import date_gen_rule_types
+from ...utils.day_count import day_count_types
+from ...utils.frequency import frequency_types
+from ...utils.day_count import day_count
 from ...utils.schedule import Schedule
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.helpers import check_argument_types
 from ...utils.date import Date
 
@@ -31,11 +31,11 @@ from ...models.lmm_mc import lmm_simulate_fwds_nf
 from ...models.lmm_mc import ModelLMMModelTypes
 from ...models.lmm_mc import lmm_cap_flr_pricer
 
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...utils.math import ONE_MILLION
 
-from ...utils.global_types import SwapTypes
-from ...utils.global_types import FinCapFloorTypes
+from ...utils.global_types import swap_types
+from ...utils.global_types import cap_floor
 
 from financepy.market.volatility.ibor_cap_vol_curve import IborCapVolCurve
 
@@ -48,11 +48,11 @@ class FinIborLMMProducts():
     def __init__(self,
                  settlement_date: Date,
                  maturity_date: Date,
-                 float_frequency_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 float_day_count_type: DayCountTypes = DayCountTypes.THIRTY_E_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 float_frequency_type: frequency_types = frequency_types.QUARTERLY,
+                 float_day_count_type: day_count_types = day_count_types.THIRTY_E_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Create a European-style swaption by defining the exercise date of
         the swaption, and all of the details of the underlying interest rate
         swap including the fixed coupon and the details of the fixed and the
@@ -61,7 +61,7 @@ class FinIborLMMProducts():
         check_argument_types(self.__init__, locals())
 
         if settlement_date > maturity_date:
-            raise FinError("Settlement date must be before maturity date")
+            raise finpy_error("Settlement date must be before maturity date")
 
         """ Set up the grid for the Ibor rates that are to be simulated. These
         must be consistent with the floating rate leg of the product that is to
@@ -78,14 +78,14 @@ class FinIborLMMProducts():
         self._accrual_factors = []
         self._float_day_count_type = float_day_count_type
 
-        basis = DayCount(self._float_day_count_type)
+        basis = day_count(self._float_day_count_type)
         prev_dt = self._gridDates[0]
 
         self._gridTimes = [0.0]
 
         for swap_start_date in self._gridDates[1:]:
             tau = basis.year_frac(prev_dt, next_dt)[0]
-            t = (next_dt - self._gridDates[0]) / gDaysInYear
+            t = (next_dt - self._gridDates[0]) / g_days_in_year
             self._accrual_factors.append(tau)
             self._gridTimes.append(t)
             prev_dt = next_dt
@@ -110,10 +110,10 @@ class FinIborLMMProducts():
         Ibors to generate and store all of the Ibor forward rate paths. """
 
         if num_paths < 2 or num_paths > 1000000:
-            raise FinError("NumPaths must be between 2 and 1 million")
+            raise finpy_error("NumPaths must be between 2 and 1 million")
 
         if discount_curve._valuation_date != self._start_date:
-            raise FinError("Curve anchor date not the same as LMM start date.")
+            raise finpy_error("Curve anchor date not the same as LMM start date.")
 
         self._num_paths = num_paths
         self._numeraireIndex = numeraireIndex
@@ -167,20 +167,20 @@ class FinIborLMMProducts():
 #        check_argument_types(self.__init__, locals())
 
         if num_paths < 2 or num_paths > 1000000:
-            raise FinError("NumPaths must be between 2 and 1 million")
+            raise finpy_error("NumPaths must be between 2 and 1 million")
 
         if discount_curve._curve_date != self._start_date:
-            raise FinError("Curve anchor date not the same as LMM start date.")
+            raise finpy_error("Curve anchor date not the same as LMM start date.")
 
         print("LEN LAMBDAS", len(lambdas))
         print("LEN", len(lambdas[0]))
         # We pass a vector of vol discount, one for each factor
         if numFactors != len(lambdas):
-            raise FinError("Lambda doesn't have specified number of factors.")
+            raise finpy_error("Lambda doesn't have specified number of factors.")
 
         numRows = len(lambdas[0])
         if numRows != self._numForwards+1:
-            raise FinError("Vol Components needs same number of rows as grid")
+            raise finpy_error("Vol Components needs same number of rows as grid")
 
         self._num_paths = num_paths
         self._numeraireIndex = numeraireIndex
@@ -226,13 +226,13 @@ class FinIborLMMProducts():
         check_argument_types(self.__init__, locals())
 
         if num_paths < 2 or num_paths > 1000000:
-            raise FinError("NumPaths must be between 2 and 1 million")
+            raise finpy_error("NumPaths must be between 2 and 1 million")
 
         if isinstance(modelType, ModelLMMModelTypes) is False:
-            raise FinError("Model type must be type FinRateModelLMMModelTypes")
+            raise finpy_error("Model type must be type FinRateModelLMMModelTypes")
 
         if discount_curve.curve_date != self._start_date:
-            raise FinError("Curve anchor date not the same as LMM start date.")
+            raise finpy_error("Curve anchor date not the same as LMM start date.")
 
         self._num_paths = num_paths
         self._volCurves = volCurve
@@ -276,16 +276,16 @@ class FinIborLMMProducts():
                        settlement_date: Date,
                        exercise_date: Date,
                        maturity_date: Date,
-                       swaptionType: SwapTypes,
+                       swaptionType: swap_types,
                        fixed_coupon: float,
-                       fixed_frequency_type: FrequencyTypes,
-                       fixed_day_count_type: DayCountTypes,
+                       fixed_frequency_type: frequency_types,
+                       fixed_day_count_type: day_count_types,
                        notional: float = ONE_MILLION,
-                       float_frequency_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                       float_day_count_type: DayCountTypes = DayCountTypes.THIRTY_E_360,
-                       calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                       bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                       date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                       float_frequency_type: frequency_types = frequency_types.QUARTERLY,
+                       float_day_count_type: day_count_types = day_count_types.THIRTY_E_360,
+                       calendar_type: calendar_types = calendar_types.WEEKEND,
+                       bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                       date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Value a swaption in the LMM model using simulated paths of the
         forward curve. This relies on pricing the fixed leg of the swap and
         assuming that the floating leg will be worth par. As a result we only
@@ -313,7 +313,7 @@ class FinIborLMMProducts():
                     foundDt = True
                     break
             if foundDt is False:
-                raise FinError("Swaption float leg not on grid.")
+                raise finpy_error("Swaption float leg not on grid.")
 
         swaptionFixedDates = Schedule(settlement_date,
                                       maturity_date,
@@ -329,7 +329,7 @@ class FinIborLMMProducts():
                     foundDt = True
                     break
             if foundDt is False:
-                raise FinError("Swaption fixed leg not on grid.")
+                raise finpy_error("Swaption fixed leg not on grid.")
 
         a = 0
         b = 0
@@ -347,7 +347,7 @@ class FinIborLMMProducts():
                 b += 1
 
         if b == 0:
-            raise FinError("Swaption swap maturity date is today.")
+            raise finpy_error("Swaption swap maturity date is today.")
 
 #        num_paths = 1000
 #        v = LMMSwaptionPricer(fixed_coupon, a, b, num_paths,
@@ -360,14 +360,14 @@ class FinIborLMMProducts():
     def value_cap_floor(self,
                         settlement_date: Date,
                         maturity_date: Date,
-                        capFloorType: FinCapFloorTypes,
+                        capFloorType: cap_floor,
                         capFloorRate: float,
-                        frequencyType: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                        day_count_type: DayCountTypes = DayCountTypes.ACT_360,
+                        frequencyType: frequency_types = frequency_types.QUARTERLY,
+                        day_count_type: day_count_types = day_count_types.ACT_360,
                         notional: float = ONE_MILLION,
-                        calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                        bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                        date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                        calendar_type: calendar_types = calendar_types.WEEKEND,
+                        bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                        date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Value a cap or floor in the LMM. """
 
         capFloorDates = Schedule(settlement_date,
@@ -384,13 +384,13 @@ class FinIborLMMProducts():
                     foundDt = True
                     break
             if foundDt is False:
-                raise FinError("CapFloor date not on grid.")
+                raise finpy_error("CapFloor date not on grid.")
 
         numFowards = len(capFloorDates)
         num_paths = self._num_paths
         K = capFloorRate
         isCap = 0
-        if capFloorType == FinCapFloorTypes.CAP:
+        if capFloorType == cap_floor.CAP:
             isCap = 1
 
         fwd0 = self._forwardCurve

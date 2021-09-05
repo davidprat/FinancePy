@@ -3,12 +3,12 @@
 ###############################################################################
 
 from FinTestCases import FinTestCases, globalTestCaseMode
-from financepy.utils.date import Date, set_date_format, DateFormatTypes
-from financepy.utils.calendar import CalendarTypes, Calendar
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.date import Date, set_date_format, date_format_types
+from financepy.utils.calendar import calendar_types, calendar
+from financepy.utils.frequency import frequency_types
 from financepy.utils.schedule import Schedule
-from financepy.utils.calendar import DateGenRuleTypes
-from financepy.utils.calendar import BusDayAdjustTypes
+from financepy.utils.calendar import date_gen_rule_types
+from financepy.utils.calendar import bus_day_adjust_types
 import sys
 sys.path.append("..")
 
@@ -17,7 +17,7 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
 
-set_date_format(DateFormatTypes.UK_LONGEST)
+set_date_format(date_format_types.UK_LONGEST)
 
 
 def dumpSchedule(desc, schedule):
@@ -61,10 +61,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 6, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
     termination_dateAdjust = True
 
     schedule = Schedule(d1,
@@ -79,10 +79,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 6, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.QUARTERLY
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.QUARTERLY
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -96,10 +96,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 6, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.MONTHLY
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.MONTHLY
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -117,10 +117,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 6, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.FORWARD
+    freq_type = frequency_types.ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.FORWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -134,10 +134,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 6, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -150,10 +150,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 6, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.MONTHLY
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.MONTHLY
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -171,10 +171,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 8, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.QUARTERLY
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.QUARTERLY
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -191,10 +191,10 @@ def test_FinSchedule():
 
     d1 = Date(19, 9, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.QUARTERLY
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.QUARTERLY
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -212,10 +212,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 8, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.FORWARD
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.FORWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -229,10 +229,10 @@ def test_FinSchedule():
 
     d1 = Date(19, 9, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.QUARTERLY
-    calendar_type = CalendarTypes.TARGET
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.FORWARD
+    freq_type = frequency_types.QUARTERLY
+    calendar_type = calendar_types.TARGET
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.FORWARD
 
     schedule = Schedule(d1,
                         d2,
@@ -245,10 +245,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 6, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
     termination_dateAdjust = True
 
     schedule = Schedule(d1,
@@ -263,10 +263,10 @@ def test_FinSchedule():
 
     d1 = Date(20, 6, 2018)
     d2 = Date(20, 6, 2020)
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.MODIFIED_FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.MODIFIED_FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
     termination_dateAdjust = True
     eomFlag = True
 
@@ -283,10 +283,10 @@ def test_FinSchedule():
 
     d1 = Date(30, 6, 2018)
     d2 = Date(30, 6, 2020)
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    calendar_type = CalendarTypes.WEEKEND
-    bus_day_adjust_type = BusDayAdjustTypes.MODIFIED_FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
+    freq_type = frequency_types.SEMI_ANNUAL
+    calendar_type = calendar_types.WEEKEND
+    bus_day_adjust_type = bus_day_adjust_types.MODIFIED_FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
     termination_dateAdjust = True
     eomFlag = True
 
@@ -308,10 +308,10 @@ def test_FinScheduleAlignment(eomFlag):
 
     valuation_date = Date(29, 3, 2005)
     effDate = valuation_date.add_tenor("2d")
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    bus_day_adjust_type = BusDayAdjustTypes.MODIFIED_FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    calendar_type = CalendarTypes.UNITED_STATES
+    freq_type = frequency_types.SEMI_ANNUAL
+    bus_day_adjust_type = bus_day_adjust_types.MODIFIED_FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    calendar_type = calendar_types.UNITED_STATES
     adjust_termination_date = False
 
     matDate1 = effDate.add_tenor("4Y")
@@ -320,7 +320,7 @@ def test_FinScheduleAlignment(eomFlag):
 #    print(matDate1)
 #    print(matDate2)
 
-    myCal = Calendar(calendar_type)
+    myCal = calendar(calendar_type)
 
     adjustedMatDate1 = myCal.adjust(matDate1, bus_day_adjust_type)
     adjustedMatDate2 = myCal.adjust(matDate2, bus_day_adjust_type)
@@ -360,10 +360,10 @@ def test_FinScheduleAlignmentLeapYearEOM():
 
     valuation_date = Date(26, 2, 2006)
     effDate = valuation_date.add_tenor("2D")
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    bus_day_adjust_type = BusDayAdjustTypes.MODIFIED_FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    calendar_type = CalendarTypes.UNITED_STATES
+    freq_type = frequency_types.SEMI_ANNUAL
+    bus_day_adjust_type = bus_day_adjust_types.MODIFIED_FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    calendar_type = calendar_types.UNITED_STATES
     adjust_termination_date = True
 
     matDate1 = effDate.add_tenor("4Y")
@@ -405,10 +405,10 @@ def test_FinScheduleAlignmentLeapYearNotEOM():
 
     valuation_date = Date(26, 2, 2006)
     effDate = valuation_date.add_tenor("2D")
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    bus_day_adjust_type = BusDayAdjustTypes.MODIFIED_FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    calendar_type = CalendarTypes.UNITED_STATES
+    freq_type = frequency_types.SEMI_ANNUAL
+    bus_day_adjust_type = bus_day_adjust_types.MODIFIED_FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    calendar_type = calendar_types.UNITED_STATES
     adjust_termination_date = True
 
     matDate1 = effDate.add_tenor("4Y")
@@ -450,10 +450,10 @@ def test_FinScheduleAlignmentEff31():
     eomFlag = True
     valuation_date = Date(29, 7, 2006)
     effDate = valuation_date.add_tenor("2D")
-    freq_type = FrequencyTypes.SEMI_ANNUAL
-    bus_day_adjust_type = BusDayAdjustTypes.MODIFIED_FOLLOWING
-    date_gen_rule_type = DateGenRuleTypes.BACKWARD
-    calendar_type = CalendarTypes.UNITED_STATES
+    freq_type = frequency_types.SEMI_ANNUAL
+    bus_day_adjust_type = bus_day_adjust_types.MODIFIED_FOLLOWING
+    date_gen_rule_type = date_gen_rule_types.BACKWARD
+    calendar_type = calendar_types.UNITED_STATES
     adjust_termination_date = True
 
     matDate1 = effDate.add_tenor("4Y")
@@ -500,4 +500,4 @@ test_FinScheduleAlignmentEff31()
 
 testCases.compareTestCases()
 
-set_date_format(DateFormatTypes.UK_LONGEST)
+set_date_format(date_format_types.UK_LONGEST)

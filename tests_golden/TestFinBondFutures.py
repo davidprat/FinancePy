@@ -4,8 +4,8 @@
 
 from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.utils.date import Date
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 from financepy.products.bonds.bond import Bond
 from financepy.products.bonds.bond_future import BondFuture
 import sys
@@ -18,8 +18,8 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 def test_BondFuture():
 
     # Example taken from Martellini and Priaulet page 360
-    freq = FrequencyTypes.SEMI_ANNUAL
-    basis = DayCountTypes.ACT_ACT_ICMA
+    freq = frequency_types.SEMI_ANNUAL
+    basis = day_count_types.ACT_ACT_ICMA
     issue_date = Date(15, 2, 2004)
 
     bond1 = Bond(issue_date, Date(15, 8, 2011), 0.0500, freq, basis)

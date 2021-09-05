@@ -8,9 +8,9 @@ from financepy.products.equity.equity_vanilla_option import EquityVanillaOption
 from financepy.models.black_scholes import BlackScholesTypes
 from financepy.models.black_scholes import BlackScholes
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
-from financepy.utils.global_types import FinOptionTypes
-from financepy.utils.day_count import DayCountTypes
-from financepy.utils.frequency import FrequencyTypes
+from financepy.utils.global_types import option_types
+from financepy.utils.day_count import day_count_types
+from financepy.utils.frequency import frequency_types
 from financepy.utils.date import Date
 import sys
 sys.path.append("..")
@@ -34,8 +34,8 @@ def testFinModelBlackScholes():
     interest_rate = 0.001
     dividend_yield = 0.0163
 
-    option_type = FinOptionTypes.AMERICAN_CALL
-    euOptionType = FinOptionTypes.EUROPEAN_CALL
+    option_type = option_types.AMERICAN_CALL
+    euOptionType = option_types.EUROPEAN_CALL
 
     amOption = EquityAmericanOption(expiry_date, strike_price,
                                     option_type)
@@ -47,12 +47,12 @@ def testFinModelBlackScholes():
                                    euOptionType)
 
     discount_curve = DiscountCurveFlat(valuation_date, interest_rate,
-                                       FrequencyTypes.CONTINUOUS,
-                                       DayCountTypes.ACT_365F)
+                                       frequency_types.CONTINUOUS,
+                                       day_count_types.ACT_365F)
 
     dividend_curve = DiscountCurveFlat(valuation_date, dividend_yield,
-                                       FrequencyTypes.CONTINUOUS,
-                                       DayCountTypes.ACT_365F)
+                                       frequency_types.CONTINUOUS,
+                                       day_count_types.ACT_365F)
 
     num_steps_per_year = 400
 

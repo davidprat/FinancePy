@@ -9,9 +9,9 @@
 
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.frequency import annual_frequency, FrequencyTypes
-from ...utils.day_count import DayCountTypes
+from ...utils.error import finpy_error
+from ...utils.frequency import annual_frequency, frequency_types
+from ...utils.day_count import day_count_types
 from ...utils.helpers import label_to_string, check_argument_types
 from ..bonds.bond import Bond, YTMCalcType
 
@@ -27,8 +27,8 @@ class FinInflationBond(Bond):
                  issue_date: Date,
                  maturity_date: Date,
                  coupon: float,  # Annualised bond coupon before inflation
-                 freq_type: FrequencyTypes,
-                 accrual_type: DayCountTypes,
+                 freq_type: frequency_types,
+                 accrual_type: day_count_types,
                  face_amount: float,
                  base_cpi_value: float,
                  num_ex_dividend_days: int = 0): # Value of CPI index at bond issue date
@@ -40,7 +40,7 @@ class FinInflationBond(Bond):
         check_argument_types(self.__init__, locals())
 
         if issue_date >= maturity_date:
-            raise FinError("Issue Date must preceded maturity date.")
+            raise finpy_error("Issue Date must preceded maturity date.")
 
         self._issue_date = issue_date
         self._maturity_date = maturity_date

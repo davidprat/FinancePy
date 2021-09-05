@@ -5,13 +5,13 @@
 import numpy as np
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.global_vars import gSmall
+from ...utils.error import finpy_error
+from ...utils.global_vars import g_small
 from ...utils.helpers import label_to_string
 from ...market.curves.discount_curve import DiscountCurve
 from ...utils.helpers import check_argument_types
-from ...utils.frequency import FrequencyTypes
-from ...utils.day_count import DayCountTypes
+from ...utils.frequency import frequency_types
+from ...utils.day_count import day_count_types
 from ...utils.helpers import times_from_dates
 
 
@@ -28,8 +28,8 @@ class DiscountCurvePoly(DiscountCurve):
     def __init__(self,
                  valuation_date: Date,
                  coefficients: (list, np.ndarray),
-                 freq_type: FrequencyTypes = FrequencyTypes.CONTINUOUS,
-                 day_count_type: DayCountTypes = DayCountTypes.ACT_ACT_ISDA):
+                 freq_type: frequency_types = frequency_types.CONTINUOUS,
+                 day_count_type: day_count_types = day_count_types.ACT_ACT_ISDA):
         """ Create zero rate curve parametrised using a cubic curve from
         coefficients and specifying a compounding frequency type and day count
         convention. """
@@ -46,8 +46,8 @@ class DiscountCurvePoly(DiscountCurve):
 
     def zero_rate(self,
                   dts: (list, Date),
-                  freq_type: FrequencyTypes = FrequencyTypes.CONTINUOUS,
-                  day_count_type: DayCountTypes = DayCountTypes.ACT_360):
+                  freq_type: frequency_types = frequency_types.CONTINUOUS,
+                  day_count_type: day_count_types = day_count_types.ACT_360):
         """ Calculation of zero rates with specified frequency according to
         polynomial parametrisation. This method overrides FinDiscountCurve.
         The parametrisation is not strictly in terms of continuously compounded
@@ -56,11 +56,11 @@ class DiscountCurvePoly(DiscountCurve):
         of dates so must use Numpy functions. The default frequency is a
         continuously compounded rate and ACT ACT day counting. """
 
-        if isinstance(freq_type, FrequencyTypes) is False:
-            raise FinError("Invalid Frequency type.")
+        if isinstance(freq_type, frequency_types) is False:
+            raise finpy_error("Invalid Frequency type.")
 
-        if isinstance(day_count_type, DayCountTypes) is False:
-            raise FinError("Invalid Day Count type.")
+        if isinstance(day_count_type, day_count_types) is False:
+            raise finpy_error("Invalid Day Count type.")
 
         # Get day count times to use with curve day count convention
         dc_times = times_from_dates(dts, self._valuation_date, self._day_count_type)
@@ -88,7 +88,7 @@ class DiscountCurvePoly(DiscountCurve):
         use. The compounding frequency defaults to that specified in the
         constructor of the curve object. Which may be annual to continuous. """
 
-        t = np.maximum(times, gSmall)
+        t = np.maximum(times, g_small)
 
         zero_rate = 0.0
         for n in range(0, len(self._coefficients)):

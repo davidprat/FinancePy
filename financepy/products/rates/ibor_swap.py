@@ -4,16 +4,16 @@
 
 import numpy as np
 
-from ...utils.error import FinError
+from ...utils.error import finpy_error
 from ...utils.date import Date
-from ...utils.global_vars import gSmall
-from ...utils.day_count import DayCountTypes
-from ...utils.frequency import FrequencyTypes, annual_frequency
-from ...utils.calendar import CalendarTypes, DateGenRuleTypes
-from ...utils.calendar import Calendar, BusDayAdjustTypes
+from ...utils.global_vars import g_small
+from ...utils.day_count import day_count_types
+from ...utils.frequency import frequency_types, annual_frequency
+from ...utils.calendar import calendar_types, date_gen_rule_types
+from ...utils.calendar import calendar, bus_day_adjust_types
 from ...utils.helpers import check_argument_types, label_to_string
 from ...utils.math import ONE_MILLION
-from ...utils.global_types import SwapTypes
+from ...utils.global_types import swap_types
 from ...market.curves.discount_curve import DiscountCurve
 
 from .swap_fixed_leg import SwapFixedLeg
@@ -40,17 +40,17 @@ class IborSwap:
     def __init__(self,
                  effective_date: Date,  # Date interest starts to accrue
                  termination_date_or_tenor: (Date, str),  # Date contract ends
-                 fixed_leg_type: SwapTypes,
+                 fixed_leg_type: swap_types,
                  fixed_coupon: float,  # Fixed coupon (annualised)
-                 fixed_freq_type: FrequencyTypes,
-                 fixed_day_count_type: DayCountTypes,
+                 fixed_freq_type: frequency_types,
+                 fixed_day_count_type: day_count_types,
                  notional: float = ONE_MILLION,
                  float_spread: float = 0.0,
-                 float_freq_type: FrequencyTypes = FrequencyTypes.QUARTERLY,
-                 float_day_count_type: DayCountTypes = DayCountTypes.THIRTY_E_360,
-                 calendar_type: CalendarTypes = CalendarTypes.WEEKEND,
-                 bus_day_adjust_type: BusDayAdjustTypes = BusDayAdjustTypes.FOLLOWING,
-                 date_gen_rule_type: DateGenRuleTypes = DateGenRuleTypes.BACKWARD):
+                 float_freq_type: frequency_types = frequency_types.QUARTERLY,
+                 float_day_count_type: day_count_types = day_count_types.THIRTY_E_360,
+                 calendar_type: calendar_types = calendar_types.WEEKEND,
+                 bus_day_adjust_type: bus_day_adjust_types = bus_day_adjust_types.FOLLOWING,
+                 date_gen_rule_type: date_gen_rule_types = date_gen_rule_types.BACKWARD):
         """ Create an interest rate swap contract giving the contract start
         date, its maturity, fixed coupon, fixed leg frequency, fixed leg day
         count convention and notional. The floating leg parameters have default
@@ -67,18 +67,18 @@ class IborSwap:
         else:
             self._termination_date = effective_date.add_tenor(termination_date_or_tenor)
 
-        calendar = Calendar(calendar_type)
+        calendar = calendar(calendar_type)
         self._maturity_date = calendar.adjust(self._termination_date,
                                               bus_day_adjust_type)
 
         if effective_date > self._maturity_date:
-            raise FinError("Start date after maturity date")
+            raise finpy_error("Start date after maturity date")
 
         self._effective_date = effective_date
 
-        float_leg_type = SwapTypes.PAY
-        if fixed_leg_type == SwapTypes.PAY:
-            float_leg_type = SwapTypes.RECEIVE
+        float_leg_type = swap_types.PAY
+        if fixed_leg_type == swap_types.PAY:
+            float_leg_type = swap_types.RECEIVE
 
         payment_lag = 0
         principal = 0.0
@@ -163,8 +163,8 @@ class IborSwap:
 
         pv01 = self.pv01(valuation_date, discount_curve)
 
-        if abs(pv01) < gSmall:
-            raise FinError("PV01 is zero. Cannot compute swap rate.")
+        if abs(pv01) < g_small:
+            raise finpy_error("PV01 is zero. Cannot compute swap rate.")
 
         if valuation_date < self._effective_date:
             df0 = discount_curve.df(self._effective_date)
@@ -201,7 +201,7 @@ class IborSwap:
         m = annual_frequency(frequency_type)
 
         if m == 0:
-            raise FinError("Frequency cannot be zero.")
+            raise finpy_error("Frequency cannot be zero.")
 
         """ The swap may have started in the past but we can only value
         payments that have occurred after the valuation date. """

@@ -2,7 +2,7 @@
 # Copyright (C) 2018, 2019, 2020 Dominic O'Kane
 ###############################################################################
 
-from ...utils.global_vars import gDaysInYear
+from ...utils.global_vars import g_days_in_year
 from ...products.bonds.bond import Bond
 from ...utils.date import Date
 from ...utils.helpers import label_to_string, check_argument_types
@@ -46,7 +46,7 @@ class BondFuture:
         # https://www.cmegroup.com//trading//interest-rates//us-treasury-futures-conversion-factor-lookup-tables.html
         # for a reference.
 
-        tmat = (bond._maturity_date - self._first_delivery_date) / gDaysInYear
+        tmat = (bond._maturity_date - self._first_delivery_date) / g_days_in_year
         roundedTmatInMonths = int(tmat * 4.0) * 3
         newMat = self._first_delivery_date.add_months(roundedTmatInMonths)
         face = 1.0

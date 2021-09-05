@@ -6,12 +6,12 @@ import numpy as np
 import scipy.optimize as optimize
 
 from ...utils.date import Date
-from ...utils.error import FinError
-from ...utils.global_vars import gDaysInYear
+from ...utils.error import finpy_error
+from ...utils.global_vars import g_days_in_year
 from ...market.curves.interpolator import _uinterpolate, InterpTypes
 from ...utils.helpers import input_time, table_to_string
-from ...utils.day_count import DayCount
-from ...utils.frequency import annual_frequency, FrequencyTypes
+from ...utils.day_count import day_count
+from ...utils.frequency import annual_frequency, frequency_types
 from ...utils.helpers import check_argument_types, _func_name
 from ...utils.helpers import label_to_string
 
@@ -55,7 +55,7 @@ class CDSCurve:
         check_argument_types(getattr(self, _func_name(), None), locals())
 
         if valuation_date != libor_curve._valuation_date:
-            raise FinError(
+            raise finpy_error(
                 "Curve does not have same valuation date as Issuer curve.")
 
         self._valuation_date = valuation_date
@@ -81,13 +81,13 @@ class CDSCurve:
         """ Ensure that contracts are in increasing maturity. """
 
         if len(cds_contracts) == 0:
-            raise FinError("No CDS contracts have been supplied.")
+            raise finpy_error("No CDS contracts have been supplied.")
 
         maturity_date = cds_contracts[0]._maturity_date
 
         for cds in cds_contracts[1:]:
             if cds._maturity_date <= maturity_date:
-                raise FinError("CDS contracts not in increasing maturity.")
+                raise finpy_error("CDS contracts not in increasing maturity.")
 
             maturity_date = cds._maturity_date
 
@@ -98,14 +98,14 @@ class CDSCurve:
         supports vectorisation. """
 
         if isinstance(dt, Date):
-            t = (dt - self._valuation_date) / gDaysInYear
+            t = (dt - self._valuation_date) / g_days_in_year
         elif isinstance(dt, list):
             t = np.array(dt)
         else:
             t = dt
 
         if np.any(t < 0.0):
-            raise FinError("Survival Date before curve anchor date")
+            raise finpy_error("Survival Date before curve anchor date")
 
         if isinstance(t, np.ndarray):
             n = len(t)
@@ -123,7 +123,7 @@ class CDSCurve:
                               self._interpolation_method.value)
             return q
         else:
-            raise FinError("Unknown time type")
+            raise finpy_error("Unknown time type")
 
 ###############################################################################
 
@@ -132,7 +132,7 @@ class CDSCurve:
         function supports vectorisation. """
 
         if isinstance(dt, Date):
-            t = (dt - self._valuation_date) / gDaysInYear
+            t = (dt - self._valuation_date) / g_days_in_year
         elif isinstance(dt, list):
             t = np.array(dt)
         else:
@@ -157,7 +157,7 @@ class CDSCurve:
             maturity_date = self._cds_contracts[i]._maturity_date
 
             argtuple = (self, self._valuation_date, self._cds_contracts[i])
-            tmat = (maturity_date - self._valuation_date) / gDaysInYear
+            tmat = (maturity_date - self._valuation_date) / g_days_in_year
             q = self._values[i]
 
             self._times = np.append(self._times, tmat)
@@ -186,12 +186,12 @@ class CDSCurve:
         according to the specified day count convention. """
 
         if date1 < self._valuation_date:
-            raise FinError("Date1 before curve value date.")
+            raise finpy_error("Date1 before curve value date.")
 
         if date2 < date1:
-            raise FinError("Date2 must not be before Date1")
+            raise finpy_error("Date2 must not be before Date1")
 
-        day_count = DayCount(day_count_type)
+        day_count = day_count(day_count_type)
         year_frac = day_count.year_frac(date1, date2)[0]
         df1 = self.df(date1)
         df2 = self.df(date2)
@@ -202,7 +202,7 @@ class CDSCurve:
 
     def zero_rate(self,
                   dt,
-                  freq_type=FrequencyTypes.CONTINUOUS):
+                  freq_type=frequency_types.CONTINUOUS):
         """ Calculate the zero rate to date dt in the chosen compounding
         frequency where -1 is continuous is the default. """
 

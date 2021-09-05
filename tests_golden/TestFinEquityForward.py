@@ -4,7 +4,7 @@
 
 from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.market.curves.discount_curve_flat import DiscountCurveFlat
-from financepy.utils.global_types import FinLongShort
+from financepy.utils.global_types import long_short
 from financepy.utils.date import Date
 from financepy.products.equity.equity_forward import EquityForward
 import sys
@@ -37,7 +37,7 @@ def test_EquityForward():
     equityForward = EquityForward(expiry_date,
                                   forward_price,
                                   notional,
-                                  FinLongShort.LONG)
+                                  long_short.LONG)
 
     testCases.header("SPOT FX", "FX FWD", "VALUE_BS")
 

@@ -1,31 +1,57 @@
-###############################################################################
-# Copyright (C) 2018, 2019, 2020 Dominic O'Kane
-###############################################################################
+"""Copyright (C) Dominic O'Kane.
+OLD code
 
+@njit([float64(float64)], fastmath=True, cache=True)
+ def normcdf(x: float):
+    This is the Normal CDF function which forks to one of three of the
+     implemented approximations. This is based on the choice of the fast flag
+     variable. A value of 1 is the fast routine, 2 is the slow and 3 is the
+     even slower integration scheme.
+
+     return normcdf_fast(x)
+
+      if fastFlag == 1:
+          return normcdf_fast(x)
+      elif fastFlag == 2:
+          return normcdf_slow(x)
+      elif fastFlag == 3:
+          return normcdf_integrate(x)
+      else:
+               return 0.0
+
+
+@vectorize([float64(float64)], fastmath=True, cache=True)
+def N(x: float):
+     This is the shortcut to the default Normal CDF function and currently
+     is hardcoded to the fastest of the implemented routines. This is the most
+     widely used way to access the Normal CDF.
+     return normcdf_fast(x)
+
+TODO: Move this somewhere else.
+"""
 
 from math import exp, sqrt, fabs, log
 from numba import njit, boolean, int64, float64, vectorize
 import numpy as np
-from .error import FinError
+from .error import finpy_error
 
 PI = 3.14159265358979323846
 INVROOT2PI = 0.3989422804014327
 
-ONE_MILLION = 1000000
-TEN_MILLION = 10000000
-ONE_BILLION = 1000000000
-
-###############################################################################
-# TODO: Move this somewhere else.
-###############################################################################
+ONE_MILLION = 1_000_000
+TEN_MILLION = 10_000_000
+ONE_BILLION = 1_000_000_000
 
 
 @njit(fastmath=True, cache=True)
 def accrued_interpolator(tset: float,  # Settlement time in years
-                        coupon_times: np.ndarray,
-                        couponAmounts: np.ndarray):
-    """ Fast calulation of accrued interest using an Actual/Actual type of
-    convention. This does not calculate according to other conventions. """
+                         coupon_times: np.ndarray,
+                         couponAmounts: np.ndarray):
+    """Fast calulation of accrued interest using an Actual/Actual type of
+    convention. This does not calculate according to other conventions.
+
+    TODO: NEED TO REVISIT THIS TODO
+    """
 
     num_coupons = len(coupon_times)
 
@@ -33,76 +59,60 @@ def accrued_interpolator(tset: float,  # Settlement time in years
 
         pct = coupon_times[i - 1]
         nct = coupon_times[i]
-        denom = (nct-pct)
-       
+        denom = (nct - pct)
+
         if tset >= pct and tset < nct:
-            accdFrac = (tset-pct) / denom
+            accdFrac = (tset - pct) / denom
             accdCpn = accdFrac * couponAmounts[i]
             return accdCpn
 
-    # TODO: NEED TO REVISIT THIS TODO
     return 0.0
     print("t", tset)
     print("CPN TIMES", coupon_times)
     print("CPN AMNTS", couponAmounts)
- 
-    raise FinError("Failed to calculate accrued")
 
-###############################################################################
+    raise finpy_error("Failed to calculate accrued")
 
 
 @njit(boolean(int64), fastmath=True, cache=True)
 def is_leap_year(y: int):
-    """ Test whether year y is a leap year - if so return True, else False """
+    """Test whether year y is a leap year - if so return True, else False"""
     leap_year = ((y % 4 == 0) and (y % 100 != 0) or (y % 400 == 0))
     return leap_year
 
-###############################################################################
-
 
 @njit(float64[:](float64[:], float64), fastmath=True, cache=True)
-def scale(x: np.ndarray,
-          factor: float):
-    """ Scale all of the elements of an array by the same amount factor. """
+def scale(x: np.ndarray, factor: float):
+    """Scale all of the elements of an array by the same amount factor."""
     x_scale = np.empty(len(x))
     for i in range(0, len(x)):
         x_scale[i] = x[i] * factor
     return x_scale
 
-###############################################################################
-
 
 @njit(boolean(float64[:]), fastmath=True, cache=True)
-def test_monotonicity(x: np.ndarray):
-    """ Check that an array of doubles is monotonic and strictly increasing."""
+def arr_is_monotonic(x: np.ndarray):
+    """Check that an array of doubles is monotonic and strictly increasing."""
     for i in range(1, len(x)):
-        if x[i] <= x[i-1]:
+        if x[i] <= x[i - 1]:
             return False
     return True
 
-###############################################################################
-
 
 @njit(fastmath=True, cache=True)
-def test_range(x: np.ndarray,
-               lower: float,
-               upper: float):
-    """ Check that all of the values of an array fall between a lower and
-    upper bound. """
+def arr_is_in_range(x: np.ndarray, lower: float, upper: float):
+    """Check that all of the values of an array fall between a lower and upper bound."""
     for i in range(0, len(x)):
         if x[i] < lower:
-            raise FinError("Value below lower.")
+            raise finpy_error("Value below lower.")
         if x[i] > upper:
-            raise FinError("Value above upper.")
-
-###############################################################################
+            raise finpy_error("Value above upper.")
 
 
 @njit(fastmath=True, cache=True)
-def maximum(a: np.ndarray,
-            b: np.ndarray):
-    """ Determine the array in which each element is the maximum of the
-    corresponding element in two equally length arrays a and b. """
+def maximum(a: np.ndarray, b: np.ndarray):
+    """Determine the array in which each element is the maximum of the
+    corresponding element in two equally length arrays a and b."""
 
     n = len(a)
     out = [0.0] * n
@@ -114,8 +124,6 @@ def maximum(a: np.ndarray,
             out[i] = b[i]
 
     return out
-
-###############################################################################
 
 
 @njit(float64[:](float64[:, :]), fastmath=True, cache=True)
@@ -138,8 +146,6 @@ def maxaxis(s: np.ndarray):
 
     return maxVector
 
-###############################################################################
-
 
 @njit(float64[:](float64[:, :]), fastmath=True, cache=True)
 def minaxis(s: np.ndarray):
@@ -160,15 +166,12 @@ def minaxis(s: np.ndarray):
 
     return minVector
 
-###############################################################################
-
 
 @njit(fastmath=True, cache=True)
-def covar(a: np.ndarray,
-          b: np.ndarray):
+def covar(a: np.ndarray, b: np.ndarray):
     """ Calculate the Covariance of two arrays of numbers.
     TODO: check that this works well for Numpy Arrays and add NUMBA function
-    signature to code. Do test of timings against Numpy. """
+    signature to code. Do test of timings against Numpy."""
 
     n = len(a)
     ma = 0.0
@@ -180,8 +183,8 @@ def covar(a: np.ndarray,
     for i in range(0, n):
         ma = ma + a[i]
         mb = mb + b[i]
-        ma2 = ma2 + a[i]**2
-        mb2 = mb2 + b[i]**2
+        ma2 = ma2 + a[i] ** 2
+        mb2 = mb2 + b[i] ** 2
         mab = mab + a[i] * b[i]
 
     ma /= n
@@ -201,15 +204,12 @@ def covar(a: np.ndarray,
     m[1][1] = cbb
     return m
 
-###############################################################################
-
 
 @njit(float64(float64, float64), fastmath=True, cache=True)
-def pair_gcd(v1: float,
-             v2: float):
+def pair_gcd(v1: float, v2: float) -> float:
     """ Determine the Greatest Common Divisor of two integers using Euclid's
     algorithm. TODO - compare this with math.gcd(a,b) for speed. Also examine
-    to see if I should not be declaring inputs as integers for NUMBA. """
+    to see if I should not be declaring inputs as integers for NUMBA."""
 
     if v1 == 0 or v2 == 0:
         return 0
@@ -223,34 +223,26 @@ def pair_gcd(v1: float,
     pairGCD = abs(v1)
     return pairGCD
 
-###############################################################################
-
 
 @njit(fastmath=True, cache=True)
-def nprime(x: float):
+def nprime(x: float) -> float:
     """Calculate the first derivative of the Cumulative Normal CDF which is
     simply the PDF of the Normal Distribution """
 
     InvRoot2Pi = 0.3989422804014327
     return np.exp(-x * x / 2.0) * InvRoot2Pi
 
-###############################################################################
-
 
 @njit(fastmath=True, cache=True)
-def heaviside(x: float):
+def heaviside(x: float) -> float:
     """ Calculate the Heaviside function for x """
     if x >= 0.0:
         return 1.0
     return 0.0
 
-###############################################################################
-
 
 @njit(fastmath=True, cache=True)
-def frange(start: int,
-           stop: int,
-           step: int):
+def frange(start: int, stop: int, step: int):
     """ Calculate a range of values from start in steps of size step. Ends as
     soon as the value equals or exceeds stop. """
     x = []
@@ -260,8 +252,6 @@ def frange(start: int,
 
     return x
 
-###############################################################################
-
 
 @njit(fastmath=True, cache=True)
 def normpdf(x: float):
@@ -270,7 +260,6 @@ def normpdf(x: float):
     InvRoot2Pi = 0.3989422804014327
     return np.exp(-x * x / 2.0) * InvRoot2Pi
 
-###############################################################################
 
 @njit(float64(float64), fastmath=True, cache=True)
 def N(x):
@@ -292,25 +281,22 @@ def N(x):
 
     if x >= 0.0:
         c = (a1 * k + a2 * k2 + a3 * k3 + a4 * k4 + a5 * k5)
-        phi = 1.0 - c * exp(-x*x/2.0) * INVROOT2PI
+        phi = 1.0 - c * exp(-x * x / 2.0) * INVROOT2PI
     else:
         phi = 1.0 - N(-x)
 
     return phi
 
-###############################################################################
 
 @vectorize([float64(float64)], fastmath=True, cache=True)
 def n_vect(x):
     return N(x)
 
-###############################################################################
 
 @vectorize([float64(float64)], fastmath=True, cache=True)
 def n_prime_vect(x):
     return nprime(x)
 
-###############################################################################
 
 @njit(float64(float64), fastmath=True, cache=True)
 def normcdf_integrate(x: float):
@@ -338,8 +324,6 @@ def normcdf_integrate(x: float):
     integral += fx / 2.0
     integral *= InvRoot2Pi * dx
     return integral
-
-###############################################################################
 
 
 @njit(float64(float64), fastmath=True, cache=True)
@@ -400,111 +384,71 @@ def normcdf_slow(z: float):
 
     return p
 
-###############################################################################
-
-
-# @njit([float64(float64)], fastmath=True, cache=True)
-# def normcdf(x: float):
-#     """ This is the Normal CDF function which forks to one of three of the
-#     implemented approximations. This is based on the choice of the fast flag
-#     variable. A value of 1 is the fast routine, 2 is the slow and 3 is the
-#     even slower integration scheme. """
-
-#     return normcdf_fast(x)
-
-#     # if fastFlag == 1:
-#     #     return normcdf_fast(x)
-#     # elif fastFlag == 2:
-#     #     return normcdf_slow(x)
-#     # elif fastFlag == 3:
-#     #     return normcdf_integrate(x)
-#     # else:
-#     #     return 0.0
-
-###############################################################################
-
-
-# @vectorize([float64(float64)], fastmath=True, cache=True)
-# def N(x: float):
-#     """ This is the shortcut to the default Normal CDF function and currently
-#     is hardcoded to the fastest of the implemented routines. This is the most
-#     widely used way to access the Normal CDF. """
-#     return normcdf_fast(x)
-
-###############################################################################
-
 
 @njit(fastmath=True, cache=True)
-def phi3(b1: float,
-         b2: float,
-         b3: float,
-         r12: float,
-         r13: float,
-         r23: float):
+def phi3(b_1: float, b_2: float, b_3: float, r_1_2: float, r_1_3: float, r_2_3: float):
     """ Bivariate Normal CDF function to upper limits $b1$ and $b2$ which uses
     integration to perform the innermost integral. This may need further
     refinement to ensure it is optimal as the current range of integration is
     from -7 and the integration steps are dx = 0.001. This may be excessive."""
 
-    dx = 0.001
-    lowerLimit = -7
-    upperlimit = b1
-    num_points = int((b1 - lowerLimit) / dx)
-    dx = (upperlimit - lowerLimit) / num_points
-    x = lowerLimit
+    _dx = 0.001
+    lower_limit = -7
+    upper_limit = b_1
+    num_points = int((b_1 - lower_limit) / _dx)
+    _dx = (upper_limit - lower_limit) / num_points
+    x = lower_limit
 
-    r12p = sqrt(1.0 - r12 * r12)
-    r13p = sqrt(1.0 - r13 * r13)
-    r123 = (r23 - r12 * r13) / r12p / r13p
+    r12p = sqrt(1.0 - r_1_2 * r_1_2)
+    r13p = sqrt(1.0 - r_1_3 * r_1_3)
+    r123 = (r_2_3 - r_1_2 * r_1_3) / r12p / r13p
 
     v = 0.0
 
     for _ in range(1, num_points + 1):
-        dp = N(x + dx) - N(x)
-        h = (b2 - r12 * x) / r12p
-        k = (b3 - r13 * x) / r13p
+        dp = N(x + _dx) - N(x)
+        h = (b_2 - r_1_2 * x) / r12p
+        k = (b_3 - r_1_3 * x) / r13p
         bivariate = M(h, k, r123)
         v = v + bivariate * dp
-        x += dx
+        x += _dx
 
     return v
-
-###############################################################################
 
 
 @njit(fastmath=True, cache=True)
 def norminvcdf(p):
-    """  This algorithm computes the inverse Normal CDF and is based on the
+    """This algorithm computes the inverse Normal CDF and is based on the
     algorithm found at (http:#home.online.no/~pjacklam/notes/invnorm/)
-    which is by John Herrero (3-Jan-03) """
+    which is by John Herrero (3-Jan-03)."""
 
     # Define coefficients in rational approximations
-    a1 = -39.6968302866538
-    a2 = 220.946098424521
-    a3 = -275.928510446969
-    a4 = 138.357751867269
-    a5 = -30.6647980661472
-    a6 = 2.50662827745924
+    a_1 = -39.6968302866538
+    a_2 = 220.946098424521
+    a_3 = -275.928510446969
+    a_4 = 138.357751867269
+    a_5 = -30.6647980661472
+    a_6 = 2.50662827745924
 
-    b1 = -54.4760987982241
-    b2 = 161.585836858041
-    b3 = -155.698979859887
-    b4 = 66.8013118877197
-    b5 = -13.2806815528857
+    b_1 = -54.4760987982241
+    b_2 = 161.585836858041
+    b_3 = -155.698979859887
+    b_4 = 66.8013118877197
+    b_5 = -13.2806815528857
 
-    c1 = -7.78489400243029E-03
-    c2 = -0.322396458041136
-    c3 = -2.40075827716184
-    c4 = -2.54973253934373
-    c5 = 4.37466414146497
-    c6 = 2.93816398269878
+    c_1 = -7.78489400243029E-03
+    c_2 = -0.322396458041136
+    c_3 = -2.40075827716184
+    c_4 = -2.54973253934373
+    c_5 = 4.37466414146497
+    c_6 = 2.93816398269878
 
-    d1 = 7.78469570904146E-03
-    d2 = 0.32246712907004
-    d3 = 2.445134137143
-    d4 = 3.75440866190742
+    d_1 = 7.78469570904146E-03
+    d_2 = 0.32246712907004
+    d_3 = 2.445134137143
+    d_4 = 3.75440866190742
 
-    inverseCDF = 0.0
+    inverse_cdf = 0.0
 
     # Define break-points
     p_low = 0.02425
@@ -512,7 +456,7 @@ def norminvcdf(p):
 
     # If argument out of bounds, raise error
     if p < 0.0 or p > 1.0:
-        raise FinError("p must be between 0.0 and 1.0")
+        raise finpy_error("p must be between 0.0 and 1.0")
 
     if p == 0.0:
         p = 1e-10
@@ -523,38 +467,35 @@ def norminvcdf(p):
     if p < p_low:
         # Rational approximation for lower region
         q = sqrt(-2.0 * log(p))
-        inverseCDF = (((((c1 * q + c2) * q + c3) * q + c4) * q + c5)
-                    * q + c6) / ((((d1 * q + d2) * q + d3) * q + d4) * q + 1.0)
+        inverse_cdf = (((((c_1 * q + c_2) * q + c_3) * q + c_4) * q + c_5)
+                       * q + c_6) / ((((d_1 * q + d_2) * q + d_3) * q + d_4) * q + 1.0)
     elif p <= p_high:
         # Rational approximation for lower region
         q = p - 0.5
         r = q * q
-        inverseCDF = (((((a1 * r + a2) * r + a3) * r + a4) * r + a5) * r + a6) * \
-            q / (((((b1 * r + b2) * r + b3) * r + b4) * r + b5) * r + 1.0)
+        inverse_cdf = (((((a_1 * r + a_2) * r + a_3) * r + a_4) * r + a_5) * r + a_6) * \
+                      q / (((((b_1 * r + b_2) * r + b_3) * r + b_4) * r + b_5) * r + 1.0)
     elif p < 1.0:
         # Rational approximation for upper region
         q = sqrt(-2.0 * log(1 - p))
-        inverseCDF = -(((((c1 * q + c2) * q + c3) * q + c4) * q + c5)
-                       * q + c6) / ((((d1 * q + d2) * q + d3) * q + d4) * q + 1.0)
+        inverse_cdf = -(((((c_1 * q + c_2) * q + c_3) * q + c_4) * q + c_5)
+                        * q + c_6) / ((((d_1 * q + d_2) * q + d_3) * q + d_4) * q + 1.0)
 
-    return inverseCDF
+    return inverse_cdf
 
-###############################################################################
-# This is used for consistency with Haug and its conciseness. Consider renaming
-# phi2 to M
+
 @njit(fastmath=True, cache=True)
 def M(a, b, c):
-    return phi2(a, b, c)
-
-###############################################################################
+    """This is used for consistency with Haug and its conciseness. Consider renaming phi2 to M."""
+    return phi_2(a, b, c)
 
 
 @njit(float64(float64, float64, float64), fastmath=True, cache=True)
-def phi2(h1, hk, r):
-    """ Drezner and Wesolowsky implementation of bi-variate normal """
+def phi_2(h_1, h_k, r):
+    """Drezner and Wesolowsky implementation of bi-variate normal."""
 
-#    if abs(r) > 0.9999999:
-#        raise FinError("Phi2: |Correlation| > 1")
+    #    if abs(r) > 0.9999999:
+    #        raise FinError("Phi2: |Correlation| > 1")
 
     x = [0.0, 0.0, 0.0, 0.0, 0.0]
     w = [0.0, 0.0, 0.0, 0.0, 0.0]
@@ -571,32 +512,32 @@ def phi2(h1, hk, r):
     w[3] = 0.038088059
     w[4] = 0.018854042
 
-    h2 = hk
-    h12 = (h1 * h1 + h2 * h2) * 0.5
+    h_2 = h_k
+    h_12 = (h_1 * h_1 + h_2 * h_2) * 0.5
     bv = 0.0
 
-    if fabs(r) < 0.7 or fabs(h1) > 35 or fabs(h2) > 35:
+    if fabs(r) < 0.7 or fabs(h_1) > 35 or fabs(h_2) > 35:
 
-        h3 = h1 * h2
+        h3 = h_1 * h_2
 
         for i in range(0, 5):
             r1 = r * x[i]
             rr2 = 1.0 - r1 * r1
-            bv = bv + w[i] * exp((r1 * h3 - h12) / rr2) / sqrt(rr2)
+            bv = bv + w[i] * exp((r1 * h3 - h_12) / rr2) / sqrt(rr2)
 
-        bv = N(h1) * N(h2) + r * bv
+        bv = N(h_1) * N(h_2) + r * bv
     else:
         r2 = 1.0 - r * r
         r3 = sqrt(r2)
 
         if r < 0.0:
-            h2 = -h2
+            h_2 = -h_2
 
-        h3 = h1 * h2
+        h3 = h_1 * h_2
         h7 = exp(-h3 * 0.5)
 
         if r2 != 0.0:
-            h6 = abs(h1 - h2)
+            h6 = abs(h_1 - h_2)
             h5 = h6 * h6 * 0.5
             h6 = h6 / r3
             aa = 0.5 - h3 * 0.125
@@ -609,34 +550,30 @@ def phi2(h1, hk, r):
                 rr = r1 * r1
                 r2 = sqrt(1.0 - rr)
                 bv = bv - w[i] * exp(-h5 / rr) * \
-                    (exp(-h3 / (1.0 + r2)) / r2 / h7 - 1.0 - aa * rr)
+                     (exp(-h3 / (1.0 + r2)) / r2 / h7 - 1.0 - aa * rr)
 
         if r > 0.0:
-            bv = bv * r3 * h7 + N(min(h1, h2))
+            bv = bv * r3 * h7 + N(min(h_1, h_2))
         else:
-            if h1 < h2:
+            if h_1 < h_2:
                 bv = -bv * r3 * h7
             else:
-                bv = -bv * r3 * h7 + N(h1) + N(hk) - 1.0
+                bv = -bv * r3 * h7 + N(h_1) + N(h_k) - 1.0
 
     return bv
-
-###############################################################################
 
 
 @njit(float64[:, :](float64[:, :]), cache=True, fastmath=True)
 def cholesky(rho):
-    """ Numba-compliant wrapper around Numpy cholesky function. """
+    """Numba-compliant wrapper around Numpy cholesky function."""
     chol = np.linalg.cholesky(rho)
     return chol
-
-###############################################################################
 
 
 @njit(fastmath=True, cache=True)
 def corr_matrix_generator(rho, n):
-    """ Utility function to generate a full rank n x n correlation matrix with
-    a flat correlation structure and value rho. """
+    """Utility function to generate a full rank n x n correlation matrix with
+    a flat correlation structure and value rho."""
 
     corr_matrix = np.zeros(shape=(n, n))
     for i in range(0, n):
@@ -646,5 +583,3 @@ def corr_matrix_generator(rho, n):
             corr_matrix[j, i] = rho
 
     return corr_matrix
-
-###############################################################################
