@@ -1,6 +1,6 @@
 [![unit test action](https://github.com/ru-corporate/FinancePy/actions/workflows/run-unit-tests.yml/badge.svg)](https://github.com/ru-corporate/FinancePy/actions/workflows/run-unit-tests.yml)
 
-![alt text](https://github.com/davidpat/FinancePy/blob/more_pep_8/static/1st_idea.jpg?raw=true)
+![alt text](./static/1st_idea.png?raw=true)
 
 # Quick Start Guide
 
