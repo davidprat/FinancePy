@@ -100,3 +100,5 @@ Contributions are very welcome. There are a number of requirements:
 ## License
 
  GPL-3.0 License - See the license file in this folder for details.
+ 
+ ## Disclaimer
