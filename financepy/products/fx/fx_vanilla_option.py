@@ -25,7 +25,7 @@ from ...models.black_scholes_analytic import bs_value, bs_delta
 
 from ...utils.helpers import check_argument_types, label_to_string
 
-from ...utils.math import N
+from ...utils.math import normal_cdf
 
 
 ###############################################################################
@@ -643,12 +643,12 @@ class FXVanillaOption():
 
             if self._option_type == option_types.EUROPEAN_CALL:
                 v = - S0 * np.exp(-rf * t) * nprime(d1) * vol / 2.0 / sqrtT
-                v = v + rf * S0 * np.exp(-rf * t) * N(d1)
-                v = v - rd * K * np.exp(-rd * t) * N(d2)
+                v = v + rf * S0 * np.exp(-rf * t) * normal_cdf(d1)
+                v = v - rd * K * np.exp(-rd * t) * normal_cdf(d2)
             elif self._option_type == option_types.EUROPEAN_PUT:
                 v = - S0 * np.exp(-rf * t) * nprime(d1) * vol / 2.0 / sqrtT
-                v = v + rd * K * np.exp(-rd * t) * N(-d2)
-                v = v - rf * S0 * np.exp(-rf * t) * N(-d1)
+                v = v + rd * K * np.exp(-rd * t) * normal_cdf(-d2)
+                v = v - rf * S0 * np.exp(-rf * t) * normal_cdf(-d1)
             else:
                 raise finpy_error("Unknown option type")
 

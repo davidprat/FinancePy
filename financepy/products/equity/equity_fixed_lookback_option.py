@@ -5,7 +5,7 @@
 import numpy as np
 
 
-from ...utils.math import N
+from ...utils.math import normal_cdf
 from ...utils.global_vars import g_days_in_year, g_small
 from ...utils.error import finpy_error
 from ...utils.date import Date
@@ -110,29 +110,29 @@ class EquityFixedLookbackOption(EquityOption):
                 d2 = d1 - v * sqrtT
 
                 if s0 == k:
-                    term = -N(d1 - 2.0 * b * sqrtT / v) + expbt * N(d1)
+                    term = -normal_cdf(d1 - 2.0 * b * sqrtT / v) + expbt * normal_cdf(d1)
                 elif s0 < k and w > 100.0:
-                    term = expbt * N(d1)
+                    term = expbt * normal_cdf(d1)
                 else:
-                    term = -np.power(s0 / k, -w) * N(d1 - 2 * b * sqrtT / v) \
-                           + expbt * N(d1)
+                    term = -np.power(s0 / k, -w) * normal_cdf(d1 - 2 * b * sqrtT / v) \
+                           + expbt * normal_cdf(d1)
 
-                v = s0 * dq * N(d1) - k * df * N(d2) + s0 * df * u * term
+                v = s0 * dq * normal_cdf(d1) - k * df * normal_cdf(d2) + s0 * df * u * term
 
             else:
                 e1 = (np.log(s0/smax) + (r - q + v*v/2) * t) / v / sqrtT
                 e2 = e1 - v * sqrtT
 
                 if s0 == smax:
-                    term = -N(e1 - 2.0 * b * sqrtT / v) + expbt * N(e1)
+                    term = -normal_cdf(e1 - 2.0 * b * sqrtT / v) + expbt * normal_cdf(e1)
                 elif s0 < smax and w > 100.0:
-                    term = expbt * N(e1)
+                    term = expbt * normal_cdf(e1)
                 else:
                     term = (-(s0 / smax)**(-w)) * \
-                           N(e1 - 2.0 * b * sqrtT / v) + expbt * N(e1)
+                           normal_cdf(e1 - 2.0 * b * sqrtT / v) + expbt * normal_cdf(e1)
 
-                v = df * (smax - k) + s0 * dq * N(e1) - \
-                    smax * df * N(e2) + s0 * df * u * term
+                v = df * (smax - k) + s0 * dq * normal_cdf(e1) - \
+                    smax * df * normal_cdf(e2) + s0 * df * u * term
 
         elif self._option_type == option_types.EUROPEAN_PUT:
 
@@ -141,29 +141,29 @@ class EquityFixedLookbackOption(EquityOption):
                 f2 = f1 - v * sqrtT
 
                 if s0 == smin:
-                    term = N(-f1 + 2.0 * b * sqrtT / v) - expbt * N(-f1)
+                    term = normal_cdf(-f1 + 2.0 * b * sqrtT / v) - expbt * normal_cdf(-f1)
                 elif s0 > smin and w < -100.0:
-                    term = -expbt * N(-f1)
+                    term = -expbt * normal_cdf(-f1)
                 else:
-                    term = ((s0 / smin)**(-w)) * N(-f1 + 2.0 * b * sqrtT / v) \
-                           - expbt * N(-f1)
+                    term = ((s0 / smin)**(-w)) * normal_cdf(-f1 + 2.0 * b * sqrtT / v) \
+                           - expbt * normal_cdf(-f1)
 
-                v = df * (k - smin) - s0 * dq * N(-f1) + \
-                    smin * df * N(-f2) + s0 * df * u * term
+                v = df * (k - smin) - s0 * dq * normal_cdf(-f1) + \
+                    smin * df * normal_cdf(-f2) + s0 * df * u * term
 
             else:
                 d1 = (np.log(s0 / k) + (b + v * v / 2) * t) / v / sqrtT
                 d2 = d1 - v * sqrtT
 
                 if s0 == k:
-                    term = N(-d1 + 2.0 * b * sqrtT / v) - expbt * N(-d1)
+                    term = normal_cdf(-d1 + 2.0 * b * sqrtT / v) - expbt * normal_cdf(-d1)
                 elif s0 > k and w < -100.0:
-                    term = -expbt * N(-d1)
+                    term = -expbt * normal_cdf(-d1)
                 else:
-                    term = ((s0 / k)**(-w)) * N(-d1 + 2.0 * b * sqrtT / v) \
-                           - expbt * N(-d1)
+                    term = ((s0 / k)**(-w)) * normal_cdf(-d1 + 2.0 * b * sqrtT / v) \
+                           - expbt * normal_cdf(-d1)
 
-                v = k * df * N(-d2) - s0 * dq * N(-d1) + s0 * df * u * term
+                v = k * df * normal_cdf(-d2) - s0 * dq * normal_cdf(-d1) + s0 * df * u * term
 
         else:
             raise finpy_error("Unknown lookback option type:" +

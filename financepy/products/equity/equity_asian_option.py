@@ -18,7 +18,7 @@ from ...utils.helpers import check_argument_types, label_to_string
 from ...utils.date import Date
 from ...market.curves.discount_curve import DiscountCurve
 
-from ...utils.math import N
+from ...utils.math import normal_cdf
 
 
 ###############################################################################
@@ -477,7 +477,7 @@ class EquityAsianOption:
         d2 = d1 - np.sqrt(varGeo)
 
         # the Geometric price is the lower bound
-        call_g = np.exp(-r * texp) * (EG * N(d1) - K * N(d2))
+        call_g = np.exp(-r * texp) * (EG * normal_cdf(d1) - K * normal_cdf(d2))
 
         if self._option_type == option_types.EUROPEAN_CALL:
             v = call_g
@@ -547,9 +547,9 @@ class EquityAsianOption:
         d2 = d1 - sigmaA * np.sqrt(texp)
 
         if self._option_type == option_types.EUROPEAN_CALL:
-            v = np.exp(-r * texp) * (FA * N(d1) - K * N(d2))
+            v = np.exp(-r * texp) * (FA * normal_cdf(d1) - K * normal_cdf(d2))
         elif self._option_type == option_types.EUROPEAN_PUT:
-            v = np.exp(-r * texp) * (K * N(-d2) - FA * N(-d1))
+            v = np.exp(-r * texp) * (K * normal_cdf(-d2) - FA * normal_cdf(-d1))
         else:
             return None
 
@@ -622,10 +622,10 @@ class EquityAsianOption:
         d2 = d1 - sigma * np.sqrt(texp)
 
         if self._option_type == option_types.EUROPEAN_CALL:
-            call = np.exp(-r * texp) * (F0 * N(d1) - K * N(d2))
+            call = np.exp(-r * texp) * (F0 * normal_cdf(d1) - K * normal_cdf(d2))
             v = call
         elif self._option_type == option_types.EUROPEAN_PUT:
-            put = np.exp(-r * texp) * (K * N(-d2) - F0 * N(-d1))
+            put = np.exp(-r * texp) * (K * normal_cdf(-d2) - F0 * normal_cdf(-d1))
             v = put
         else:
             return None

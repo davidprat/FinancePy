@@ -33,7 +33,7 @@ from ...models.black_scholes_mc import _value_mc_numba_only
 from ...models.black_scholes_mc import _value_mc_numpy_only
 from ...models.black_scholes_mc import _value_mc_numba_parallel
 
-from ...utils.math import N
+from ...utils.math import normal_cdf
 
 ###############################################################################
 

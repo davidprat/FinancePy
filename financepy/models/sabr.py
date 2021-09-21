@@ -8,7 +8,7 @@ from numba import njit, float64
 from scipy.optimize import minimize
 
 from ..utils.global_types import option_types
-from ..utils.math import N
+from ..utils.math import normal_cdf
 from ..utils.error import finpy_error
 from ..utils.helpers import label_to_string
 
@@ -238,9 +238,9 @@ class SABR():
         d2 = d1 - vol * sqrtT
 
         if call_or_put == option_types.EUROPEAN_CALL:
-            return df * (f * N(d1) - k * N(d2))
+            return df * (f * normal_cdf(d1) - k * normal_cdf(d2))
         elif call_or_put == option_types.EUROPEAN_PUT:
-            return df * (k * N(-d2) - f * N(-d1))
+            return df * (k * normal_cdf(-d2) - f * normal_cdf(-d1))
         else:
             raise Exception("Option type must be a European Call(C) or Put(P)")
 

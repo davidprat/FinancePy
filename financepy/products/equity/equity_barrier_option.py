@@ -14,7 +14,7 @@ from ...utils.helpers import label_to_string, check_argument_types
 from ...utils.date import Date
 
 
-from ...utils.math import N
+from ...utils.math import normal_cdf
 
 # TODO: SOME REDESIGN ON THE MONTE CARLO PROCESS IS PROBABLY NEEDED
 
@@ -134,8 +134,8 @@ class EquityBarrierOption(EquityOption):
         df = np.exp(-r * texp)
         dq = np.exp(-q * texp)
 
-        c = s * dq * N(d1) - k * df * N(d2)
-        p = k * df * N(-d2) - s * dq * N(-d1)
+        c = s * dq * normal_cdf(d1) - k * df * normal_cdf(d2)
+        p = k * df * normal_cdf(-d2) - s * dq * normal_cdf(-d1)
 #        print("CALL:",c,"PUT:",p)
 
         if self._option_type == EquityBarrierTypes.DOWN_AND_OUT_CALL and s <= h:
@@ -195,84 +195,84 @@ class EquityBarrierOption(EquityOption):
 
         if self._option_type == EquityBarrierTypes.DOWN_AND_OUT_CALL:
             if h >= k:
-                c_do = s * dq * N(x1) - k * df * N(x1 - sigmaRootT) \
-                       - s * dq * pow(hOverS, 2.0 * l) * N(y1) \
-                       + k * df * pow(hOverS, 2.0 * l - 2.0) * N(y1 - sigmaRootT)
+                c_do = s * dq * normal_cdf(x1) - k * df * normal_cdf(x1 - sigmaRootT) \
+                       - s * dq * pow(hOverS, 2.0 * l) * normal_cdf(y1) \
+                       + k * df * pow(hOverS, 2.0 * l - 2.0) * normal_cdf(y1 - sigmaRootT)
                 price = c_do
             else:
-                c_di = s * dq * pow(hOverS, 2.0 * l) * N(y) \
-                       - k * df * pow(hOverS, 2.0 * l - 2.0) * N(y - sigmaRootT)
+                c_di = s * dq * pow(hOverS, 2.0 * l) * normal_cdf(y) \
+                       - k * df * pow(hOverS, 2.0 * l - 2.0) * normal_cdf(y - sigmaRootT)
                 price = c - c_di
         elif self._option_type == EquityBarrierTypes.DOWN_AND_IN_CALL:
             if h <= k:
-                c_di = s * dq * pow(hOverS, 2.0 * l) * N(y) \
-                       - k * df * pow(hOverS, 2.0 * l - 2.0) * N(y - sigmaRootT)
+                c_di = s * dq * pow(hOverS, 2.0 * l) * normal_cdf(y) \
+                       - k * df * pow(hOverS, 2.0 * l - 2.0) * normal_cdf(y - sigmaRootT)
                 price = c_di
             else:
-                c_do = s * dq * N(x1) \
-                       - k * df * N(x1 - sigmaRootT) \
-                       - s * dq * pow(hOverS, 2.0 * l) * N(y1) \
-                       + k * df * pow(hOverS, 2.0 * l - 2.0) * N(y1 - sigmaRootT)
+                c_do = s * dq * normal_cdf(x1) \
+                       - k * df * normal_cdf(x1 - sigmaRootT) \
+                       - s * dq * pow(hOverS, 2.0 * l) * normal_cdf(y1) \
+                       + k * df * pow(hOverS, 2.0 * l - 2.0) * normal_cdf(y1 - sigmaRootT)
                 price = c - c_do
         elif self._option_type == EquityBarrierTypes.UP_AND_IN_CALL:
             if h >= k:
-                c_ui = s * dq * N(x1) - k * df * N(x1 - sigmaRootT) \
-                       - s * dq * pow(hOverS, 2.0 * l) * (N(-y) - N(-y1)) \
+                c_ui = s * dq * normal_cdf(x1) - k * df * normal_cdf(x1 - sigmaRootT) \
+                       - s * dq * pow(hOverS, 2.0 * l) * (normal_cdf(-y) - normal_cdf(-y1)) \
                        + k * df * pow(hOverS, 2.0 * l - 2.0) * \
-                       (N(-y + sigmaRootT) - N(-y1 + sigmaRootT))
+                       (normal_cdf(-y + sigmaRootT) - normal_cdf(-y1 + sigmaRootT))
                 price = c_ui
             else:
                 price = c
         elif self._option_type == EquityBarrierTypes.UP_AND_OUT_CALL:
             if h > k:
-                c_ui = s * dq * N(x1) - k * df * N(x1 - sigmaRootT) \
-                       - s * dq * pow(hOverS, 2.0 * l) * (N(-y) - N(-y1)) \
+                c_ui = s * dq * normal_cdf(x1) - k * df * normal_cdf(x1 - sigmaRootT) \
+                       - s * dq * pow(hOverS, 2.0 * l) * (normal_cdf(-y) - normal_cdf(-y1)) \
                        + k * df * pow(hOverS, 2.0 * l - 2.0) * \
-                       (N(-y + sigmaRootT) - N(-y1 + sigmaRootT))
+                       (normal_cdf(-y + sigmaRootT) - normal_cdf(-y1 + sigmaRootT))
                 price = c - c_ui
             else:
                 price = 0.0
         elif self._option_type == EquityBarrierTypes.UP_AND_IN_PUT:
             if h > k:
-                p_ui = -s * dq * pow(hOverS, 2.0 * l) * N(-y) \
-                       + k * df * pow(hOverS, 2.0 * l - 2.0) * N(-y + sigmaRootT)
+                p_ui = -s * dq * pow(hOverS, 2.0 * l) * normal_cdf(-y) \
+                       + k * df * pow(hOverS, 2.0 * l - 2.0) * normal_cdf(-y + sigmaRootT)
                 price = p_ui
             else:
-                p_uo = -s * dq * N(-x1) \
-                       + k * df * N(-x1 + sigmaRootT) \
-                       + s * dq * pow(hOverS, 2.0 * l) * N(-y1) \
-                       - k * df * pow(hOverS, 2.0 * l - 2.0) * N(-y1 + sigmaRootT)
+                p_uo = -s * dq * normal_cdf(-x1) \
+                       + k * df * normal_cdf(-x1 + sigmaRootT) \
+                       + s * dq * pow(hOverS, 2.0 * l) * normal_cdf(-y1) \
+                       - k * df * pow(hOverS, 2.0 * l - 2.0) * normal_cdf(-y1 + sigmaRootT)
                 price = p - p_uo
         elif self._option_type == EquityBarrierTypes.UP_AND_OUT_PUT:
             if h >= k:
-                p_ui = -s * dq * pow(hOverS, 2.0 * l) * N(-y) \
-                       + k * df * pow(hOverS, 2.0 * l - 2.0) * N(-y + sigmaRootT)
+                p_ui = -s * dq * pow(hOverS, 2.0 * l) * normal_cdf(-y) \
+                       + k * df * pow(hOverS, 2.0 * l - 2.0) * normal_cdf(-y + sigmaRootT)
                 price = p - p_ui
             else:
-                p_uo = -s * dq * N(-x1) \
-                       + k * df * N(-x1 + sigmaRootT) \
-                       + s * dq * pow(hOverS, 2.0 * l) * N(-y1) \
-                       - k * df * pow(hOverS, 2.0 * l - 2.0) * N(-y1 + sigmaRootT)
+                p_uo = -s * dq * normal_cdf(-x1) \
+                       + k * df * normal_cdf(-x1 + sigmaRootT) \
+                       + s * dq * pow(hOverS, 2.0 * l) * normal_cdf(-y1) \
+                       - k * df * pow(hOverS, 2.0 * l - 2.0) * normal_cdf(-y1 + sigmaRootT)
                 price = p_uo
         elif self._option_type == EquityBarrierTypes.DOWN_AND_OUT_PUT:
             if h >= k:
                 price = 0.0
             else:
-                p_di = -s * dq * N(-x1) \
-                       + k * df * N(-x1 + sigmaRootT) \
-                       + s * dq * pow(hOverS, 2.0 * l) * (N(y) - N(y1)) \
+                p_di = -s * dq * normal_cdf(-x1) \
+                       + k * df * normal_cdf(-x1 + sigmaRootT) \
+                       + s * dq * pow(hOverS, 2.0 * l) * (normal_cdf(y) - normal_cdf(y1)) \
                        - k * df * pow(hOverS, 2.0 * l - 2.0) * \
-                       (N(y - sigmaRootT) - N(y1 - sigmaRootT))
+                       (normal_cdf(y - sigmaRootT) - normal_cdf(y1 - sigmaRootT))
                 price = p - p_di
         elif self._option_type == EquityBarrierTypes.DOWN_AND_IN_PUT:
             if h >= k:
                 price = p
             else:
-                p_di = -s * dq * N(-x1) \
-                       + k * df * N(-x1 + sigmaRootT) \
-                       + s * dq * pow(hOverS, 2.0 * l) * (N(y) - N(y1)) \
+                p_di = -s * dq * normal_cdf(-x1) \
+                       + k * df * normal_cdf(-x1 + sigmaRootT) \
+                       + s * dq * pow(hOverS, 2.0 * l) * (normal_cdf(y) - normal_cdf(y1)) \
                        - k * df * pow(hOverS, 2.0 * l - 2.0) * \
-                       (N(y - sigmaRootT) - N(y1 - sigmaRootT))
+                       (normal_cdf(y - sigmaRootT) - normal_cdf(y1 - sigmaRootT))
                 price = p_di
         else:
             raise finpy_error("Unknown barrier option type." +

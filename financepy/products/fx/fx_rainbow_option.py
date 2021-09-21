@@ -6,7 +6,7 @@ import numpy as np
 from typing import List
 
 from ...utils.date import Date
-from ...utils.math import N, M
+from ...utils.math import normal_cdf, consistent_with_haug
 from ...utils.global_vars import g_days_in_year
 from ...utils.error import finpy_error
 from ...models.gbm_process_simulator import FinGBMProcess
@@ -226,22 +226,22 @@ class FXRainbowOption(EquityOption):
         sqrtt = np.sqrt(t)
 
         if self._payoff_type == FXRainbowOptionTypes.CALL_ON_MAXIMUM:
-            v = s1 * dq1 * M(y1, d, rho1) + s2 * dq2 * M(y2, -d + v * sqrtt, rho2) \
-                - k * df * (1.0 - M(-y1 + v1 * np.sqrt(t), -y2 + v2 * sqrtt, rho))
+            v = s1 * dq1 * consistent_with_haug(y1, d, rho1) + s2 * dq2 * consistent_with_haug(y2, -d + v * sqrtt, rho2) \
+                - k * df * (1.0 - consistent_with_haug(-y1 + v1 * np.sqrt(t), -y2 + v2 * sqrtt, rho))
         elif self._payoff_type == FXRainbowOptionTypes.CALL_ON_MINIMUM:
-            v = s1 * dq1 * M(y1, -d, -rho1) + s2 * dq2 * M(y2, d - v * np.sqrt(t), -rho2) \
-                - k * df * M(y1 - v1 * np.sqrt(t), y2 - v2 * np.sqrt(t), rho)
+            v = s1 * dq1 * consistent_with_haug(y1, -d, -rho1) + s2 * dq2 * consistent_with_haug(y2, d - v * np.sqrt(t), -rho2) \
+                - k * df * consistent_with_haug(y1 - v1 * np.sqrt(t), y2 - v2 * np.sqrt(t), rho)
         elif self._payoff_type == FXRainbowOptionTypes.PUT_ON_MAXIMUM:
-            cmax1 = s2 * dq2 + s1 * dq1 * N(d) - s2 * dq2 * N(d - v * sqrtt)
-            cmax2 = s1 * dq1 * M(y1, d, rho1) \
-                    + s2 * dq2 * M(y2, -d + v * sqrtt, rho2) \
-                    - k * df * (1.0 - M(-y1 + v1 * sqrtt, -y2 + v2 * sqrtt, rho))
+            cmax1 = s2 * dq2 + s1 * dq1 * normal_cdf(d) - s2 * dq2 * normal_cdf(d - v * sqrtt)
+            cmax2 = s1 * dq1 * consistent_with_haug(y1, d, rho1) \
+                    + s2 * dq2 * consistent_with_haug(y2, -d + v * sqrtt, rho2) \
+                    - k * df * (1.0 - consistent_with_haug(-y1 + v1 * sqrtt, -y2 + v2 * sqrtt, rho))
             v = k * df - cmax1 + cmax2
         elif self._payoff_type == FXRainbowOptionTypes.PUT_ON_MINIMUM:
-            cmin1 = s1 * dq1 - s1 * dq1 * N(d) + s2 * dq2 * N(d - v * sqrtt)
-            cmin2 = s1 * dq1 * M(y1, -d, -rho1) + s2 * dq2 * M(y2, d - v * sqrtt
-                                                               , -rho2) - k * df * M(y1 - v1 * sqrtt, y2 - v2 * sqrtt,
-                                                                                     rho)
+            cmin1 = s1 * dq1 - s1 * dq1 * normal_cdf(d) + s2 * dq2 * normal_cdf(d - v * sqrtt)
+            cmin2 = s1 * dq1 * consistent_with_haug(y1, -d, -rho1) + s2 * dq2 * consistent_with_haug(y2, d - v * sqrtt
+                                                                                                     , -rho2) - k * df * consistent_with_haug(y1 - v1 * sqrtt, y2 - v2 * sqrtt,
+                                                                                                                                              rho)
             v = k * df - cmin1 + cmin2
         else:
             raise finpy_error("Unsupported FX Rainbow option type")

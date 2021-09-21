@@ -1,3 +1,5 @@
+# pylint: disable = E0401,
+
 import setuptools
 
 INSTALL_REQUIRES = [

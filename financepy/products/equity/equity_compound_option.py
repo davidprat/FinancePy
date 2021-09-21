@@ -10,7 +10,7 @@ from scipy import optimize
 from numba import njit
 
 
-from ...utils.math import N, phi_2
+from ...utils.math import normal_cdf, phi_2
 from ...utils.global_vars import g_days_in_year, g_small
 from ...utils.error import finpy_error
 from ...utils.global_types import option_types
@@ -343,16 +343,16 @@ class EquityCompoundOption(EquityOption):
 
         if self._cOptionType == CALL and self._uOptionType == CALL:
             v = s0 * dqu * phi_2(a1, b1, c) - ku * dfu * \
-                phi_2(a2, b2, c) - dfc * kc * N(a2)
+                phi_2(a2, b2, c) - dfc * kc * normal_cdf(a2)
         elif self._cOptionType == PUT and self._uOptionType == CALL:
             v = ku * dfu * phi_2(-a2, b2, -c) - s0 * dqu * \
-                phi_2(-a1, b1, -c) + dfc * kc * N(-a2)
+                phi_2(-a1, b1, -c) + dfc * kc * normal_cdf(-a2)
         elif self._cOptionType == CALL and self._uOptionType == PUT:
             v = ku * dfu * phi_2(-a2, -b2, c) - s0 * dqu * \
-                phi_2(-a1, -b1, c) - dfc * kc * N(-a2)
+                phi_2(-a1, -b1, c) - dfc * kc * normal_cdf(-a2)
         elif self._cOptionType == PUT and self._uOptionType == PUT:
             v = s0 * dqu * phi_2(a1, -b1, -c) - ku * dfu * \
-                phi_2(a2, -b2, -c) + dfc * kc * N(a2)
+                phi_2(a2, -b2, -c) + dfc * kc * normal_cdf(a2)
         else:
             raise finpy_error("Unknown option type")
 

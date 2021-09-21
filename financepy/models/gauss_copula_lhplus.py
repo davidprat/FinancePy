@@ -4,7 +4,7 @@
 
 import numpy as np
 
-from ..utils.math import N, M, phi3
+from ..utils.math import normal_cdf, consistent_with_haug, phi3
 from ..utils.math import norminvcdf as NormSInv
 from ..utils.error import finpy_error
 
@@ -59,7 +59,7 @@ class LHPlusModel():
         b = (1.0 / self._beta) * \
             ((c - RtOneMinusBeta2 * invb))
 
-        probLgtK = N(a) + M(c0, b, self._beta0) - M(c0, a, self._beta0)
+        probLgtK = normal_cdf(a) + consistent_with_haug(c0, b, self._beta0) - consistent_with_haug(c0, a, self._beta0)
 
         return probLgtK
 
@@ -117,9 +117,9 @@ class LHPlusModel():
 
         el1 = self._P * self._H * (1.0 - self._R)
         el2 = self._P0 * self._H0 * (1.0 - self._R0)
-        el3 = -K * (M(c0, a, self._beta0) - N(a))
-        el4 = - ((1.0 - self._R0) * self._H0 - K) * M(c0, b, self._beta0)
-        term1 = M(c, a, self._beta) + phi3(b, c, c0, r12, r13, r23) \
+        el3 = -K * (consistent_with_haug(c0, a, self._beta0) - normal_cdf(a))
+        el4 = - ((1.0 - self._R0) * self._H0 - K) * consistent_with_haug(c0, b, self._beta0)
+        term1 = consistent_with_haug(c, a, self._beta) + phi3(b, c, c0, r12, r13, r23) \
                 - phi3(a, c, c0, r12, r13, r23)
         el5 = - (1.0 - self._R) * self._H * term1
 
@@ -156,10 +156,10 @@ class LHPlusModel():
 
         el1 = self._P * self._H * (1.0 - self._R) + \
             self._P0 * self._H0 * (1.0 - self._R0)
-        el1 = el1 - K * (M(c0, a, self._beta0) - N(a))
-        el1 = el1 - ((1.0 - self._R0) * self._H0 - K) * M(c0, b, self._beta0)
+        el1 = el1 - K * (consistent_with_haug(c0, a, self._beta0) - normal_cdf(a))
+        el1 = el1 - ((1.0 - self._R0) * self._H0 - K) * consistent_with_haug(c0, b, self._beta0)
 
-        term = M(c, a, self._beta) + phi3(b, c, c0, r12, r13, r23) \
+        term = consistent_with_haug(c, a, self._beta) + phi3(b, c, c0, r12, r13, r23) \
                - phi3(a, c, c0, r12, r13, r23)
 
         el1 = el1 - (1.0 - self._R) * self._H * term

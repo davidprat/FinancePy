@@ -6,7 +6,7 @@ import numpy as np
 from numba import njit
 
 from ..utils.error import finpy_error
-from ..utils.math import N
+from ..utils.math import normal_cdf
 from ..market.curves.interpolator import InterpTypes, _uinterpolate
 from ..utils.helpers import label_to_string
 
@@ -86,8 +86,8 @@ class ModelRatesHoLee:
 
         h = np.log((face_amount*ptmat)/(strike_price*ptexp))/sigmap+sigmap/2.0
 
-        callValue = face_amount * ptmat * N(h) - strike_price * ptexp * N(h - sigmap)
-        putValue = strike_price * ptexp * N(-h + sigmap) - face_amount * ptmat * N(-h)
+        callValue = face_amount * ptmat * normal_cdf(h) - strike_price * ptexp * normal_cdf(h - sigmap)
+        putValue = strike_price * ptexp * normal_cdf(-h + sigmap) - face_amount * ptmat * normal_cdf(-h)
 
         return {'call': callValue, 'put': putValue}
 

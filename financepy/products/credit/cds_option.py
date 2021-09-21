@@ -10,7 +10,7 @@ from ...utils.calendar import bus_day_adjust_types, date_gen_rule_types
 from ...utils.day_count import day_count_types
 from ...utils.frequency import frequency_types
 from ...utils.global_vars import g_days_in_year
-from ...utils.math import ONE_MILLION, N
+from ...utils.math import ONE_MILLION, normal_cdf
 from ...products.credit.cds import CDS
 from ...utils.helpers import check_argument_types
 from ...utils.date import Date
@@ -126,9 +126,9 @@ class CDSOption:
         d2 = (logMoneyness - halfVolSquaredT) / volSqrtT
 
         if self._long_protection:
-            option_value = forward_spread * N(d1) - strike * N(d2)
+            option_value = forward_spread * normal_cdf(d1) - strike * normal_cdf(d2)
         else:
-            option_value = strike * N(-d2) - forward_spread * N(-d1)
+            option_value = strike * normal_cdf(-d2) - forward_spread * normal_cdf(-d1)
 
         option_value = option_value * forward_rpv01
 

@@ -11,7 +11,7 @@ from ...utils.calendar import bus_day_adjust_types, date_gen_rule_types
 from ...utils.day_count import day_count, day_count_types
 from ...utils.frequency import frequency_types
 from ...utils.global_vars import g_days_in_year
-from ...utils.math import ONE_MILLION, INVROOT2PI, N
+from ...utils.math import ONE_MILLION, INVROOT2PI, normal_cdf
 from ...utils.error import finpy_error
 from ...products.credit.cds_curve import CDSCurve
 from ...products.credit.cds import CDS
@@ -118,8 +118,8 @@ class CDSIndexOption:
         d1 /= denom
         d2 /= denom
 
-        v_pay = (adjFwd * N(d1) - adjStrike * N(d2)) * indexRPV01
-        v_rec = (adjStrike * N(-d2) - adjFwd * N(-d1)) * indexRPV01
+        v_pay = (adjFwd * normal_cdf(d1) - adjStrike * normal_cdf(d2)) * indexRPV01
+        v_rec = (adjStrike * normal_cdf(-d2) - adjFwd * normal_cdf(-d1)) * indexRPV01
 
         v_pay *= self._notional
         v_rec *= self._notional

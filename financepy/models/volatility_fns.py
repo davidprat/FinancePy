@@ -5,7 +5,7 @@
 import numpy as np
 from numba import njit, float64
 
-from ..utils.math import N
+from ..utils.math import normal_cdf
 from ..utils.error import finpy_error
 
 ###############################################################################
@@ -46,7 +46,7 @@ def vol_function_clark(params, f, k, t):
     x = np.log(f/k)
     sigma0 = np.exp(params[0])
     arg = x / (sigma0 * np.sqrt(t))
-    deltax = N(arg) - 0.50  # The -0.50 seems to be missing in book
+    deltax = normal_cdf(arg) - 0.50  # The -0.50 seems to be missing in book
     f = 0.0
     for i in range(0, len(params)):
         f += params[i] * (deltax ** i)
@@ -77,7 +77,7 @@ def vol_function_bloomberg(params, f, k, t):
     vsqrtt = sigma * np.sqrt(t)
     
     d1 = np.log(f/k)/ vsqrtt + vsqrtt/2.0
-    delta = N(d1)
+    delta = normal_cdf(d1)
 
     v = 0.0
     for i in range(0, len(params)):

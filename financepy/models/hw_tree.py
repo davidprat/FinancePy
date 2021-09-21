@@ -9,7 +9,7 @@ from numba import njit
 from math import ceil
 
 from ..utils.error import finpy_error
-from ..utils.math import N, accrued_interpolator
+from ..utils.math import normal_cdf, accrued_interpolator
 from ..market.curves.interpolator import InterpTypes, _uinterpolate
 from ..utils.helpers import label_to_string
 from ..utils.global_types import exercise_types
@@ -903,8 +903,8 @@ class HWTree():
 
         h = np.log((face_amount*ptmat)/(strike * ptexp)) / \
             sigmap + sigmap / 2.0
-        callValue = face_amount * ptmat * N(h) - strike * ptexp * N(h - sigmap)
-        putValue = strike * ptexp * N(-h + sigmap) - face_amount * ptmat * N(-h)
+        callValue = face_amount * ptmat * normal_cdf(h) - strike * ptexp * normal_cdf(h - sigmap)
+        putValue = strike * ptexp * normal_cdf(-h + sigmap) - face_amount * ptmat * normal_cdf(-h)
 
         return {'call': callValue, 'put': putValue}
 

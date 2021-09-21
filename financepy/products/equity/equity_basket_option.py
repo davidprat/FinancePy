@@ -19,7 +19,7 @@ from ...utils.helpers import _func_name
 from ...utils.date import Date
 from ...market.curves.discount_curve import DiscountCurve
 
-from ...utils.math import N
+from ...utils.math import normal_cdf
 
 
 ###############################################################################
@@ -169,11 +169,11 @@ class EquityBasketOption:
         d2 = (lnS0k + (mu - vhat2 / 2.0) * texp) / den
 
         if self._option_type == option_types.EUROPEAN_CALL:
-            v = smean * np.exp(-qhat * texp) * N(d1)
-            v = v - self._strike_price * np.exp(-r * texp) * N(d2)
+            v = smean * np.exp(-qhat * texp) * normal_cdf(d1)
+            v = v - self._strike_price * np.exp(-r * texp) * normal_cdf(d2)
         elif self._option_type == option_types.EUROPEAN_PUT:
-            v = self._strike_price * np.exp(-r * texp) * N(-d2)
-            v = v - smean * np.exp(-qhat * texp) * N(-d1)
+            v = self._strike_price * np.exp(-r * texp) * normal_cdf(-d2)
+            v = v - smean * np.exp(-qhat * texp) * normal_cdf(-d1)
         else:
             raise finpy_error("Unknown option type")
 

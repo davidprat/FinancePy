@@ -5,7 +5,7 @@
 import numpy as np
 
 
-from ...utils.math import N
+from ...utils.math import normal_cdf
 from ...utils.global_vars import g_days_in_year, g_small
 from ...utils.error import finpy_error
 from ...utils.date import Date
@@ -105,14 +105,14 @@ class EquityFloatLookbackOption(EquityOption):
             a2 = a1 - v * np.sqrt(t)
 
             if smin == s0:
-                term = N(-a1 + 2.0 * b * np.sqrt(t) / v) - expbt * N(-a1)
+                term = normal_cdf(-a1 + 2.0 * b * np.sqrt(t) / v) - expbt * normal_cdf(-a1)
             elif s0 < smin and w < -100:
-                term = - expbt * N(-a1)
+                term = - expbt * normal_cdf(-a1)
             else:
                 term = ((s0 / smin)**(-w)) \
-                       * N(-a1 + 2.0 * b * np.sqrt(t) / v) - expbt * N(-a1)
+                       * normal_cdf(-a1 + 2.0 * b * np.sqrt(t) / v) - expbt * normal_cdf(-a1)
 
-            v = s0 * dq * N(a1) - smin * df * N(a2) + s0 * df * u * term
+            v = s0 * dq * normal_cdf(a1) - smin * df * normal_cdf(a2) + s0 * df * u * term
 
         elif self._option_type == option_types.EUROPEAN_PUT:
 
@@ -120,14 +120,14 @@ class EquityFloatLookbackOption(EquityOption):
             b2 = b1 - v * np.sqrt(t)
 
             if smax == s0:
-                term = -N(b1 - 2.0 * b * np.sqrt(t) / v) + expbt * N(b1)
+                term = -normal_cdf(b1 - 2.0 * b * np.sqrt(t) / v) + expbt * normal_cdf(b1)
             elif s0 < smax and w > 100:
-                term = expbt * N(b1)
+                term = expbt * normal_cdf(b1)
             else:
                 term = (-(s0 / smax)**(-w)) * \
-                       N(b1 - 2.0 * b * np.sqrt(t) / v) + expbt * N(b1)
+                       normal_cdf(b1 - 2.0 * b * np.sqrt(t) / v) + expbt * normal_cdf(b1)
 
-            v = smax * df * N(-b2) - s0 * dq * N(-b1) + s0 * df * u * term
+            v = smax * df * normal_cdf(-b2) - s0 * dq * normal_cdf(-b1) + s0 * df * u * term
 
         else:
             raise finpy_error("Unknown lookback option type:" +

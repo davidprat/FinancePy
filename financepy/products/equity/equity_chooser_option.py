@@ -6,7 +6,7 @@
 import numpy as np
 from scipy import optimize
 
-from ...utils.math import M
+from ...utils.math import consistent_with_haug
 from ...utils.global_vars import g_days_in_year
 from ...utils.global_vars import g_small
 from ...utils.error import finpy_error
@@ -158,10 +158,10 @@ class EquityChooserOption(EquityOption):
             print("rho1", rho1)
             print("rho2", rho2)
 
-        w = s0 * np.exp(-q * tc) * M(d1, y1, rho1)
-        w = w - xc * np.exp(-rtc * tc) * M(d2, y1 - v * np.sqrt(tc), rho1)
-        w = w - s0 * np.exp(-q * tp) * M(-d1, -y2, rho2)
-        w = w + xp * np.exp(-rtp * tp) * M(-d2, -y2 + v * np.sqrt(tp), rho2)
+        w = s0 * np.exp(-q * tc) * consistent_with_haug(d1, y1, rho1)
+        w = w - xc * np.exp(-rtc * tc) * consistent_with_haug(d2, y1 - v * np.sqrt(tc), rho1)
+        w = w - s0 * np.exp(-q * tp) * consistent_with_haug(-d1, -y2, rho2)
+        w = w + xp * np.exp(-rtp * tp) * consistent_with_haug(-d2, -y2 + v * np.sqrt(tp), rho2)
         return w
 
     ###########################################################################

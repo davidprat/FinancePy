@@ -4,7 +4,7 @@
 
 import numpy as np
 
-from ..utils.math import N
+from ..utils.math import normal_cdf
 
 from scipy import optimize
 
@@ -32,8 +32,8 @@ def _fobj(x, *args):
     d1 = d1 / sigmaRootT
     d2 = d1 - sigmaRootT
 
-    vE_LHS = (A / E) * N(d1) * vA
-    E_LHS = A * N(d1) - L * np.exp(-r * t) * N(d2)
+    vE_LHS = (A / E) * normal_cdf(d1) * vA
+    E_LHS = A * normal_cdf(d1) - L * np.exp(-r * t) * normal_cdf(d2)
     obj = (E - E_LHS)**2 + (vE - vE_LHS)**2
 
     return obj

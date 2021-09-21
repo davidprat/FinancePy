@@ -7,7 +7,7 @@ import numpy as np
 from numba import jit, njit, float64, int64  # , prange DOES NOT WORK ON GITHUB
 
 from ..utils.error import finpy_error
-from ..utils.math import N
+from ..utils.math import normal_cdf
 from ..utils.math import norminvcdf
 from ..models.sobol import get_uniform_sobol
 
@@ -267,7 +267,7 @@ def lmm_price_caps_black(fwd0, volCaplet, p, K, taus):
         F = fwd0[i]
         d1 = (np.log(F/K) + vol * vol * texp / 2.0) / vol / np.sqrt(texp)
         d2 = d1 - vol * np.sqrt(texp)
-        caplet[i] = (F * N(d1) - K * N(d2)) * taus[i] * discFwd[i]
+        caplet[i] = (F * normal_cdf(d1) - K * normal_cdf(d2)) * taus[i] * discFwd[i]
 
     return caplet
 

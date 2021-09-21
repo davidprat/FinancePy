@@ -5,7 +5,7 @@
 from FinTestCases import FinTestCases, globalTestCaseMode
 from financepy.utils.math import norminvcdf
 from financepy.utils.math import normcdf_slow
-from financepy.utils.math import N
+from financepy.utils.math import normal_cdf
 from financepy.utils.math import normcdf_integrate
 import numpy as np
 import time
@@ -27,7 +27,7 @@ def test_FinMath():
 
     testCases.header("FUNCTION", "X", "Y")
     for x in xValues:
-        y = N(x)
+        y = normal_cdf(x)
         testCases.print("NORMCDF1", x, y)
 
     end = time.time()
@@ -71,7 +71,7 @@ def test_FinMath():
     testCases.header("X", "Y1", "Y2", "Y3", "DIFF1", "DIFF2")
 
     for x in xValues:
-        y1 = N(x)
+        y1 = normal_cdf(x)
         y2 = normcdf_slow(x)
         y3 = normcdf_integrate(x)
         diff1 = y3 - y1
@@ -85,7 +85,7 @@ def test_FinMath():
     testCases.header("X", "Y1", "Y2", "INV_Y1", "INV_Y2", "DIFF1", "DIFF2")
 
     for x_in in xValues:
-        y1 = N(x_in)
+        y1 = normal_cdf(x_in)
         y2 = normcdf_slow(x_in)
         x_out1 = norminvcdf(y1)
         x_out2 = norminvcdf(y2)

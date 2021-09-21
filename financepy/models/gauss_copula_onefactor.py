@@ -7,7 +7,7 @@ import numpy as np
 
 ##########################################################################
 
-from ..utils.math import norminvcdf, N, INVROOT2PI
+from ..utils.math import norminvcdf, normal_cdf, INVROOT2PI
 from ..utils.error import finpy_error
 from .loss_dbn_builder import indep_loss_dbn_recursion_gcd
 from .loss_dbn_builder import indep_loss_dbn_heterogeneous_adj_binomial
@@ -61,7 +61,7 @@ def loss_dbn_recursion_gcd(num_credits,
             beta = beta_vector[iCredit]
             denom = np.sqrt(1.0 - beta * beta)
             argz = (thresholds[iCredit] - beta * z) / denom
-            condDefaultProbs[iCredit] = N(argz)
+            condDefaultProbs[iCredit] = normal_cdf(argz)
 
         indepDbn = indep_loss_dbn_recursion_gcd(num_credits,
                                                 condDefaultProbs,
@@ -215,7 +215,7 @@ def gauss_approx_tranche_loss(k1, k2, mu, sigma):
         d1 = (mu - k1) / sigma
         d2 = (mu - k2) / sigma
 
-        gauss_approx_tranche_loss = (mu - k1) * N(d1) - (mu - k2) * N(d2)
+        gauss_approx_tranche_loss = (mu - k1) * normal_cdf(d1) - (mu - k2) * normal_cdf(d2)
         + sigma * np.exp(-0.5 * d1 * d1) * INVROOT2PI
         - sigma * np.exp(-0.5 * d2 * d2) * INVROOT2PI
 
@@ -270,7 +270,7 @@ def tranch_surv_prob_gaussian(k1,
             beta = beta_vector[iCredit]
             denom = np.sqrt(1.0 - beta * beta)
             argz = (thresholds[iCredit] - beta * z) / denom
-            condprob = N(argz)
+            condprob = normal_cdf(argz)
             mu += condprob * losses[iCredit]
             var += (losses[iCredit]**2) * condprob * (1.0 - condprob)
 
@@ -315,7 +315,7 @@ def loss_dbn_hetero_adj_binomial(num_credits,
             beta = beta_vector[iCredit]
             denom = np.sqrt(1.0 - beta * beta)
             argz = (thresholds[iCredit] - beta * z) / denom
-            condDefaultProbs[iCredit] = N(argz)
+            condDefaultProbs[iCredit] = normal_cdf(argz)
 
         indepDbn = indep_loss_dbn_heterogeneous_adj_binomial(num_credits,
                                                              condDefaultProbs,

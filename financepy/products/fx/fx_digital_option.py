@@ -6,7 +6,7 @@ from math import exp, log, sqrt
 import numpy as np
 
 
-from ...utils.math import N
+from ...utils.math import normal_cdf
 from ...utils.global_vars import g_days_in_year
 from ...utils.error import finpy_error
 # from ...products.equity.EquityOption import FinOption
@@ -100,16 +100,16 @@ class FXDigitalOption:
 
             if self._option_type == option_types.DIGITAL_CALL and \
                     self._forName == self._prem_currency:
-                v = S0 * exp(-rf * tdel) * N(d2)
+                v = S0 * exp(-rf * tdel) * normal_cdf(d2)
             elif self._option_type == option_types.DIGITAL_PUT and \
                     self._forName == self._prem_currency:
-                v = S0 * exp(-rf * tdel) * N(-d2)
+                v = S0 * exp(-rf * tdel) * normal_cdf(-d2)
             if self._option_type == option_types.DIGITAL_CALL and \
                     self._domName == self._prem_currency:
-                v = exp(-rd * tdel) * N(d2)
+                v = exp(-rd * tdel) * normal_cdf(d2)
             elif self._option_type == option_types.DIGITAL_PUT and \
                     self._domName == self._prem_currency:
-                v = exp(-rd * tdel) * N(-d2)
+                v = exp(-rd * tdel) * normal_cdf(-d2)
             else:
                 raise finpy_error("Unknown option type")
 
