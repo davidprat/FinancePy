@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
 
 setuptools.setup(
     name="financepy",
-    version='1.2.3',
+    version="0.200",
     author="Dominic O'Kane",
     author_email="quant@financepy.com",
     description="A Finance Library",

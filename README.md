@@ -1,5 +1,7 @@
 [![unit test action](https://github.com/ru-corporate/FinancePy/actions/workflows/run-unit-tests.yml/badge.svg)](https://github.com/ru-corporate/FinancePy/actions/workflows/run-unit-tests.yml)
 
+![alt text](./static/1st_idea.png?raw=true)
+
 # Quick Start Guide
 
 FinancePy can be installed from pip using the following command:
@@ -98,3 +100,5 @@ Contributions are very welcome. There are a number of requirements:
 ## License
 
  GPL-3.0 License - See the license file in this folder for details.
+ 
+ ## Disclaimer
